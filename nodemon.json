@@ -1,0 +1,4 @@
+{
+	"watch": ["webpack-dev.config.js", "src/rust/pkg/"],
+	"exec": "cls && webpack serve --config webpack-dev.config.js"
+}

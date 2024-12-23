@@ -1,0 +1,26 @@
+{
+  "name": "bau",
+  "version": "1.0.0",
+  "main": "src/js/index.js",
+  "scripts": {
+    "start": "concurrently --kill-others \"nodemon\" \"npm run watch-wasm\"",
+    "watch-wasm": "watchexec --clear -w ./src/rust/ npm run build-wasm-debug",
+    "build-wasm-debug": "wasm-pack build ./src/rust --no-typescript --target bundler -d ./pkg --debug",
+    
+    "build": "npm i && npm run build-wasm && npm run build-bundle",
+    "build-wasm": "wasm-pack build ./src/rust --no-typescript --target bundler -d ./pkg --release",
+    "build-bundle": "webpack --config webpack.config.js & webpack --config webpack.config.js --env minify noclean"
+  },
+  "author": "GreysonR",
+  "license": "MIT",
+  "description": "A WASM Web physics engine",
+  "devDependencies": {
+    "html-webpack-plugin": "^5.6.3",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.2.0"
+  },
+  "dependencies": {
+    "wasm": "file:src/rust/pkg"
+  }
+}

@@ -1,0 +1,7 @@
+{
+	"liveServer.settings.port": 5501,
+	"rust-analyzer.linkedProjects": [
+		"src/rust/Cargo.toml"
+	],
+	"makefile.configureOnOpen": false
+}
