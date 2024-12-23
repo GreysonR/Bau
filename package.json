@@ -1,6 +1,6 @@
 {
   "name": "bau",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "src/js/index.js",
   "scripts": {
     "start": "concurrently --kill-others \"nodemon\" \"npm run watch-wasm\"",
@@ -14,6 +14,9 @@
   "author": "GreysonR",
   "license": "MIT",
   "description": "A WASM Web physics engine",
+  "repository": {
+    "url": "https://github.com/GreysonR/Bau"
+  },
   "devDependencies": {
     "html-webpack-plugin": "^5.6.3",
     "webpack": "^5.97.1",
