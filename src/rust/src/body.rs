@@ -44,6 +44,9 @@ impl Body {
 	pub fn get_velocity(&self) -> &Vec2 { &self.velocity }
 	
 	// setters
+	pub fn set_position(&mut self, position: Vec2) {
+		self.translate_position(position - self.position);
+	}
 	pub fn translate_position(&mut self, translation: Vec2) {
 		self.position += translation;
 		

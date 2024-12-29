@@ -36,6 +36,10 @@ impl Engine {
 		self.bodies.insert(id, body);
 		id
 	}
+	pub fn body_set_position(&mut self, body_id: Id, position: Vec2) {
+		if !self.bodies.contains_key(&body_id) { return } // Body doesn't exist
+		self.bodies.get_mut(&body_id).unwrap().set_position(position);
+	}
 	pub fn body_translate_position(&mut self, body_id: Id, translation: Vec2) {
 		if !self.bodies.contains_key(&body_id) { return } // Body doesn't exist
 		self.bodies.get_mut(&body_id).unwrap().translate_position(translation);
