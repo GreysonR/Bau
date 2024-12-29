@@ -30,11 +30,15 @@ export class Render {
 		ctx.save();
 
 		let bodies = engine.get_bodies_vertices();
+		ctx.beginPath();
 		for (let body of bodies) {
 			renderPolygon(body, ctx);
-			ctx.fillStyle = "#4FC2B5";
-			ctx.fill();
 		}
+		ctx.fillStyle = "#4FC2B5";
+		ctx.strokeStyle = "#4FC2B5";
+		ctx.lineWidth = 2;
+		// ctx.fill();
+		ctx.stroke();
 
 		ctx.restore();
 	}

@@ -9,7 +9,7 @@ module.exports = {
 		clean: false,
 
 		library: {
-			name: "bau",
+			name: "bauLoader",
 			type: "umd",
 			umdNamedDefine: true,
 		},

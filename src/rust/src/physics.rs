@@ -1,34 +1,31 @@
-use wasm_bindgen::prelude::*;
 use std::collections::HashMap;
-use crate::{World, Body, Id};
+use crate::{World, Body, Id, Time};
 
-#[wasm_bindgen]
-pub struct Physics {}
+// todo: add physics options struct
 
-impl Physics {
-	pub fn new() -> Self {
-		Self {}
-	}
-	pub fn update(&mut self, world: &mut World, bodies: &mut HashMap<Id, Body>) {
-		// apply forces
-		self.apply_forces(world, bodies);
+pub fn update(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: Time) {
+	// apply forces
+	apply_forces(world, bodies, delta);
 
-		// apply velocities
-		self.apply_velocities(world, bodies);
+	// apply velocities
+	apply_velocities(world, bodies, delta);
+}
+fn apply_forces(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: Time) {
+	let gravity = world.gravity * &delta;
+	for body_id in world.bodies.iter() {
+		let body = bodies.get_mut(body_id).unwrap();
+		if body.is_static { continue; } // Don't apply forces to static bodies
+		body.apply_velocity(&gravity);
 	}
-	fn apply_forces(&mut self, world: &mut World, bodies: &mut HashMap<Id, Body>) {
-		let gravity = &world.gravity;
-		for body_id in world.bodies.iter() {
-			let body = bodies.get_mut(body_id).unwrap();
-			body.apply_velocity(gravity);
-		}
+}
+fn apply_velocities(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: Time) {
+	// todo: use actual delta time
+	for body_id in world.bodies.iter() {
+		let body = bodies.get_mut(body_id).unwrap();
+		if body.is_static { continue; } // Don't move static bodies
+		body.translate_position(*body.get_velocity() * &delta); // todo: average cur velocity with last velocity for trapezoidal approx
 	}
-	fn apply_velocities(&mut self, world: &mut World, bodies: &mut HashMap<Id, Body>) {
-		// todo: use actual delta time
-		let delta_t = 1.0 / 144.0f32; // delta time, 144 is the assumed framerate
-		for body_id in world.bodies.iter() {
-			let body = bodies.get_mut(body_id).unwrap();
-			body.translate_position(*body.get_velocity() * &delta_t); // todo: average cur velocity with last velocity for trapezoidal approx
-		}
-	}
+
+	world.frame += 1;
+	world.time += delta;
 }

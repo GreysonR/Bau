@@ -2,7 +2,6 @@ const Vec2 = require("./Vec2.js").default;
 
 let RenderMethods = {
 	polygon: function(vertices, ctx) {
-		ctx.beginPath();
 		ctx.moveTo(vertices[0].x, vertices[0].y);
 		for (let i = 1; i < vertices.length; ++i) {
 			let vertex = vertices[i];

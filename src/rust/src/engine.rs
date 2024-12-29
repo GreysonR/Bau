@@ -1,4 +1,4 @@
-use crate::{Vec2, Geo, Id, Body, Physics, World};
+use crate::{Vec2, Geo, Id, Time, Body, physics, World};
 use wasm_bindgen::prelude::*;
 use std::collections::HashMap;
 
@@ -6,7 +6,6 @@ use std::collections::HashMap;
 pub struct Engine {
 	world: World,
 	bodies: HashMap<Id, Body>,
-	physics: Physics,
 }
 #[wasm_bindgen]
 impl Engine {
@@ -15,7 +14,6 @@ impl Engine {
 		Self {
 			world: World::new(),
 			bodies: HashMap::new(),
-			physics: Physics::new(),
 		}
 	}
 
@@ -30,8 +28,8 @@ impl Engine {
 	}
 
 	// Body methods
-	pub fn body_create_rect(&mut self, width: Geo, height: Geo, position: Vec2) -> Id {
-		let body = Body::rectangle(width, height, position);
+	pub fn body_create_rect(&mut self, width: Geo, height: Geo, position: Vec2, is_static: bool) -> Id {
+		let body = Body::rectangle(width, height, position, is_static);
 		let id = body.id;
 		self.bodies.insert(id, body);
 		id
@@ -43,6 +41,14 @@ impl Engine {
 	pub fn body_translate_position(&mut self, body_id: Id, translation: Vec2) {
 		if !self.bodies.contains_key(&body_id) { return } // Body doesn't exist
 		self.bodies.get_mut(&body_id).unwrap().translate_position(translation);
+	}
+	pub fn body_set_velocity(&mut self, body_id: Id, velocity: Vec2) {
+		if !self.bodies.contains_key(&body_id) { return } // Body doesn't exist
+		self.bodies.get_mut(&body_id).unwrap().set_velocity(velocity);
+	}
+	pub fn body_apply_velocity(&mut self, body_id: Id, velocity: Vec2) {
+		if !self.bodies.contains_key(&body_id) { return } // Body doesn't exist
+		self.bodies.get_mut(&body_id).unwrap().apply_velocity(&velocity);
 	}
 
 	// World methods
@@ -57,6 +63,7 @@ impl Engine {
 
 	// Physics methods
 	pub fn physics_update(&mut self) {
-		self.physics.update(&mut self.world, &mut self.bodies);
+		let delta: Time = 1.0 / 144.0; // delta time. todo: compute this
+		physics::update(&mut self.world, &mut self.bodies, delta);
 	}
 }

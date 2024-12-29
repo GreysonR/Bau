@@ -6,11 +6,13 @@ pub struct Body {
 	position: Vec2,
 	angle: Geo,
 	velocity: Vec2,
+	
+	pub is_static: bool,
 }
 
 impl Body {
 	// constructors
-	pub fn new(vertices: Vec<Vec2>, position: Vec2) -> Body {
+	pub fn new(vertices: Vec<Vec2>, position: Vec2, is_static: bool) -> Body {
 		assert!(vertices.len() >= 3); // There should be at least 3 vertices for a valid body
 		
 		let mut body = Body {
@@ -19,13 +21,15 @@ impl Body {
 			position: Vec2::new(0.0, 0.0),
 			velocity: Vec2::new(0.0, 0.0),
 			angle: 0.0,
+
+			is_static,
 		};
 
 		body.translate_position(position);
 
 		body
 	}
-	pub fn rectangle(width: Geo, height: Geo, position: Vec2) -> Body {
+	pub fn rectangle(width: Geo, height: Geo, position: Vec2, is_static: bool) -> Body {
 		let half_width = width / 2.0;
 		let half_height = height / 2.0;
 		let vertices = vec![
@@ -34,7 +38,7 @@ impl Body {
 			Vec2::new( half_width,  half_height), // bottom right
 			Vec2::new(-half_width,  half_height), // bottom left
 		];
-		Body::new(vertices, position)
+		Body::new(vertices, position, is_static)
 	}
 
 	// getters

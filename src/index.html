@@ -15,29 +15,35 @@
 </head>
 <body>
 </body>
-<script>
-	bau.then(bau => {
-		const { Ticker, Render, Vec2, Engine } = bau;
-		window.Vec2 = Vec2;
+<script type="module">
+	let bau = await bauLoader;
 
-		console.log(bau);
-		window["bau"] = bau;
-		
-		let engine = new Engine();
-		let render = new Render();
-		
-		window["engine"] = engine;
+	const { Ticker, Render, Vec2, Engine } = bau;
+	window.Vec2 = Vec2;
+	window.bau = bau;
+	
+	let engine = new Engine();
+	let render = new Render();
+	
 
-		let ticker = new Ticker();
-		ticker.on("physicsTick", () => {
-			engine.physics_update();
-			render.render(engine);
-		});
-		
-		let bodyA = window.bodyA = engine.body_create_rect(100, 100, new Vec2(300, 300));
-		engine.body_translate_position(bodyA, new Vec2(100, 100));
-		engine.world_add_body(bodyA);
-		console.log(bodyA);
+	let ticker = new Ticker();
+	ticker.on("physicsTick", () => {
+		engine.physics_update();
+		render.render(engine);
+	});
+	
+	let bodyA = engine.body_create_rect(100, 100, new Vec2(300, 300), true);
+	engine.world_add_body(bodyA);
+	let bodyB = engine.body_create_rect(100, 100, new Vec2(300, 600), true);
+	engine.world_add_body(bodyB);
+
+	window.engine = engine;
+	window.bodyA = bodyA;
+	window.bodyB = bodyB;
+
+	window.addEventListener("mousemove", event => {
+		let { clientX: mouseX, clientY: mouseY } = event;
+		engine.body_set_position(bodyB, new Vec2(mouseX, mouseY));
 	});
 </script>
 </html>
