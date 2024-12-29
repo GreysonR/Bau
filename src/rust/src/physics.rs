@@ -1,7 +1,6 @@
 use wasm_bindgen::prelude::*;
-use std::{collections::HashMap, ops::Mul};
-use crate::{Engine, World, Body, Id};
-use web_sys::console;
+use std::collections::HashMap;
+use crate::{World, Body, Id};
 
 #[wasm_bindgen]
 pub struct Physics {}
