@@ -18,7 +18,7 @@ impl Physics {
 
 
 		// apply velocities
-		self.apply_velocity(world, bodies);
+		self.apply_velocities(world, bodies);
 	}
 	fn apply_forces(&mut self, world: &mut World, bodies: &mut HashMap<Id, Body>) {
 		let gravity = &world.gravity;
@@ -27,7 +27,7 @@ impl Physics {
 			body.apply_velocity(gravity);
 		}
 	}
-	fn apply_velocity(&mut self, world: &mut World, bodies: &mut HashMap<Id, Body>) {
+	fn apply_velocities(&mut self, world: &mut World, bodies: &mut HashMap<Id, Body>) {
 		// todo: use actual delta time
 		let delta_t = 1.0 / 144.0f32; // delta time, 144 is the assumed framerate
 		for body_id in world.bodies.iter() {
