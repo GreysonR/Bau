@@ -19,7 +19,4 @@ impl World {
 	pub fn remove_body(&mut self, id: Id) {
 		self.bodies.retain(|body| *body != id); // SLOW: O(n)
 	}
-	pub fn num_bodies(&self) -> usize {
-		self.bodies.len()
-	}
 }

@@ -10,11 +10,8 @@ impl Physics {
 		Self {}
 	}
 	pub fn update(&mut self, world: &mut World, bodies: &mut HashMap<Id, Body>) {
-		// console::log_1(&format!("world has {} bodies", world.num_bodies()).into());
-
 		// apply forces
 		self.apply_forces(world, bodies);
-
 
 		// apply velocities
 		self.apply_velocities(world, bodies);
