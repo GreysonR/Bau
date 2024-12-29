@@ -1,6 +1,7 @@
 // Modified version of [vec2](https://crates.io/crates/vec2) that removes non standard stuff
 
 use std::ops::*;
+use serde::{Serialize, Deserialize};
 use wasm_bindgen::prelude::*;
 use crate::Geo;
 
@@ -54,7 +55,7 @@ use crate::Geo;
 /// assert_approx_eq!(f64, e.mag(), 20.0);
 /// ```
 #[wasm_bindgen]
-#[derive(Copy, Clone, PartialEq, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Default, Debug, Serialize,  Deserialize)]
 pub struct Vec2 {
     #[allow(missing_docs)]
     pub x: Geo,
@@ -83,6 +84,7 @@ impl Vec2 {
     ///
     /// let a: Vec2<i32> = (10, 0).into();
     /// ```
+    #[wasm_bindgen(constructor)]
     pub fn new(x: Geo, y: Geo) -> Self {
         Self { x, y }
     }
@@ -118,10 +120,7 @@ impl Vec2 {
     pub fn cross(self, rhs: Vec2) -> Geo {
         self.x * rhs.y - self.y * rhs.x
     }
-}
-
-#[wasm_bindgen]
-impl Vec2 {
+    
     /// Performs element-wise [`min`](std::cmp::Ord::min).
     ///
     /// # Examples

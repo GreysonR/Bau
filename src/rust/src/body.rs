@@ -1,20 +1,13 @@
-use std::hash::Hash;
-use std::hash::Hasher;
+use crate::{Vec2, Geo, Id};
 
-use wasm_bindgen::prelude::*;
-use crate::Vec2;
-use crate::Geo;
-
-#[wasm_bindgen]
 pub struct Body {
-	pub id: u64,
+	pub id: Id,
 	vertices: Vec<Vec2>,
 	position: Vec2,
 	angle: Geo,
 	velocity: Vec2,
 }
 
-#[wasm_bindgen]
 impl Body {
 	// constructors
 	pub fn new(vertices: Vec<Vec2>, position: Vec2) -> Body {
@@ -46,16 +39,16 @@ impl Body {
 
 	// getters
 	pub fn get_angle(&self) -> Geo { self.angle }
-	pub fn get_position(&self) -> Vec2 { self.position.clone() }
-	pub fn get_vertices(&self) -> Vec<Vec2> { self.vertices.clone() }
-	pub fn get_velocity(&self) -> Vec2 { self.velocity.clone() }
-
+	pub fn get_position(&self) -> &Vec2 { &self.position }
+	pub fn get_vertices(&self) -> &Vec<Vec2> { &self.vertices }
+	pub fn get_velocity(&self) -> &Vec2 { &self.velocity }
+	
 	// setters
 	pub fn translate_position(&mut self, translation: Vec2) {
 		self.position += translation;
 		
-		for vertice in self.vertices.iter_mut() {
-			*vertice += translation;
+		for vertex in self.vertices.iter_mut() {
+			*vertex += translation;
 		}
 	}
 }
@@ -66,9 +59,3 @@ impl PartialEq for Body {
 	}
 }
 impl Eq for Body {}
-
-impl Hash for Body {
-	fn hash<H: Hasher>(&self, state: &mut H) {
-		self.id.hash(state);
-	}
-}

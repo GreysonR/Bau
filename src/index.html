@@ -17,8 +17,27 @@
 </body>
 <script>
 	bau.then(bau => {
-		// console.log(bau);
-		bau.run();
+		const { Ticker, Render, Vec2, Engine } = bau;
+		window.Vec2 = Vec2;
+
+		console.log(bau);
+		window["bau"] = bau;
+		
+		let engine = new Engine();
+		let render = new Render();
+		
+		window["engine"] = engine;
+
+		let ticker = new Ticker();
+		ticker.on("physicsTick", () => {
+			engine.physics_update();
+			render.render(engine);
+		});
+		
+		let bodyA = window.bodyA = engine.body_create_rect(100, 100, new Vec2(300, 300));
+		engine.body_translate_position(bodyA, new Vec2(100, 100));
+		engine.world_add_body(bodyA);
+		console.log(bodyA);
 	});
 </script>
 </html>

@@ -1,18 +1,19 @@
-use wasm_bindgen::prelude::*;
-use crate::Body;
-use std::collections::HashMap;
+use crate::Id;
 
-#[wasm_bindgen]
 pub struct World {
-	bodies: HashMap<u64, Box<Body>>,
+	pub bodies: Vec<Id>,
 }
 
-#[wasm_bindgen]
 impl World {
-	pub fn add_body(&mut self, body: Body) {
-		self.bodies.insert(body.id, Box::new(body));
+	pub fn new() -> Self {
+		Self {
+			bodies: Vec::new(),
+		}
 	}
-	pub fn remove_body(&mut self, id: u64) -> bool {
-		self.bodies.remove(&id).is_some()
+	pub fn add_body(&mut self, body: Id) {
+		self.bodies.push(body);
+	}
+	pub fn remove_body(&mut self, id: Id) {
+		self.bodies.retain(|body| *body != id);
 	}
 }
