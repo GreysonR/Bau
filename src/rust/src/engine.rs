@@ -53,6 +53,6 @@ impl Engine {
 
 	// Physics methods
 	pub fn physics_update(&mut self) {
-		self.physics.update(&mut self.world);
+		self.physics.update(&mut self.world, &mut self.bodies);
 	}
 }

@@ -9,8 +9,6 @@ pub use vec2::Vec2;
 mod color;
 pub use color::Color;
 
-// mod console_log;
-// use console_log::*;
 
 mod body;
 pub use body::Body;

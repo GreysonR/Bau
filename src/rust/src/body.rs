@@ -51,6 +51,12 @@ impl Body {
 			*vertex += translation;
 		}
 	}
+	pub fn set_velocity(&mut self, velocity: Vec2) {
+		self.velocity = velocity;
+	}
+	pub fn apply_velocity(&mut self, force: &Vec2) {
+		self.velocity += force;
+	}
 }
 
 impl PartialEq for Body {
