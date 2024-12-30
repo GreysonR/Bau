@@ -6,6 +6,8 @@ pub struct Body {
 	position: Vec2,
 	angle: Geo,
 	velocity: Vec2,
+
+	pub axes: Vec<Vec2>,
 	
 	pub is_static: bool,
 }
@@ -17,6 +19,9 @@ impl Body {
 		
 		let mut body = Body {
 			id: rand::random(),
+
+			axes: Body::get_axes(&vertices),
+
 			vertices,
 			position: Vec2::new(0.0, 0.0),
 			velocity: Vec2::new(0.0, 0.0),
@@ -24,6 +29,7 @@ impl Body {
 
 			is_static,
 		};
+
 
 		body.translate_position(position);
 
@@ -39,6 +45,18 @@ impl Body {
 			Vec2::new(-half_width,  half_height), // bottom left
 		];
 		Body::new(vertices, position, is_static)
+	}
+
+	// property calculation
+	fn get_axes(vertices: &Vec<Vec2>) -> Vec<Vec2> {
+		let mut axes = Vec::new();
+		let len = vertices.len();
+		for i in 0..len {
+			let j = (i + 1) % len;
+			let axis = (vertices[j] - vertices[i]).normalize();
+			axes.push(axis);
+		}
+		axes
 	}
 
 	// getters

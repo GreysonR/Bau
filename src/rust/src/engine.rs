@@ -1,6 +1,14 @@
-use crate::{Vec2, Geo, Id, Time, Body, physics, World};
+use crate::{physics, Body, Geo, Id, Time, Vec2, World};
 use wasm_bindgen::prelude::*;
 use std::collections::HashMap;
+use serde::*;
+
+#[wasm_bindgen]
+#[derive(Serialize)]
+pub struct RenderBody {
+	vertices: Vec<Vec2>,
+	id: Id,
+}
 
 #[wasm_bindgen]
 pub struct Engine {
@@ -19,12 +27,23 @@ impl Engine {
 
 	// Render methods
 	pub fn get_bodies_vertices(&self) -> JsValue {
-		let mut vertices: Vec<Vec<Vec2>> = Vec::new();
+		let mut bodies: Vec<RenderBody> = Vec::new();
 		for body_id in self.world.bodies.iter() {
 			let body = self.bodies.get(body_id).unwrap();
-			vertices.push(body.get_vertices().clone())
+			bodies.push(RenderBody {
+				vertices: body.get_vertices().clone(),
+				id: body.id,
+			});
 		}
-		serde_wasm_bindgen::to_value(&vertices).unwrap()
+		serde_wasm_bindgen::to_value(&bodies).unwrap()
+	}
+	pub fn get_collision_pairs(&self) -> JsValue {
+		// world.collision_pairs = HashMap<Id, CollisionPair>
+		let mut pairs: Vec<Vec<Id>> = Vec::new();
+		for pair in self.world.collision_pairs.iter() {
+			pairs.push(vec![pair.body_a, pair.body_b]);
+		}
+		serde_wasm_bindgen::to_value(&pairs).unwrap()
 	}
 
 	// Body methods

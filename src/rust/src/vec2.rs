@@ -1,6 +1,6 @@
 // Modified version of [vec2](https://crates.io/crates/vec2) that removes non standard stuff
 
-use std::ops::*;
+use std::{mem, ops::*};
 use serde::{Serialize, Deserialize};
 use wasm_bindgen::prelude::*;
 use crate::Geo;
@@ -119,6 +119,18 @@ impl Vec2 {
     /// ```
     pub fn cross(self, rhs: Vec2) -> Geo {
         self.x * rhs.y - self.y * rhs.x
+    }
+
+    pub fn length(&self) -> Geo {
+        (self.x * self.x + self.y * self.y).sqrt()
+    }
+    pub fn normalize(self) -> Vec2 {
+        self / self.length()
+    }
+    pub fn normal(mut self) -> Vec2 {
+        mem::swap(&mut self.x, &mut self.y);
+        self.y = -self.y;
+        self
     }
     
     /// Performs element-wise [`min`](std::cmp::Ord::min).
@@ -354,6 +366,16 @@ impl Mul for Vec2 {
 }
 
 // Owned & borrowed.
+impl Mul<Geo> for Vec2 {
+    type Output = Vec2;
+
+    fn mul(self, rhs: Geo) -> Self::Output {
+        Vec2 {
+            x: self.x.mul(rhs),
+            y: self.y.mul(rhs),
+        }
+    }
+}
 impl Mul<&Geo> for Vec2 {
     type Output = Vec2;
 
@@ -414,6 +436,16 @@ impl Div<&Geo> for Vec2 {
         }
     }
 }
+impl Div<Geo> for Vec2 {
+    type Output = Vec2;
+
+    fn div(self, rhs: Geo) -> Self::Output {
+        Vec2 {
+            x: self.x.div(rhs),
+            y: self.y.div(rhs),
+        }
+    }
+}
 
 // Borrowed & owned.
 impl Div for &Vec2 {
@@ -423,6 +455,16 @@ impl Div for &Vec2 {
         Vec2 {
             x: self.x.div(rhs.x),
             y: self.y.div(rhs.y),
+        }
+    }
+}
+impl Div<Geo> for &Vec2 {
+    type Output = Vec2;
+
+    fn div(self, rhs: Geo) -> Self::Output {
+        Vec2 {
+            x: self.x.div(rhs),
+            y: self.y.div(rhs),
         }
     }
 }
@@ -482,6 +524,12 @@ impl MulAssign for Vec2 {
         self.y.mul_assign(rhs.y);
     }
 }
+impl MulAssign<Geo> for Vec2 {
+    fn mul_assign(&mut self, rhs: Geo) {
+        self.x.mul_assign(rhs);
+        self.y.mul_assign(rhs);
+    }
+}
 
 // Borrowed.
 impl MulAssign<&Geo> for Vec2 {
@@ -498,6 +546,12 @@ impl DivAssign for Vec2 {
     fn div_assign(&mut self, rhs: Vec2) {
         self.x.div_assign(rhs.x);
         self.y.div_assign(rhs.y);
+    }
+}
+impl DivAssign<Geo> for Vec2 {
+    fn div_assign(&mut self, rhs: Geo) {
+        self.x.div_assign(rhs);
+        self.y.div_assign(rhs);
     }
 }
 
