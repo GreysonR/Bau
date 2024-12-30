@@ -1,7 +1,7 @@
 use crate::{physics, Body, Geo, Id, Time, Vec2, World};
 use wasm_bindgen::prelude::*;
 use std::collections::HashMap;
-use serde::*;
+use serde::Serialize;
 
 #[wasm_bindgen]
 #[derive(Serialize)]
