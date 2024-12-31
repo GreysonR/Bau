@@ -1,10 +1,10 @@
 extern crate web_sys;
 
-type Geo = f32;
-type Id = u16;
-type PairId = u64;
-type Time = f32;
-type Frame = u32;
+pub type Geo = f32;
+pub type Id = u16;
+pub type PairId = u64;
+pub type Time = f32;
+pub type Frame = u32;
 
 mod vec2;
 pub use vec2::Vec2;

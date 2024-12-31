@@ -25,27 +25,6 @@ impl Engine {
 		}
 	}
 
-	// Render methods
-	pub fn get_bodies_vertices(&self) -> JsValue {
-		let mut bodies: Vec<RenderBody> = Vec::new();
-		for body_id in self.world.bodies.iter() {
-			let body = self.bodies.get(body_id).unwrap();
-			bodies.push(RenderBody {
-				vertices: body.get_vertices().clone(),
-				id: body.id,
-			});
-		}
-		serde_wasm_bindgen::to_value(&bodies).unwrap()
-	}
-	pub fn get_collision_pairs(&self) -> JsValue {
-		// world.collision_pairs = HashMap<Id, CollisionPair>
-		let mut pairs: Vec<Vec<Id>> = Vec::new();
-		for pair in self.world.collision_pairs.iter() {
-			pairs.push(vec![pair.body_a, pair.body_b]);
-		}
-		serde_wasm_bindgen::to_value(&pairs).unwrap()
-	}
-
 	// Body methods
 	pub fn body_create_rect(&mut self, width: Geo, height: Geo, position: Vec2, is_static: bool) -> Id {
 		let body = Body::rectangle(width, height, position, is_static);
@@ -69,6 +48,20 @@ impl Engine {
 		if !self.bodies.contains_key(&body_id) { return } // Body doesn't exist
 		self.bodies.get_mut(&body_id).unwrap().apply_velocity(&velocity);
 	}
+	pub fn body_translate_angle(&mut self, body_id: Id, angle: Geo) {
+		if !self.bodies.contains_key(&body_id) { return } // Body doesn't exist
+		self.bodies.get_mut(&body_id).unwrap().translate_angle(angle);
+	}
+	pub fn body_set_angle(&mut self, body_id: Id, angle: Geo) {
+		if !self.bodies.contains_key(&body_id) { return } // Body doesn't exist
+		self.bodies.get_mut(&body_id).unwrap().set_angle(angle);
+	}
+	pub fn body_get_position(&self, body_id: Id) -> Vec2 {
+		self.bodies.get(&body_id).unwrap().get_position().clone()
+	}
+	pub fn body_get_vertices(&self, body_id: Id) -> Vec<Vec2> {
+		self.bodies.get(&body_id).unwrap().get_vertices().clone()
+	}
 
 	// World methods
 	pub fn world_add_body(&mut self, body_id: Id) {
@@ -78,6 +71,21 @@ impl Engine {
 	pub fn world_remove_body(&mut self, body_id: Id) {
 		if !self.bodies.contains_key(&body_id) { return } // Body doesn't exist
 		self.world.remove_body(body_id);
+	}
+	pub fn world_get_bodies(&self) -> JsValue {
+		let mut bodies: Vec<Id> = Vec::new();
+		for body_id in self.world.bodies.iter() {
+			bodies.push(*body_id);
+		}
+		serde_wasm_bindgen::to_value(&bodies).unwrap()
+	}
+	pub fn world_get_collision_pairs(&self) -> JsValue {
+		// world.collision_pairs = HashMap<Id, CollisionPair>
+		let mut pairs = Vec::new();
+		for pair in self.world.collision_pairs.iter() {
+			pairs.push(pair.clone());
+		}
+		serde_wasm_bindgen::to_value(&pairs).unwrap()
 	}
 
 	// Physics methods

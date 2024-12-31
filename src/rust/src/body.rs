@@ -13,7 +13,9 @@ pub struct Body {
 }
 
 impl Body {
+	//
 	// constructors
+	//
 	pub fn new(vertices: Vec<Vec2>, position: Vec2, is_static: bool) -> Body {
 		assert!(vertices.len() >= 3); // There should be at least 3 vertices for a valid body
 		
@@ -47,40 +49,115 @@ impl Body {
 		Body::new(vertices, position, is_static)
 	}
 
+	//
 	// property calculation
+	//
 	fn get_axes(vertices: &Vec<Vec2>) -> Vec<Vec2> {
 		let mut axes = Vec::new();
 		let len = vertices.len();
 		for i in 0..len {
 			let j = (i + 1) % len;
-			let axis = (vertices[j] - vertices[i]).normalize();
+			let axis = (&vertices[j] - &vertices[i]).normalize();
 			axes.push(axis);
 		}
 		axes
 	}
 
+	//
 	// getters
+	// 
 	pub fn get_angle(&self) -> Geo { self.angle }
 	pub fn get_position(&self) -> &Vec2 { &self.position }
 	pub fn get_vertices(&self) -> &Vec<Vec2> { &self.vertices }
 	pub fn get_velocity(&self) -> &Vec2 { &self.velocity }
 	
+	//
 	// setters
+	//
+
+	// position
 	pub fn set_position(&mut self, position: Vec2) {
-		self.translate_position(position - self.position);
+		self.translate_position(position - &self.position);
 	}
 	pub fn translate_position(&mut self, translation: Vec2) {
-		self.position += translation;
+		self.position += &translation;
 		
 		for vertex in self.vertices.iter_mut() {
-			*vertex += translation;
+			*vertex += &translation;
 		}
 	}
+	// velocity
 	pub fn set_velocity(&mut self, velocity: Vec2) {
 		self.velocity = velocity;
 	}
 	pub fn apply_velocity(&mut self, force: &Vec2) {
 		self.velocity += force;
+	}
+	// angle
+	pub fn translate_angle(&mut self, angle: Geo) {
+		self.angle += angle;
+		let sin = angle.sin();
+		let cos = angle.cos();
+		let position = &self.position;
+		for vertice in self.vertices.iter_mut() {
+			let dist = vertice.clone() - position;
+			vertice.x = position.x + (dist.x * cos - dist.y * sin);
+			vertice.y = position.y + (dist.x * sin + dist.y * cos);
+		}
+		self.axes = Body::get_axes(&self.vertices);
+	}
+	pub fn set_angle(&mut self, angle: Geo) {
+		self.translate_angle(angle - self.angle);
+		self.angle = angle;
+	}
+	pub fn contains_point(&self, point: &Vec2) -> bool {
+		let vertices = &self.vertices;
+		for i in 0..vertices.len() {
+			let cur_vertex = &vertices[i];
+			let next_vertex = &vertices[(i + 1) % vertices.len()];
+			
+			// edge_normal: (next.y - cur.y, -(next.x - cur.x))
+			// cur_to_point = point - cur
+			// edge_normal dot cur_to_point >= 0, then point is outside body (similar to SAT)
+			if (point.x - cur_vertex.x) * (next_vertex.y - cur_vertex.y) + (cur_vertex.x - next_vertex.x) * (point.y - cur_vertex.y) >= 0.0 {
+				return false;
+			}
+		}
+
+		true
+	}
+	pub fn get_support(&self, direction: &Vec2) -> usize {
+		let vertices = &self.vertices;
+		let mut farthest_dist: Geo = Geo::MIN; // farthest distance in direction
+		let mut farthest_vert_index = 0; // farthest vertice index in direction
+		for i in 0..vertices.len() {
+			let dist = direction.dot(&vertices[i]);
+
+			if dist > farthest_dist {
+				farthest_dist = dist;
+				farthest_vert_index = i;
+			}
+		}
+
+		farthest_vert_index
+	}
+	pub fn get_supports(&self, direction: &Vec2) -> ((Geo, usize), (Geo, usize)) {
+		let mut min = Geo::MAX;
+		let mut min_index = 0;
+		let mut max = Geo::MIN;
+		let mut max_index = 0;
+		for (i, vertex) in self.vertices.iter().enumerate() {
+			let proj = vertex.dot(direction);
+			if proj < min {
+				min = proj;
+				min_index = i;
+			}
+			if proj > max {
+				max = proj;
+				max_index = i;
+			}
+		}
+		((min, min_index), (max, max_index))
 	}
 }
 

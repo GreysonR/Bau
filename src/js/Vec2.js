@@ -44,4 +44,7 @@ export default class Vec2 {
 			return new Vec2(this.x * other.x, this.y * other.y);
 		}
 	}
+	div(other) {
+		return this.mult(1 / other);
+	}
 }

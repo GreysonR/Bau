@@ -32,8 +32,9 @@
 		render.render(engine);
 	});
 	
-	let bodyA = engine.body_create_rect(100, 100, new Vec2(300, 300), true);
+	let bodyA = engine.body_create_rect(200, 200, new Vec2(300, 300), true);
 	engine.world_add_body(bodyA);
+	engine.body_set_angle(bodyA, 0.4);
 	let bodyB = engine.body_create_rect(100, 100, new Vec2(300, 600), true);
 	engine.world_add_body(bodyB);
 

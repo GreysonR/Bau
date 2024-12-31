@@ -1,4 +1,6 @@
-use crate::{Body, CollisionPair, Geo, Id, Vec2, World};
+use web_sys::console::log_1;
+
+use crate::{Body, collision_pair::{Contact, CollisionPair}, Geo, Id, Vec2, World};
 use std::collections::HashMap;
 
 pub fn find(world: &mut World, bodies: &mut HashMap<Id, Body>) {
@@ -10,11 +12,7 @@ pub fn find(world: &mut World, bodies: &mut HashMap<Id, Body>) {
 
 		// Create manifold (collision_pair) if they collide and add to world pairs (if it doesn't already exist)
 		// let pair_id = CollisionPair::pair_id(body_a.id, body_b.id);
-		world.collision_pairs.replace(CollisionPair {
-			body_a: body_a.id,
-			body_b: body_b.id,
-			frame: world.frame,
-		});
+		world.collision_pairs.replace(create_manifold(world, body_a, body_b));
 	}
 }
 fn collides(body_a: &Body, body_b: &Body) -> bool {
@@ -23,7 +21,7 @@ fn collides(body_a: &Body, body_b: &Body) -> bool {
 		let mut min = Geo::MAX;
 		let mut max = Geo::MIN;
 		for vertex in body.get_vertices().iter() {
-			let proj = vertex.dot(*direction);
+			let proj = vertex.dot(direction);
 			if proj < min { min = proj };
 			if proj > max { max = proj };
 		}
@@ -41,4 +39,81 @@ fn collides(body_a: &Body, body_b: &Body) -> bool {
 		true
 	};
 	collides_against(body_a, body_b) && collides_against(body_b, body_a)
+}
+fn create_manifold(world: &World, body_a: &Body, body_b: &Body) -> CollisionPair {
+	/*
+		Find collision points
+			Check all vertices of both bodies for point overlapping
+		Find collision normal
+			Find edge with minimum penetration
+				Penetration guaranteed to be positive (colliding) since if it wasn't it wouldn't pass collision test
+				Penetration is (a.min - b.max).abs().min((a.max - b.min).abs()), where a and b are projected sides
+		Find collision penetration (see above)
+	*/
+	let mut contacts = Vec::new();
+	let mut depth: Geo = Geo::MAX;
+	let mut normal = Vec2::zero();
+	let mut normal_point = Vec2::zero();
+
+	/*
+	For each body:
+		Iterate through all vertices
+			Find min collision depth:
+				Find edge
+				Find edge normal
+				Get support (depth, vertice index) along that normal
+				If the depth < minimum found depth:
+					update min depth, normal, and vertex index
+
+			Find contacts:
+				Find if current vertex is inside other body
+				If it is, add it to contacts
+					Incident body: body that owns vertex
+					Reference body: body that is overlapping with verex
+	*/
+
+	let bodies = [body_b, body_a];
+	for i in 0..bodies.len() {
+		let incident = bodies[i];
+		let reference = bodies[bodies.len() - i - 1];
+		let vertices = incident.get_vertices();
+		let reference_vertices = reference.get_vertices();
+		for i in 0..vertices.len() {
+			let cur_vertex = &vertices[i];
+			let next_vertex = &vertices[(i + 1) % vertices.len()];
+			// Find min collision depth / other manifold data
+			let edge = next_vertex - cur_vertex;
+			let support_normal = -edge.clone().normal().normalize();
+			let support_index = reference.get_support(&support_normal);
+			let support_depth = support_normal.dot(&(&reference_vertices[support_index] - cur_vertex));
+			
+			if support_depth < depth {
+				depth = support_depth;
+				normal = support_normal;
+				normal_point = cur_vertex + &edge * 0.5;
+			}
+
+			// Find overlapping contacts
+			if reference.contains_point(&cur_vertex) {
+				contacts.push(Contact {
+					vertex: cur_vertex.clone(),
+					incident: incident.id,
+					reference: reference.id,
+				});
+			}
+		}
+	}
+
+
+	CollisionPair {
+		body_a: body_a.id,
+		body_b: body_b.id,
+		frame: world.frame,
+
+		contacts,
+
+		depth,
+		normal,
+		normal_point,
+	}
 }

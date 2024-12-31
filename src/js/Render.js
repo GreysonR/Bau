@@ -1,4 +1,5 @@
 import { polygon as renderPolygon } from "./RenderMethods";
+import { default as Vec2 } from "./Vec2";
 
 export class Render {
 	canvas;
@@ -36,26 +37,49 @@ export class Render {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		ctx.save();
 
-		let bodies = engine.get_bodies_vertices();
-		let pairs = engine.get_collision_pairs();
-		let collidingBodies = pairs.flatMap(pair => pair);
+		let bodyIds = engine.world_get_bodies();
+		let pairs = engine.world_get_collision_pairs();
+		let collidingBodies = pairs.flatMap(pair => [pair.body_a, pair.body_b]);
 
+		// Render colliding bodies filled in
 		ctx.beginPath();
-		for (let body of bodies) {
-			if (collidingBodies.includes(body.id)) {
-				renderPolygon(body.vertices, ctx);
+		for (let id of bodyIds) {
+			if (collidingBodies.includes(id)) {
+				renderPolygon(engine.body_get_vertices(id), ctx);
 			}
 		}
 		ctx.fillStyle = "#4FC2B580";
 		ctx.fill();
 		
+		// Render body outlines
 		ctx.beginPath();
-		for (let body of bodies) {
-			renderPolygon(body.vertices, ctx);
+		for (let id of bodyIds) {
+			renderPolygon(engine.body_get_vertices(id), ctx);
 		}
 		ctx.strokeStyle = "#4FC2B5";
-		ctx.lineWidth = 2;
+		ctx.lineWidth = 1.5;
 		ctx.stroke();
+
+		// Render collision points
+		for (let pair of pairs) {
+			let { body_a, body_b, contacts, depth, normal, normal_point } = pair;
+			if (contacts.length <= 0) continue;
+
+			for (let contact of contacts) {
+				let { incident, reference, vertex } = contact;
+				ctx.beginPath();
+				ctx.arc(vertex.x, vertex.y, 3, 0, Math.PI * 2);
+				ctx.fillStyle = "white";
+				ctx.fill();
+			}
+
+			ctx.beginPath();
+			ctx.moveTo(normal_point.x, normal_point.y);
+			ctx.lineTo(normal_point.x + normal.x * 10, normal_point.y + normal.y * 10);
+			ctx.strokeStyle = "#DF7157";
+			ctx.lineWidth = 3;
+			ctx.stroke();
+		}
 
 		ctx.restore();
 	}

@@ -1,9 +1,24 @@
-use crate::{Frame, Id, PairId};
+use crate::{Frame, Geo, Id, PairId, Vec2};
+use serde::Serialize;
 
+#[derive(Serialize, Clone)]
+pub struct Contact {
+	pub vertex: Vec2,
+	pub incident: Id,
+	pub reference: Id,
+}
+
+#[derive(Serialize, Clone)]
 pub struct CollisionPair {
 	pub body_a: Id,
 	pub body_b: Id,
 	pub frame: Frame,
+
+	pub contacts: Vec<Contact>,
+
+	pub depth: Geo,
+	pub normal: Vec2,
+	pub normal_point: Vec2, // purely for debugging
 }
 
 impl CollisionPair {
