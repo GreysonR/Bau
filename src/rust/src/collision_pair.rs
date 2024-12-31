@@ -18,7 +18,7 @@ pub struct CollisionPair {
 
 	pub depth: Geo,
 	pub normal: Vec2,
-	pub normal_point: Vec2, // purely for debugging
+	pub normal_point: Vec2, // only used for debugging
 }
 
 impl CollisionPair {

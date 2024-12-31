@@ -1,5 +1,3 @@
-use web_sys::console::log_1;
-
 use crate::{Body, collision_pair::{Contact, CollisionPair}, Geo, Id, Vec2, World};
 use std::collections::HashMap;
 

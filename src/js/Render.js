@@ -1,5 +1,4 @@
 import { polygon as renderPolygon } from "./RenderMethods";
-import { default as Vec2 } from "./Vec2";
 
 export class Render {
 	canvas;
