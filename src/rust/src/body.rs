@@ -1,14 +1,26 @@
+use core::f32;
+
 use crate::{Vec2, Geo, Id};
+
+mod body_options;
+pub use body_options::BodyOptions;
 
 pub struct Body {
 	pub id: Id,
+
+	// Inherent
 	vertices: Vec<Vec2>,
 	position: Vec2,
 	angle: Geo,
 	velocity: Vec2,
-
-	pub axes: Vec<Vec2>,
 	
+	// Calculated
+	pub axes: Vec<Vec2>,
+	pub inertia: Geo,
+	pub inverse_inertia: Geo,
+	
+	// Options
+	mass: Geo,
 	pub is_static: bool,
 }
 
@@ -16,7 +28,7 @@ impl Body {
 	//
 	// constructors
 	//
-	pub fn new(vertices: Vec<Vec2>, position: Vec2, is_static: bool) -> Body {
+	pub fn new(vertices: Vec<Vec2>, position: Vec2, options: BodyOptions) -> Body {
 		assert!(vertices.len() >= 3); // There should be at least 3 vertices for a valid body
 		
 		let mut body = Body {
@@ -29,15 +41,20 @@ impl Body {
 			velocity: Vec2::new(0.0, 0.0),
 			angle: 0.0,
 
-			is_static,
+			mass: options.mass,
+			is_static: options.is_static,
+
+			inertia: 1.0,
+			inverse_inertia: 1.0,
 		};
 
+		body.update_inertia();
 
 		body.translate_position(position);
 
 		body
 	}
-	pub fn rectangle(width: Geo, height: Geo, position: Vec2, is_static: bool) -> Body {
+	pub fn rectangle(width: Geo, height: Geo, position: Vec2, options: BodyOptions) -> Body {
 		let half_width = width / 2.0;
 		let half_height = height / 2.0;
 		let vertices = vec![
@@ -46,7 +63,23 @@ impl Body {
 			Vec2::new( half_width,  half_height), // bottom right
 			Vec2::new(-half_width,  half_height), // bottom left
 		];
-		Body::new(vertices, position, is_static)
+		Body::new(vertices, position, options)
+	}
+	pub fn circle(radius: Geo, position: Vec2, options: BodyOptions) -> Body {
+		let mut vertices = Vec::new();
+		let vertice_count = (radius.powf(0.333) * 2.8).round() as u32;
+		
+		let start_angle = f32::consts::TAU * 2.0 / vertice_count as f32;
+		for i in 0..vertice_count {
+			vertices.push(Vec2::new((start_angle * i as f32 + start_angle / 2.0).cos() * radius, (start_angle * i as f32 + start_angle / 2.0).sin() * radius));
+		}
+		Body::new(vertices, position, options)
+	}
+
+	// Helper methods
+	fn update_inertia(&mut self) {
+		self.inertia = Body::get_inertia(self);
+		self.inverse_inertia = 1.0 / self.inertia;
 	}
 
 	//
@@ -62,7 +95,28 @@ impl Body {
 		}
 		axes
 	}
+	fn get_inertia(body: &Body) -> Geo {
+		if body.is_static { return Geo::MAX; }
+		let vertices = &body.vertices;
+		let len = vertices.len();
+		let mass = body.mass;
+		
+		let mut numerator = 0.0;
+		let mut denominator = 0.0;
 
+		for i in 0..len {
+			let j = (i + 1) % len;
+			let cur = &vertices[i];
+			let next= &vertices[j];
+
+			let cross = next.cross(cur).abs();
+			numerator += cross * (vertices[j].dot(&vertices[j]) + vertices[j].dot(&vertices[i]) + vertices[i].dot(&vertices[i]));
+			denominator += cross;
+		}
+
+		return (mass / 6.0) * (numerator / denominator);
+	}
+	
 	//
 	// getters
 	// 

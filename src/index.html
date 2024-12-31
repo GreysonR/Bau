@@ -18,9 +18,10 @@
 <script type="module">
 	let bau = await bauLoader;
 
-	const { Ticker, Render, Vec2, Engine } = bau;
+	const { Ticker, Render, Vec2, Engine, BodyOptions } = bau;
 	window.Vec2 = Vec2;
 	window.bau = bau;
+	window.BodyOptions = BodyOptions;
 	
 	let engine = new Engine();
 	let render = new Render();
@@ -32,10 +33,16 @@
 		render.render(engine);
 	});
 	
-	let bodyA = engine.body_create_rect(200, 200, new Vec2(300, 300), true);
+	let bodyA = engine.body_create_rect(200, 200, new Vec2(300, 300), new BodyOptions()
+		.is_static(true)
+		.mass(1)
+	);
 	engine.world_add_body(bodyA);
 	engine.body_set_angle(bodyA, 0.4);
-	let bodyB = engine.body_create_rect(100, 100, new Vec2(300, 600), true);
+	let bodyB = engine.body_create_rect(100, 100, new Vec2(300, 600), new BodyOptions()
+		.is_static(true)
+		.mass(1)
+	);
 	engine.world_add_body(bodyB);
 
 	window.engine = engine;

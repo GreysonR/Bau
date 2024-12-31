@@ -111,6 +111,7 @@ fn create_manifold(world: &World, body_a: &Body, body_b: &Body) -> CollisionPair
 		contacts,
 
 		depth,
+		tangent: normal.clone().normal(),
 		normal,
 		normal_point,
 	}

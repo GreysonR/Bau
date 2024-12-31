@@ -5,124 +5,22 @@ use serde::{Serialize, Deserialize};
 use wasm_bindgen::prelude::*;
 use crate::Geo;
 
-/// Generic vector with two components.
-///
-/// It implements multiple operators (for each combination of owned and borrowed
-/// args), namely addition, subtraction, element-wise multiplication,
-/// element-wise division and multiplication & division by a number. (Note that
-/// you can only multiply and divide in the following order: `vector op number`,
-/// since it is not possible to implement a foreign trait on `T`.)
-///
-/// This crate exports a specific version of [`Vec2`](crate::vec2::Vec2) with
-/// [`f64`](f64) components — [`Fecc`](crate::fecc::Fecc). It implements
-/// additional methods and is heavily inspired by [`p5.Vector`](https://p5js.org/reference/#/p5.Vector).
-///
-/// # Examples
-///
-/// Basic arithmetic.
-///
-/// ```
-/// use vec2::Vec2;
-///
-/// let a = Vec2::new(3_i32, 4);
-/// let b = a * 5; // (15, 20)
-/// let c = Vec2::new(-10, -8);
-/// let d = b - c; // (5, 12)
-/// let e = -d; // (-5, -12)
-/// ```
-///
-/// Shorthand construction using [`From`](std::convert::From).
-///
-/// ```
-/// use vec2::Vec2;
-///
-/// let a: Vec2<i32> = (10, 5).into();
-/// ```
-///
-/// Using [`Fecc`](crate::fecc::Fecc)'s extended API.
-///
-/// ```
-/// # use float_cmp::assert_approx_eq;
-/// # use std::f64::consts::PI;
-/// use vec2::Fecc;
-///
-/// let a: Fecc = (3.0, 4.0).into();
-/// let b = a / 0.2; // (15.0, 20.0)
-/// let c = b.limit(20.0); // (12.0, 16.0)
-/// let d = c.rotate(PI); // (-12.0, -16.0)
-/// let e = d.turn(0.0); // (20.0, 0.0)
-///
-/// assert_approx_eq!(f64, e.mag(), 20.0);
-/// ```
 #[wasm_bindgen]
 #[derive(Clone, PartialEq, Default, Debug, Serialize,  Deserialize)]
 pub struct Vec2 {
-	#[allow(missing_docs)]
 	pub x: Geo,
-
-	#[allow(missing_docs)]
 	pub y: Geo,
 }
 
 
 #[wasm_bindgen]
 impl Vec2 {
-	/// Constructs a new vector.
-	///
-	/// # Examples
-	///
-	/// ```
-	/// use vec2::Vec2;
-	///
-	/// let a: Vec2<i32> = Vec2::new(10, 0);
-	/// ```
-	///
-	/// You can also construct it from a tuple:
-	///
-	/// ```
-	/// use vec2::Vec2;
-	///
-	/// let a: Vec2<i32> = (10, 0).into();
-	/// ```
 	#[wasm_bindgen(constructor)]
 	pub fn new(x: Geo, y: Geo) -> Self {
 		Self { x, y }
 	}
-
 	pub fn zero() -> Self {
 		Self { x: 0.0, y: 0.0 }
-	}
-
-	/// Takes a dot product of the vector with another.
-	///
-	/// # Examples
-	///
-	/// ```
-	/// use vec2::Vec2;
-	///
-	/// let a: Vec2<i32> = Vec2::new(10, 0);
-	/// let b: Vec2<i32> = Vec2::new(5, 0);
-	///
-	/// assert_eq!(a.dot(b), 50);
-	/// ```
-	pub fn dot(&self, rhs: &Vec2) -> Geo {
-		self.x * rhs.x + self.y * rhs.y
-	}
-
-	/// Takes the cross-product (a scalar) of the vector with another.
-	///
-	/// # Examples
-	///
-	/// ```
-	/// use vec2::Vec2;
-	///
-	/// let a: Vec2<i32> = Vec2::new(10, 0);
-	/// let b: Vec2<i32> = Vec2::new(0, -10);
-	///
-	/// assert_eq!(a.cross(b), -100);
-	/// ```
-	pub fn cross(self, rhs: Vec2) -> Geo {
-		self.x * rhs.y - self.y * rhs.x
 	}
 
 	pub fn length(&self) -> Geo {
@@ -134,74 +32,44 @@ impl Vec2 {
 		self.y /= len;
 		self
 	}
+	pub fn dot(&self, rhs: &Vec2) -> Geo {
+		self.x * rhs.x + self.y * rhs.y
+	}
+	pub fn cross(&self, rhs: &Vec2) -> Geo {
+		self.x * rhs.y - self.y * rhs.x
+	}
 	pub fn normal(mut self) -> Vec2 {
 		mem::swap(&mut self.x, &mut self.y);
 		self.y = -self.y;
 		self
 	}
-	
-	/// Performs element-wise [`min`](std::cmp::Ord::min).
-	///
-	/// # Examples
-	///
-	/// ```
-	/// use vec2::Vec2;
-	///
-	/// let a: Vec2<i32> = Vec2::new(-100, 100);
-	/// let b: Vec2<i32> = Vec2::new(0, 0);
-	/// let min = a.min(b);
-	///
-	/// assert_eq!(min.x, -100);
-	/// assert_eq!(min.y, 0);
-	/// ```
 	pub fn min(self, rhs: Vec2) -> Vec2 {
 		Self {
 			x: self.x.min(rhs.x),
 			y: self.y.min(rhs.y),
 		}
 	}
-
-	/// Performs element-wise [`max`](std::cmp::Ord::max).
-	///
-	/// # Examples
-	///
-	/// ```
-	/// use vec2::Vec2;
-	///
-	/// let a: Vec2<i32> = Vec2::new(-100, 100);
-	/// let b: Vec2<i32> = Vec2::new(0, 0);
-	/// let max = a.max(b);
-	///
-	/// assert_eq!(max.x, 0);
-	/// assert_eq!(max.y, 100);
-	/// ```
 	pub fn max(self, rhs: Vec2) -> Vec2 {
 		Self {
 			x: self.x.max(rhs.x),
 			y: self.y.max(rhs.y),
 		}
 	}
-
-	/// Performs element-wise [`clamp`](std::cmp::Ord::clamp).
-	///
-	/// # Examples
-	///
-	/// ```
-	/// use vec2::Vec2;
-	///
-	/// let a: Vec2<i32> = Vec2::new(-100, 100);
-	/// let min: Vec2<i32> = Vec2::new(0, 10);
-	/// let max: Vec2<i32> = Vec2::new(0, 10);
-	/// let clamped = a.clamp(min, max);
-	///
-	/// assert_eq!(clamped.x, 0);
-	/// assert_eq!(clamped.y, 10);
-	/// ```
 	pub fn clamp(self, min: Vec2, max: Vec2) -> Vec2 {
 		Self {
 			x: self.x.clamp(min.x, max.x),
 			y: self.y.clamp(min.y, max.y),
 		}
+	}
+}
+impl From<&Vec2> for Vec2 {
+	fn from(other: &Vec2) -> Vec2 {
+		other.clone()
+	}
+}
+impl From<&mut Vec2> for Vec2 {
+	fn from(other: &mut Vec2) -> Vec2 {
+		other.clone()
 	}
 }
 
@@ -220,7 +88,6 @@ impl From<(Geo, Geo)> for Vec2 {
 	}
 }
 
-#[allow(clippy::from_over_into)]
 impl Into<(Geo, Geo)> for Vec2 {
 	fn into(self) -> (Geo, Geo) {
 		(self.x, self.y)
@@ -231,19 +98,6 @@ impl Into<(Geo, Geo)> for Vec2 {
 
 // Neg.
 
-// Owned.
-impl Neg for Vec2 {
-	type Output = Vec2;
-
-	fn neg(self) -> Self::Output {
-		Vec2 {
-			x: self.x.neg(),
-			y: self.y.neg(),
-		}
-	}
-}
-
-// Borrowed.
 impl Neg for &Vec2 {
 	type Output = Vec2;
 
@@ -253,6 +107,20 @@ impl Neg for &Vec2 {
 			y: self.y.neg(),
 		}
 	}
+}
+impl Neg for &mut Vec2 {
+	type Output = Vec2;
+
+	fn neg(self) -> Self::Output {
+		Vec2 {
+			x: self.x.neg(),
+			y: self.y.neg(),
+		}
+	}
+}
+impl Neg for Vec2 {
+	type Output = Vec2;
+	fn neg(self) -> Self::Output { -&self }
 }
 
 

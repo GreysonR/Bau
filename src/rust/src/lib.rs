@@ -16,7 +16,7 @@ mod collision_pair;
 pub use collision_pair::CollisionPair;
 
 mod body;
-pub use body::Body;
+pub use body::{Body, BodyOptions};
 
 mod world;
 pub use world::World;

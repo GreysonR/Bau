@@ -1,4 +1,4 @@
-use crate::{physics, Body, Geo, Id, Time, Vec2, World};
+use crate::{physics, Body, BodyOptions, Geo, Id, Time, Vec2, World};
 use wasm_bindgen::prelude::*;
 use std::collections::HashMap;
 use serde::Serialize;
@@ -26,8 +26,8 @@ impl Engine {
 	}
 
 	// Body methods
-	pub fn body_create_rect(&mut self, width: Geo, height: Geo, position: Vec2, is_static: bool) -> Id {
-		let body = Body::rectangle(width, height, position, is_static);
+	pub fn body_create_rect(&mut self, width: Geo, height: Geo, position: Vec2, options: BodyOptions) -> Id {
+		let body = Body::rectangle(width, height, position, options);
 		let id = body.id;
 		self.bodies.insert(id, body);
 		id
