@@ -190,7 +190,7 @@ impl Body {
 			// edge_normal: (next.y - cur.y, -(next.x - cur.x))
 			// cur_to_point = point - cur
 			// edge_normal dot cur_to_point >= 0, then point is outside body (similar to SAT)
-			if (point.x - cur_vertex.x) * (next_vertex.y - cur_vertex.y) + (cur_vertex.x - next_vertex.x) * (point.y - cur_vertex.y) >= 0.0 {
+			if (point.x - cur_vertex.x) * (next_vertex.y - cur_vertex.y) + (cur_vertex.x - next_vertex.x) * (point.y - cur_vertex.y) >= 0.01 { // 0.01 for precision error. If at 0, bodies that perfectly line up find no contacts
 				return false;
 			}
 		}

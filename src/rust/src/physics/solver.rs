@@ -47,7 +47,12 @@ pub fn solve_velocity(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: 
 		let restitution = pair.restitution;
 		let friction = pair.friction;
 
-		let slop = 1.0;
+
+		let slop = 2.0;
+
+		if !body_a.is_static && !body_b.is_static {
+			// log_1(&format!("contacts: {}", contacts.len()).into());
+		}
 		
 		for contact in contacts.iter() {
 			let ra = contact.anchor_a.rotate(angle_a); // contact radius a
@@ -68,7 +73,7 @@ pub fn solve_velocity(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: 
 			if s < 0.0 { continue; }
 			
 			// Baumgarte stabilization
-			let bias = s / delta * 0.05;
+			let bias = s / delta * 0.2;
 
 			// Normal mass
 			let rna = ra.cross(normal);

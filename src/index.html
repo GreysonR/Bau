@@ -35,18 +35,35 @@
 	
 	let bodyA = engine.body_create_rect(100, 100, new Vec2(300, 300), new BodyOptions()
 		.friction(0.5)
-		.restitution(1)
+		.restitution(0.5)
 		.mass(2)
 	);
-	engine.world_add_body(bodyA);
+	// engine.world_add_body(bodyA);
 	// engine.body_set_angle(bodyA, 0.4);
 	let bodyB = engine.body_create_circle(50, new Vec2(300, 170), new BodyOptions()
 		.friction(0.5)
-		.restitution(1)
+		.restitution(0.5)
 	);
-	engine.world_add_body(bodyB);
+	// engine.world_add_body(bodyB);
 
-	let mouseBody = engine.body_create_rect(300, 100, new Vec2(300, 600), new BodyOptions()
+	function stack() {
+		let width = 10;
+		let height = 10;
+		let size = 60;
+
+		for (let x = 0; x < width; ++x) {
+			for (let y = 0; y < height; ++y) {
+				let body = engine.body_create_rect(size, size, new Vec2(700 + size * (width/2 - x), 500 - y * size), new BodyOptions()
+					.friction(0.5)
+					.restitution(0.5)
+				);
+				engine.world_add_body(body);
+			}
+		}
+	}
+	stack();
+
+	let mouseBody = engine.body_create_rect(1200, 100, new Vec2(700, 800), new BodyOptions()
 		.is_static(true)
 		.mass(10)
 	);
@@ -59,7 +76,7 @@
 
 	window.addEventListener("mousemove", event => {
 		let { clientX: mouseX, clientY: mouseY } = event;
-		engine.body_set_position(mouseBody, new Vec2(mouseX, mouseY));
+		// engine.body_set_position(mouseBody, new Vec2(mouseX, mouseY));
 	});
 </script>
 </html>
