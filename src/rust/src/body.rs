@@ -1,4 +1,4 @@
-use core::f32;
+use core::{f32, f64};
 
 use crate::{Vec2, Geo, Id};
 
@@ -73,7 +73,7 @@ impl Body {
 		let mut vertices = Vec::new();
 		let vertice_count = (radius.powf(0.333) * 8.0).round() as u32;
 		
-		let start_angle = f32::consts::TAU * 2.0 / vertice_count as Geo;
+		let start_angle = crate::TAU * 2.0 / vertice_count as Geo;
 		for i in 0..vertice_count {
 			vertices.push(Vec2::new((start_angle * i as Geo + start_angle / 2.0).cos() * radius, (start_angle * i as Geo + start_angle / 2.0).sin() * radius));
 		}

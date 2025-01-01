@@ -113,7 +113,7 @@ fn create_manifold(world: &World, body_a: &Body, body_b: &Body) -> CollisionPair
 
 	let reference_body = if body_a.id == reference_body_id { body_a } else { body_b };
 	let incident_body = if body_a.id == incident_body_id { body_a } else { body_b };
-	let mass_coef = 1.0 / contacts.len() as f32;
+	let mass_coef = 1.0 / contacts.len() as Geo;
 	for contact in contacts.iter_mut() {
 		let vertex = &contact.vertex.clone();
 		contact.anchor_a = (vertex - reference_body.get_position()).rotate(-reference_body.get_angle());
