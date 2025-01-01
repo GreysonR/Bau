@@ -4,8 +4,12 @@ use serde::Serialize;
 #[derive(Serialize, Clone)]
 pub struct Contact {
 	pub vertex: Vec2,
-	pub incident: Id,
-	pub reference: Id,
+
+	pub incident: Id, // body that owns vertex
+	pub reference: Id, // body that is overlapping with verex
+	pub anchor_a: Vec2,
+	pub anchor_b: Vec2,
+	pub mass_coefficient: Geo,
 }
 
 #[derive(Serialize, Clone)]

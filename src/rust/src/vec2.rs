@@ -38,6 +38,12 @@ impl Vec2 {
 	pub fn cross(&self, rhs: &Vec2) -> Geo {
 		self.x * rhs.y - self.y * rhs.x
 	}
+	pub fn cross_float(&self, rhs: Geo) -> Vec2 {
+		Vec2 {
+			x: self.y * -rhs,
+			y: self.x * rhs
+		}
+	}
 	pub fn normal(mut self) -> Vec2 {
 		mem::swap(&mut self.x, &mut self.y);
 		self.y = -self.y;
@@ -59,6 +65,12 @@ impl Vec2 {
 		Self {
 			x: self.x.clamp(min.x, max.x),
 			y: self.y.clamp(min.y, max.y),
+		}
+	}
+	pub fn rotate(&self, angle: Geo) -> Vec2 {
+		Vec2 {
+			x: angle.cos() * self.x - angle.sin() * self.y,
+			y: angle.sin() * self.x + angle.cos() * self.y,
 		}
 	}
 }

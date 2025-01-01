@@ -43,6 +43,7 @@ fn apply_velocities(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: Ti
 	for body_id in world.bodies.iter() {
 		let body = bodies.get_mut(body_id).unwrap();
 		if body.is_static { continue; } // Don't move static bodies
-		body.translate_position(body.get_velocity() * &delta); // todo: average cur velocity with last velocity for trapezoidal approx
+		body.translate_position(body.get_velocity() * delta); // todo: average cur velocity with last velocity for trapezoidal approx
+		body.translate_angle(body.angular_velocity * delta);
 	}
 }

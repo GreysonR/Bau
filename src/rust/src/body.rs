@@ -12,12 +12,14 @@ pub struct Body {
 	vertices: Vec<Vec2>,
 	position: Vec2,
 	angle: Geo,
-	velocity: Vec2,
+	pub velocity: Vec2,
+	pub angular_velocity: Geo,
 	
 	// Calculated
 	pub axes: Vec<Vec2>,
-	pub inertia: Geo,
-	pub inverse_inertia: Geo,
+	inertia: Geo,
+	inverse_inertia: Geo,
+	inverse_mass: Geo,
 	
 	// Options
 	mass: Geo,
@@ -40,8 +42,10 @@ impl Body {
 			position: Vec2::new(0.0, 0.0),
 			velocity: Vec2::new(0.0, 0.0),
 			angle: 0.0,
+			angular_velocity: 0.0,
 
 			mass: options.mass,
+			inverse_mass: 1.0 / options.mass,
 			is_static: options.is_static,
 
 			inertia: 1.0,
@@ -67,18 +71,18 @@ impl Body {
 	}
 	pub fn circle(radius: Geo, position: Vec2, options: BodyOptions) -> Body {
 		let mut vertices = Vec::new();
-		let vertice_count = (radius.powf(0.333) * 2.8).round() as u32;
+		let vertice_count = (radius.powf(0.333) * 8.0).round() as u32;
 		
-		let start_angle = f32::consts::TAU * 2.0 / vertice_count as f32;
+		let start_angle = f32::consts::TAU * 2.0 / vertice_count as Geo;
 		for i in 0..vertice_count {
-			vertices.push(Vec2::new((start_angle * i as f32 + start_angle / 2.0).cos() * radius, (start_angle * i as f32 + start_angle / 2.0).sin() * radius));
+			vertices.push(Vec2::new((start_angle * i as Geo + start_angle / 2.0).cos() * radius, (start_angle * i as Geo + start_angle / 2.0).sin() * radius));
 		}
 		Body::new(vertices, position, options)
 	}
 
 	// Helper methods
 	fn update_inertia(&mut self) {
-		self.inertia = Body::get_inertia(self);
+		self.inertia = Body::calculate_inertia(self);
 		self.inverse_inertia = 1.0 / self.inertia;
 	}
 
@@ -95,7 +99,7 @@ impl Body {
 		}
 		axes
 	}
-	fn get_inertia(body: &Body) -> Geo {
+	fn calculate_inertia(body: &Body) -> Geo {
 		if body.is_static { return Geo::MAX; }
 		let vertices = &body.vertices;
 		let len = vertices.len();
@@ -124,7 +128,11 @@ impl Body {
 	pub fn get_position(&self) -> &Vec2 { &self.position }
 	pub fn get_vertices(&self) -> &Vec<Vec2> { &self.vertices }
 	pub fn get_velocity(&self) -> &Vec2 { &self.velocity }
-	
+	pub fn get_mass(&self) -> Geo { self.mass }
+	pub fn get_inverse_mass(&self) -> Geo { self.inverse_mass }
+	pub fn get_inertia(&self) -> Geo { self.inertia }
+	pub fn get_inverse_inertia(&self) -> Geo { self.inverse_inertia }
+
 	//
 	// setters
 	//
@@ -164,6 +172,11 @@ impl Body {
 		self.translate_angle(angle - self.angle);
 		self.angle = angle;
 	}
+	pub fn apply_angular_velocity(&mut self, force: Geo) {
+		self.angular_velocity += force;
+	}
+
+	// physics helper methods
 	pub fn contains_point(&self, point: &Vec2) -> bool {
 		let vertices = &self.vertices;
 		for i in 0..vertices.len() {

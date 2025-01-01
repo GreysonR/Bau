@@ -32,6 +32,12 @@ impl Engine {
 		self.bodies.insert(id, body);
 		id
 	}
+	pub fn body_create_circle(&mut self, radius: Geo, position: Vec2, options: BodyOptions) -> Id {
+		let body = Body::circle(radius, position, options);
+		let id = body.id;
+		self.bodies.insert(id, body);
+		id
+	}
 	pub fn body_set_position(&mut self, body_id: Id, position: Vec2) {
 		if !self.bodies.contains_key(&body_id) { return } // Body doesn't exist
 		self.bodies.get_mut(&body_id).unwrap().set_position(position);
@@ -47,6 +53,10 @@ impl Engine {
 	pub fn body_apply_velocity(&mut self, body_id: Id, velocity: Vec2) {
 		if !self.bodies.contains_key(&body_id) { return } // Body doesn't exist
 		self.bodies.get_mut(&body_id).unwrap().apply_velocity(&velocity);
+	}
+	pub fn body_apply_angular_velocity(&mut self, body_id: Id, velocity: Geo) {
+		if !self.bodies.contains_key(&body_id) { return } // Body doesn't exist
+		self.bodies.get_mut(&body_id).unwrap().apply_angular_velocity(velocity);
 	}
 	pub fn body_translate_angle(&mut self, body_id: Id, angle: Geo) {
 		if !self.bodies.contains_key(&body_id) { return } // Body doesn't exist

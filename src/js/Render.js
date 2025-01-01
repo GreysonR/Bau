@@ -61,7 +61,7 @@ export class Render {
 
 		// Render collision points
 		for (let pair of pairs) {
-			let { body_a, body_b, contacts, depth, normal, normal_point } = pair;
+			let { body_a, body_b, contacts, depth, normal, tangent, normal_point } = pair;
 			if (contacts.length <= 0) continue;
 
 			for (let contact of contacts) {
@@ -75,6 +75,8 @@ export class Render {
 			ctx.beginPath();
 			ctx.moveTo(normal_point.x, normal_point.y);
 			ctx.lineTo(normal_point.x + normal.x * 10, normal_point.y + normal.y * 10);
+			ctx.moveTo(normal_point.x, normal_point.y);
+			ctx.lineTo(normal_point.x + tangent.x * 10, normal_point.y + tangent.y * 10);
 			ctx.strokeStyle = "#DF7157";
 			ctx.lineWidth = 3;
 			ctx.stroke();

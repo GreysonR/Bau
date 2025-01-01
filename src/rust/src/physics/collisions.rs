@@ -52,6 +52,8 @@ fn create_manifold(world: &World, body_a: &Body, body_b: &Body) -> CollisionPair
 	let mut depth: Geo = Geo::MAX;
 	let mut normal = Vec2::zero();
 	let mut normal_point = Vec2::zero();
+	let mut reference_body_id = body_a.id;
+	let mut incident_body_id = body_b.id;
 
 	/*
 	For each body:
@@ -76,6 +78,7 @@ fn create_manifold(world: &World, body_a: &Body, body_b: &Body) -> CollisionPair
 		let reference = bodies[bodies.len() - i - 1];
 		let vertices = incident.get_vertices();
 		let reference_vertices = reference.get_vertices();
+
 		for i in 0..vertices.len() {
 			let cur_vertex = &vertices[i];
 			let next_vertex = &vertices[(i + 1) % vertices.len()];
@@ -87,32 +90,48 @@ fn create_manifold(world: &World, body_a: &Body, body_b: &Body) -> CollisionPair
 			
 			if support_depth < depth {
 				depth = support_depth;
-				normal = support_normal;
+				normal = -support_normal;
 				normal_point = cur_vertex + &edge * 0.5;
+				
+				reference_body_id = reference.id;
+				incident_body_id = incident.id;
 			}
 
 			// Find overlapping contacts
 			if reference.contains_point(&cur_vertex) {
 				contacts.push(Contact {
 					vertex: cur_vertex.clone(),
-					incident: incident.id,
 					reference: reference.id,
+					incident: incident.id,
+					anchor_a: Vec2::zero(),
+					anchor_b: Vec2::zero(),
+					mass_coefficient: 1.0,
 				});
 			}
 		}
 	}
 
+	let reference_body = if body_a.id == reference_body_id { body_a } else { body_b };
+	let incident_body = if body_a.id == incident_body_id { body_a } else { body_b };
+	let mass_coef = 1.0 / contacts.len() as f32;
+	for contact in contacts.iter_mut() {
+		let vertex = &contact.vertex.clone();
+		contact.anchor_a = (vertex - reference_body.get_position()).rotate(-reference_body.get_angle());
+		contact.anchor_b = (vertex - incident_body.get_position()).rotate(-incident_body.get_angle());
+		contact.mass_coefficient = mass_coef;
+	}
+
 
 	CollisionPair {
-		body_a: body_a.id,
-		body_b: body_b.id,
+		body_a: reference_body_id,
+		body_b: incident_body_id,
 		frame: world.frame,
 
 		contacts,
 
 		depth,
 		tangent: normal.clone().normal(),
-		normal,
+		normal: normal,
 		normal_point,
 	}
 }
