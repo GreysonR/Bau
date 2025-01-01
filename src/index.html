@@ -34,14 +34,15 @@
 	});
 	
 	let bodyA = engine.body_create_rect(100, 100, new Vec2(300, 300), new BodyOptions()
-		.is_static(false)
-		.mass(1)
+		.friction(0.5)
+		.restitution(1)
+		.mass(2)
 	);
 	engine.world_add_body(bodyA);
-	engine.body_set_angle(bodyA, 0.4);
+	// engine.body_set_angle(bodyA, 0.4);
 	let bodyB = engine.body_create_circle(50, new Vec2(300, 170), new BodyOptions()
-		.is_static(false)
-		.mass(1)
+		.friction(0.5)
+		.restitution(1)
 	);
 	engine.world_add_body(bodyB);
 

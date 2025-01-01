@@ -44,8 +44,8 @@ pub fn solve_velocity(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: 
 		let mut vfb = vb.clone();
 		let mut wfb = wb;
 
-		let restitution = 1.0 + 0.0; // todo: calculate this from body properties
-		let friction = 1.0; // todo: calculate this
+		let restitution = pair.restitution;
+		let friction = pair.friction;
 
 		let slop = 1.0;
 		

@@ -24,6 +24,9 @@ pub struct CollisionPair {
 	pub normal: Vec2,
 	pub tangent: Vec2,
 	pub normal_point: Vec2, // only used for debugging
+
+	pub friction: Geo,
+	pub restitution: Geo,
 }
 
 impl CollisionPair {

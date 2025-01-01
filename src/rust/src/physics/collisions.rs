@@ -131,7 +131,10 @@ fn create_manifold(world: &World, body_a: &Body, body_b: &Body) -> CollisionPair
 
 		depth,
 		tangent: normal.clone().normal(),
-		normal: normal,
+		normal,
 		normal_point,
+
+		friction: (body_a.friction.powi(2) + body_b.friction.powi(2)).sqrt(),
+		restitution: 1.0 + body_a.restitution.max(body_b.restitution),
 	}
 }

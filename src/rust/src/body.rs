@@ -24,6 +24,8 @@ pub struct Body {
 	// Options
 	mass: Geo,
 	pub is_static: bool,
+	pub friction: Geo,
+	pub restitution: Geo,
 }
 
 impl Body {
@@ -45,9 +47,11 @@ impl Body {
 			angular_velocity: 0.0,
 
 			mass: options.mass,
-			inverse_mass: 1.0 / options.mass,
 			is_static: options.is_static,
-
+			friction: options.friction,
+			restitution: options.restitution,
+			
+			inverse_mass: 1.0 / options.mass,
 			inertia: 1.0,
 			inverse_inertia: 1.0,
 		};
