@@ -49,19 +49,19 @@ impl Vec2 {
 		self.y = -self.y;
 		self
 	}
-	pub fn min(self, rhs: Vec2) -> Vec2 {
+	pub fn min(self, rhs: &Vec2) -> Vec2 {
 		Self {
 			x: self.x.min(rhs.x),
 			y: self.y.min(rhs.y),
 		}
 	}
-	pub fn max(self, rhs: Vec2) -> Vec2 {
+	pub fn max(self, rhs: &Vec2) -> Vec2 {
 		Self {
 			x: self.x.max(rhs.x),
 			y: self.y.max(rhs.y),
 		}
 	}
-	pub fn clamp(self, min: Vec2, max: Vec2) -> Vec2 {
+	pub fn clamp(self, min: &Vec2, max: &Vec2) -> Vec2 {
 		Self {
 			x: self.x.clamp(min.x, max.x),
 			y: self.y.clamp(min.y, max.y),

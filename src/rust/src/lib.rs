@@ -1,5 +1,3 @@
-extern crate web_sys;
-
 pub type Geo = f32;
 pub static TAU: Geo = core::f32::consts::TAU;
 pub type Id = u16;

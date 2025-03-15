@@ -20,11 +20,21 @@ physics update steps:
 */
 pub fn update(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: Time) {
 	collisions::find(world, bodies);
-	apply_forces(world, bodies, delta);
-	solver::solve_velocity(world, bodies, delta);
+	apply_forces(world, bodies, delta); // applies gravity (and other forces)
+
+	// Clear old collision pairs
+	world.collision_pairs.retain(|pair| pair.is_valid(world.frame)); // todo: move this to main loop to make more efficient
+	
+	// Solve velocities
+	let velocity_iterations = 15;
+	for _ in 0..velocity_iterations {
+		solver::solve_velocity(world, bodies, delta / velocity_iterations as f32);
+	}
+
 	// todo: solve position constraints
 	apply_velocities(world, bodies, delta);
 
+	// Increment world time
 	world.frame += 1;
 	world.time += delta;
 }

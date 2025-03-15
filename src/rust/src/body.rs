@@ -1,5 +1,3 @@
-use core::{f32, f64};
-
 use crate::{Vec2, Geo, Id};
 
 mod body_options;
@@ -9,20 +7,20 @@ pub struct Body {
 	pub id: Id,
 
 	// Inherent
-	vertices: Vec<Vec2>,
-	position: Vec2,
-	angle: Geo,
+	pub vertices: Vec<Vec2>,
+	pub position: Vec2,
+	pub angle: Geo,
 	pub velocity: Vec2,
 	pub angular_velocity: Geo,
 	
 	// Calculated
 	pub axes: Vec<Vec2>,
-	inertia: Geo,
-	inverse_inertia: Geo,
-	inverse_mass: Geo,
+	pub inertia: Geo,
+	pub inverse_inertia: Geo,
+	pub inverse_mass: Geo,
 	
 	// Options
-	mass: Geo,
+	pub mass: Geo,
 	pub is_static: bool,
 	pub friction: Geo,
 	pub restitution: Geo,

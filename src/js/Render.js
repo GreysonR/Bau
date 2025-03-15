@@ -37,7 +37,8 @@ export class Render {
 		ctx.save();
 
 		let bodyIds = engine.world_get_bodies();
-		let pairs = engine.world_get_collision_pairs();
+		// let pairs = engine.world_get_collision_pairs();
+		let pairs = [];
 		let collidingBodies = pairs.flatMap(pair => [pair.body_a, pair.body_b]);
 
 		// Render colliding bodies filled in

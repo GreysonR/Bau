@@ -47,23 +47,45 @@
 	// engine.world_add_body(bodyB);
 
 	function stack() {
-		let width = 10;
-		let height = 10;
-		let size = 60;
+		let width =  1;
+		let height = 60;
+		let size = 15;
 
 		for (let x = 0; x < width; ++x) {
 			for (let y = 0; y < height; ++y) {
 				let body = engine.body_create_rect(size, size, new Vec2(700 + size * (width/2 - x), 500 - y * size), new BodyOptions()
 					.friction(0.5)
-					.restitution(0.5)
+					.restitution(0.2)
 				);
 				engine.world_add_body(body);
 			}
 		}
 	}
-	stack();
+	function multistack() {
+		let width =  10;
+		let height = 10;
+		let size = 50;
 
-	let mouseBody = engine.body_create_rect(1200, 100, new Vec2(700, 800), new BodyOptions()
+		for (let x = 0; x < width; ++x) {
+			for (let y = 0; y < height; ++y) {
+				let body = engine.body_create_rect(size, size, new Vec2(700 + size * (width/2 - x), 500 - y * size), new BodyOptions()
+					.friction(0.5)
+					.restitution(0.2)
+				);
+				engine.world_add_body(body);
+			}
+		}
+	}
+	
+	multistack();
+
+	let floor = engine.body_create_rect(1200, 100, new Vec2(700, 800), new BodyOptions()
+		.is_static(true)
+		.mass(10)
+	);
+	engine.world_add_body(floor);
+
+	let mouseBody = engine.body_create_circle(5, new Vec2(10000, 10000), new BodyOptions()
 		.is_static(true)
 		.mass(10)
 	);
@@ -76,7 +98,7 @@
 
 	window.addEventListener("mousemove", event => {
 		let { clientX: mouseX, clientY: mouseY } = event;
-		// engine.body_set_position(mouseBody, new Vec2(mouseX, mouseY));
+		engine.body_set_position(mouseBody, new Vec2(mouseX, mouseY));
 	});
 </script>
 </html>

@@ -1,13 +1,13 @@
-use web_sys::console::log_1;
-
+use wasm_bindgen::prelude::*;
 use crate::{Body, Id, World, Time};
 use std::collections::HashMap;
 
-// todo: actually solve velocity constraints
-pub fn solve_velocity(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: Time) {
-	// Clear old collision pairs
-	world.collision_pairs.retain(|pair| pair.is_valid(world.frame)); // todo: move this to main loop to make more efficient
+#[wasm_bindgen]
+extern "C" {
 
+}
+
+pub fn solve_velocity(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: Time) {
 	/*
 		For all collision pairs
 			For all collision contacts
@@ -25,17 +25,17 @@ pub fn solve_velocity(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: 
 		let depth = pair.depth;
 
 
-		let angle_a = body_a.get_angle(); // angle
-		let ma = body_a.get_inverse_mass(); // inverse mass
-		let ia = body_a.get_inverse_inertia(); // inverse inertia
-		let pa = body_a.get_position(); // position
-		let wa = body_a.angular_velocity; // angular velocity
-		let va = &body_a.velocity; // velocity
+		let angle_a = body_a.angle;
+		let ma = body_a.inverse_mass;
+		let ia = body_a.inverse_inertia;
+		let pa = &body_a.position;
+		let wa = body_a.angular_velocity;
+		let va = &body_a.velocity;
 		
-		let angle_b = body_b.get_angle();
-		let mb = body_b.get_inverse_mass();
-		let ib = body_b.get_inverse_inertia();
-		let pb = body_b.get_position();
+		let angle_b = body_b.angle;
+		let mb = body_b.inverse_mass;
+		let ib = body_b.inverse_inertia;
+		let pb = &body_b.position;
 		let wb = body_b.angular_velocity;
 		let vb = &body_b.velocity;
 
@@ -48,11 +48,7 @@ pub fn solve_velocity(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: 
 		let friction = pair.friction;
 
 
-		let slop = 2.0;
-
-		if !body_a.is_static && !body_b.is_static {
-			// log_1(&format!("contacts: {}", contacts.len()).into());
-		}
+		let slop = 1.0;
 		
 		for contact in contacts.iter() {
 			let ra = contact.anchor_a.rotate(angle_a); // contact radius a
@@ -73,7 +69,7 @@ pub fn solve_velocity(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: 
 			if s < 0.0 { continue; }
 			
 			// Baumgarte stabilization
-			let bias = s / delta * 0.2;
+			let bias = s * 10.0;
 
 			// Normal mass
 			let rna = ra.cross(normal);
@@ -97,7 +93,6 @@ pub fn solve_velocity(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: 
 			// Coulomb friction
 			let max_tangent_impulse = normal_impulse * friction;
 			tangent_impulse = tangent_impulse.min(max_tangent_impulse).max(-max_tangent_impulse);
-
 
 			let p = normal * normal_impulse - tangent * tangent_impulse; // final impulse
 
