@@ -4,6 +4,7 @@ install:
 	npm i -g nodemon
 	npm i -g concurrently
 	cargo install watchexec-cli
+	cargo install wasm-pack
 	npm run build-wasm
 
 # Start hot reload for app

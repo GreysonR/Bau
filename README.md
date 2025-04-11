@@ -1,5 +1,6 @@
 # Installation
 `make install` or install everything below manually
+If using make, ensure you already have cargo and npm installed.
 
 ## Required
  * [cargo](https://rustup.rs/)
@@ -7,6 +8,7 @@
  * nodemon: `npm i -g nodemon`
  * concurrently: `npm i -g concurrently`
  * watchexec: `cargo install watchexec`
+ * wasm-pack: `cargo install wasm-pack`
  * Also make sure to build cargo before running webpack using `npm run build-wasm`, or else webpack will fail
 
 ## Optional
