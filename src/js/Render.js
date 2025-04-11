@@ -1,4 +1,4 @@
-import { polygon as renderPolygon } from "./RenderMethods";
+import RenderMethods from "./RenderMethods";
 
 export class Render {
 	canvas;
@@ -45,7 +45,7 @@ export class Render {
 		ctx.beginPath();
 		for (let id of bodyIds) {
 			if (collidingBodies.includes(id)) {
-				renderPolygon(engine.body_get_vertices(id), ctx);
+				RenderMethods.polygon(engine.body_get_vertices(id), ctx);
 			}
 		}
 		ctx.fillStyle = "#4FC2B580";
@@ -54,7 +54,7 @@ export class Render {
 		// Render body outlines
 		ctx.beginPath();
 		for (let id of bodyIds) {
-			renderPolygon(engine.body_get_vertices(id), ctx);
+			RenderMethods.polygon(engine.body_get_vertices(id), ctx);
 		}
 		ctx.strokeStyle = "#4FC2B5";
 		ctx.lineWidth = 1.5;

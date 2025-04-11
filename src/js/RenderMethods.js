@@ -105,4 +105,4 @@ let RenderMethods = {
 		ctx.lineTo(endPos.x + sideB.x, endPos.y + sideB.y);
 	},
 }
-module.exports = RenderMethods;
+export default RenderMethods;
