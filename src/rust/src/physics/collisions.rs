@@ -1,7 +1,8 @@
 use crate::{Body, collision_pair::{Contact, CollisionPair}, Geo, Id, Vec2, World};
 use std::collections::HashMap;
+use nohash_hasher::BuildNoHashHasher;
 
-pub fn find(world: &mut World, bodies: &mut HashMap<Id, Body>) {
+pub fn find(world: &mut World, bodies: &mut HashMap<Id, Body, BuildNoHashHasher<Id>>) {
 	let pairs = world.get_pairs();
 	for pair in pairs {
 		let body_a = bodies.get(&pair.0).unwrap();

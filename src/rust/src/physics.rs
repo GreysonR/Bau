@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use nohash_hasher::BuildNoHashHasher;
 
 use crate::{Body, Id, Time, World};
 mod collisions;
@@ -18,7 +19,7 @@ physics update steps:
 	Solve position constraints
 	Update positions / angles
 */
-pub fn update(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: Time) {
+pub fn update(world: &mut World, bodies: &mut HashMap<Id, Body, BuildNoHashHasher<Id>>, delta: Time) {
 	collisions::find(world, bodies);
 	apply_forces(world, bodies, delta); // applies gravity (and other forces)
 
@@ -40,7 +41,7 @@ pub fn update(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: Time) {
 }
 
 // Applying forces/velocities
-fn apply_forces(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: Time) {
+fn apply_forces(world: &mut World, bodies: &mut HashMap<Id, Body, BuildNoHashHasher<Id>>, delta: Time) {
 	let gravity = &world.gravity * &delta;
 	for body_id in world.bodies.iter() {
 		let body = bodies.get_mut(body_id).unwrap();
@@ -48,7 +49,7 @@ fn apply_forces(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: Time) 
 		body.apply_velocity(&gravity);
 	}
 }
-fn apply_velocities(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: Time) {
+fn apply_velocities(world: &mut World, bodies: &mut HashMap<Id, Body, BuildNoHashHasher<Id>>, delta: Time) {
 	// todo: use actual delta time
 	for body_id in world.bodies.iter() {
 		let body = bodies.get_mut(body_id).unwrap();

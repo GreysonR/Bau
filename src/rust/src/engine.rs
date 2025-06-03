@@ -1,6 +1,7 @@
 use crate::{physics, Body, BodyOptions, Geo, Id, Time, Vec2, World};
 use wasm_bindgen::prelude::*;
 use std::collections::HashMap;
+use nohash_hasher::BuildNoHashHasher;
 use serde::Serialize;
 
 #[wasm_bindgen]
@@ -13,7 +14,7 @@ pub struct RenderBody {
 #[wasm_bindgen]
 pub struct Engine {
 	world: World,
-	bodies: HashMap<Id, Body>,
+	bodies: HashMap<Id, Body, BuildNoHashHasher<Id>>,
 }
 #[wasm_bindgen]
 impl Engine {
@@ -21,7 +22,7 @@ impl Engine {
 	pub fn new() -> Self {
 		Self {
 			world: World::new(),
-			bodies: HashMap::new(),
+			bodies: HashMap::with_hasher(BuildNoHashHasher::default()),
 		}
 	}
 

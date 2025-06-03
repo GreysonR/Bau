@@ -1,13 +1,8 @@
-use wasm_bindgen::prelude::*;
 use crate::{Body, Id, World, Time};
 use std::collections::HashMap;
+use nohash_hasher::BuildNoHashHasher;
 
-#[wasm_bindgen]
-extern "C" {
-
-}
-
-pub fn solve_velocity(world: &mut World, bodies: &mut HashMap<Id, Body>, delta: Time) {
+pub fn solve_velocity(world: &mut World, bodies: &mut HashMap<Id, Body, BuildNoHashHasher<Id>>, delta: Time) {
 	/*
 		For all collision pairs
 			For all collision contacts
