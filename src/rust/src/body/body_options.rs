@@ -8,6 +8,7 @@ pub struct BodyOptions {
 	pub restitution: Geo,
 	pub friction: Geo,
 }
+
 #[wasm_bindgen]
 impl BodyOptions {
 	#[wasm_bindgen(constructor)]

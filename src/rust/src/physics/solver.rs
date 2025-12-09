@@ -47,7 +47,7 @@ pub fn solve_velocity(world: &mut World, bodies: &mut HashMap<Id, Body, BuildNoH
 		
 		for contact in contacts.iter() {
 			let ra = contact.anchor_a.rotate(angle_a); // contact radius a
-			let rb = contact.anchor_b.rotate(angle_b); // contact radius a
+			let rb = contact.anchor_b.rotate(angle_b); // contact radius b
 			let vra = va + ra.cross_float(wa); // relative velocity for body A at contact
 			let vrb = vb + rb.cross_float(wb); // relative velocity for body B at contact
 			let vr = vrb - vra; // relative velocity between body A and body B at contact
@@ -60,7 +60,7 @@ pub fn solve_velocity(world: &mut World, bodies: &mut HashMap<Id, Body, BuildNoH
 			// Separation
 			let ds = (&rb + vb) - (va + &ra);
 			let mut s = ds.dot(normal) * delta + adjusted_separation; // separation scalar
-			s = (s.abs() - slop) * s.signum(); // maintain a little separation
+			s = s - slop * s.signum(); // allow a little penetration
 			if s < 0.0 { continue; }
 			
 			// Baumgarte stabilization
