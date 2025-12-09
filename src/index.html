@@ -37,17 +37,17 @@
 	});
 	
 	function basic() {
-		let bodyA = engine.body_create_rect(100, 100, new Vec2(300, 300), new BodyOptions()
-			.friction(0.5)
-			.restitution(0.5)
-			.mass(2)
-		);
+		let bodyA = engine.body_create_rect(100, 100, new Vec2(300, 300), {
+			friction: 0.5,
+			restitution: 0.5,
+			mass: 2,
+		});
 		engine.world_add_body(bodyA);
 		engine.body_set_angle(bodyA, 0.4);
-		let bodyB = engine.body_create_circle(50, new Vec2(300, 170), new BodyOptions()
-			.friction(0.5)
-			.restitution(0.5)
-		);
+		let bodyB = engine.body_create_circle(50, new Vec2(300, 170), {
+			friction: 0.5,
+			restitution: 0.5,
+		});
 		engine.world_add_body(bodyB);
 		
 		window.bodyA = bodyA;
