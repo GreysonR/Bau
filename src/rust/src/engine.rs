@@ -1,4 +1,4 @@
-use crate::{physics, Body, BodyOptions, Geo, Id, Time, Vec2, World};
+use crate::{physics, Body, Geo, Id, Time, Vec2, World};
 use wasm_bindgen::prelude::*;
 use std::collections::HashMap;
 use nohash_hasher::BuildNoHashHasher;
@@ -27,14 +27,14 @@ impl Engine {
 	}
 
 	// Body methods
-	pub fn body_create_rect(&mut self, width: Geo, height: Geo, position: Vec2, options: BodyOptions) -> Id {
-		let body = Body::rectangle(width, height, position, options);
+	pub fn body_create_rect(&mut self, width: Geo, height: Geo, position: Vec2, options: JsValue) -> Id {
+		let body = Body::rectangle(width, height, position, options.into());
 		let id = body.id;
 		self.bodies.insert(id, body);
 		id
 	}
-	pub fn body_create_circle(&mut self, radius: Geo, position: Vec2, options: BodyOptions) -> Id {
-		let body = Body::circle(radius, position, options);
+	pub fn body_create_circle(&mut self, radius: Geo, position: Vec2, options: JsValue) -> Id {
+		let body = Body::circle(radius, position, options.into());
 		let id = body.id;
 		self.bodies.insert(id, body);
 		id

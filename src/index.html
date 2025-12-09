@@ -60,10 +60,10 @@
 
 		for (let x = 0; x < width; ++x) {
 			for (let y = 0; y < height; ++y) {
-				let body = engine.body_create_rect(size, size, new Vec2(700 + size * (width/2 - x), 500 - y * size), new BodyOptions()
-					.friction(0.5)
-					.restitution(0.2)
-				);
+				let body = engine.body_create_rect(size, size, new Vec2(700 + size * (width/2 - x), 500 - y * size), {
+					friction: 0.5,
+					restitution: 0.2,
+				});
 				engine.world_add_body(body);
 			}
 		}
@@ -75,10 +75,10 @@
 
 		for (let x = 0; x < width; ++x) {
 			for (let y = 0; y < height; ++y) {
-				let body = engine.body_create_rect(size, size, new Vec2(700 + size * (width/2 - x), 500 - y * size), new BodyOptions()
-					.friction(0.5)
-					.restitution(0.2)
-				);
+				let body = engine.body_create_rect(size, size, new Vec2(700 + size * (width/2 - x), 500 - y * size), {
+					friction: 0.5,
+					restitution: 0.2,
+				});
 				engine.world_add_body(body);
 			}
 		}
@@ -86,16 +86,16 @@
 	
 	multistack();
 
-	let floor = engine.body_create_rect(1200, 100, new Vec2(700, 800), new BodyOptions()
-		.is_static(true)
-		.mass(10)
-	);
+	let floor = engine.body_create_rect(3000, 100, new Vec2(700, 800), {
+		is_static: true,
+		mass: 10,
+	});
 	engine.world_add_body(floor);
 
-	let mouseBody = engine.body_create_circle(5, new Vec2(10000, 10000), new BodyOptions()
-		.is_static(true)
-		.mass(10)
-	);
+	let mouseBody = engine.body_create_circle(5, new Vec2(10000, 10000), {
+		is_static: true,
+		mass: 10,
+	});
 	engine.world_add_body(mouseBody);
 
 	window.engine = engine;
