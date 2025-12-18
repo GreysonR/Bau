@@ -74,15 +74,21 @@ impl Engine {
 		self.bodies.get(&body_id).unwrap().get_vertices().clone()
 	}
 
+	//
 	// World methods
+	//
+
+	// Add a body to the world given its body_id
 	pub fn world_add_body(&mut self, body_id: Id) {
 		if !self.bodies.contains_key(&body_id) { return } // Body doesn't exist
 		self.world.add_body(body_id);
 	}
+	// Remove a body from the world, given its body_id
 	pub fn world_remove_body(&mut self, body_id: Id) {
 		if !self.bodies.contains_key(&body_id) { return } // Body doesn't exist
 		self.world.remove_body(body_id);
 	}
+	// Get all bodies in the world
 	pub fn world_get_bodies(&self) -> JsValue {
 		let mut bodies: Vec<Id> = Vec::new();
 		for body_id in self.world.bodies.iter() {
@@ -90,6 +96,7 @@ impl Engine {
 		}
 		serde_wasm_bindgen::to_value(&bodies).unwrap()
 	}
+	// Get all active collision pairs
 	pub fn world_get_collision_pairs(&self) -> JsValue {
 		// world.collision_pairs = HashMap<Id, CollisionPair>
 		let mut pairs = Vec::new();
@@ -99,9 +106,8 @@ impl Engine {
 		serde_wasm_bindgen::to_value(&pairs).unwrap()
 	}
 
-	// Physics methods
-	pub fn physics_update(&mut self) {
-		let delta: Time = 1.0 / 144.0; // delta time. todo: compute this
+	// Update the physics
+	pub fn physics_update(&mut self, delta: Geo) {
 		physics::update(&mut self.world, &mut self.bodies, delta);
 	}
 }

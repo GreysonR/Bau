@@ -31,7 +31,7 @@
 	window.runEngine = true;
 	ticker.on("physicsTick", () => {
 		if (window.runEngine) {
-			engine.physics_update();
+			engine.physics_update(ticker.Performance.delta || 1 / 60);
 			render.render(engine);
 		}
 	});
