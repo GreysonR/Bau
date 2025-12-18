@@ -27,6 +27,8 @@ pub struct Body {
 	pub restitution: Geo,
 }
 
+static mut GLOBAL_BODY_ID : Id = 0;
+
 impl Body {
 	//
 	// constructors
@@ -35,9 +37,15 @@ impl Body {
 	pub fn new(vertices: Vec<Vec2>, position: Vec2, options: BodyOptions) -> Body {
 		assert!(vertices.len() >= 3); // There should be at least 3 vertices for a valid body
 
+		let id: Id;
+		unsafe {
+			id = GLOBAL_BODY_ID;
+			GLOBAL_BODY_ID += 1;
+		}
+
 		let bounds = Bounds::from_vertices(&vertices);
 		let mut body = Body {
-			id: rand::random(),
+			id,
 
 			axes: Body::get_axes(&vertices),
 
@@ -175,6 +183,10 @@ impl Body {
 	}
 	
 	// angle
+	pub fn set_angle(&mut self, angle: Geo) {
+		self.translate_angle(angle - self.angle);
+		self.angle = angle;
+	}
 	pub fn translate_angle(&mut self, angle: Geo) {
 		self.angle += angle;
 		let sin = angle.sin();
@@ -187,10 +199,6 @@ impl Body {
 		}
 		self.axes = Body::get_axes(&self.vertices);
 		self.bounds.update_from_vertices(&self.vertices);
-	}
-	pub fn set_angle(&mut self, angle: Geo) {
-		self.translate_angle(angle - self.angle);
-		self.angle = angle;
 	}
 	pub fn apply_angular_velocity(&mut self, force: Geo) {
 		self.angular_velocity += force;
