@@ -30,6 +30,7 @@ impl Body {
 	//
 	// constructors
 	//
+
 	pub fn new(vertices: Vec<Vec2>, position: Vec2, options: BodyOptions) -> Body {
 		assert!(vertices.len() >= 3); // There should be at least 3 vertices for a valid body
 		
@@ -88,9 +89,11 @@ impl Body {
 		self.inverse_inertia = 1.0 / self.inertia;
 	}
 
+
 	//
 	// property calculation
 	//
+	
 	fn get_axes(vertices: &Vec<Vec2>) -> Vec<Vec2> {
 		let mut axes = Vec::new();
 		let len = vertices.len();
@@ -123,9 +126,11 @@ impl Body {
 		return (mass / 6.0) * (numerator / denominator);
 	}
 	
+
 	//
 	// getters
 	// 
+
 	pub fn get_angle(&self) -> Geo { self.angle }
 	pub fn get_position(&self) -> &Vec2 { &self.position }
 	pub fn get_vertices(&self) -> &Vec<Vec2> { &self.vertices }
@@ -134,6 +139,7 @@ impl Body {
 	pub fn get_inverse_mass(&self) -> Geo { self.inverse_mass }
 	pub fn get_inertia(&self) -> Geo { self.inertia }
 	pub fn get_inverse_inertia(&self) -> Geo { self.inverse_inertia }
+
 
 	//
 	// setters
@@ -150,6 +156,7 @@ impl Body {
 			*vertex += &translation;
 		}
 	}
+	
 	// velocity
 	pub fn set_velocity(&mut self, velocity: Vec2) {
 		self.velocity = velocity;
@@ -157,6 +164,7 @@ impl Body {
 	pub fn apply_velocity(&mut self, force: &Vec2) {
 		self.velocity += force;
 	}
+	
 	// angle
 	pub fn translate_angle(&mut self, angle: Geo) {
 		self.angle += angle;

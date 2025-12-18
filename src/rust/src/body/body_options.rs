@@ -1,4 +1,4 @@
-use crate::{Body, Geo};
+use crate::Geo;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsValue;
 

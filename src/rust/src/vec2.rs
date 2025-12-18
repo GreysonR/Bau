@@ -1,4 +1,4 @@
-// Modified version of [vec2](https://crates.io/crates/vec2) that removes non standard stuff
+// Modified version of [vec2](https://crates.io/crates/vec2) that removes non standard stuff and shortens the code somewhat with macros
 
 use std::{mem, ops::*};
 use serde::{Serialize, Deserialize};

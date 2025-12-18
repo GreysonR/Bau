@@ -14,6 +14,7 @@ pub fn find(world: &mut World, bodies: &mut HashMap<Id, Body, BuildNoHashHasher<
 		world.collision_pairs.replace(create_manifold(world, body_a, body_b));
 	}
 }
+
 fn collides(body_a: &Body, body_b: &Body) -> bool {
 	// SAT: check if 1d projection has a collision for every axis of each body
 	let find_supports = |body: &Body, direction: &Vec2| {
@@ -39,6 +40,7 @@ fn collides(body_a: &Body, body_b: &Body) -> bool {
 	};
 	collides_against(body_a, body_b) && collides_against(body_b, body_a)
 }
+
 fn create_manifold(world: &World, body_a: &Body, body_b: &Body) -> CollisionPair {
 	/*
 		Find collision points

@@ -60,8 +60,8 @@ pub fn solve_velocity(world: &mut World, bodies: &mut HashMap<Id, Body, BuildNoH
 			// Separation
 			let ds = (&rb + vb) - (va + &ra);
 			let mut s = ds.dot(normal) * delta + adjusted_separation; // separation scalar
-			s = s - slop * s.signum(); // allow a little penetration
 			if s < 0.0 { continue; }
+			s = (s - slop * s.signum()).max(0.0); // allow a little penetration
 			
 			// Baumgarte stabilization
 			let bias = s * 10.0;

@@ -24,7 +24,7 @@ pub fn update(world: &mut World, bodies: &mut HashMap<Id, Body, BuildNoHashHashe
 	apply_forces(world, bodies, delta); // applies gravity (and other forces)
 
 	// Clear old collision pairs
-	world.collision_pairs.retain(|pair| pair.is_valid(world.frame)); // todo: move this to main loop to make more efficient
+	world.collision_pairs.retain(|pair| pair.is_valid(world.frame));
 	
 	// Solve velocities
 	let velocity_iterations = 15;
