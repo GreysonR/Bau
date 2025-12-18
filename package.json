@@ -1,6 +1,6 @@
 {
   "name": "bau",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "src/js/index.js",
   "scripts": {
     "start": "concurrently --kill-others \"nodemon\" \"npm run watch-wasm\"",
