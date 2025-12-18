@@ -1,8 +1,10 @@
-use crate::{physics, Body, Geo, Id, Time, Vec2, World};
+use crate::{Body, Bounds, Geo, Id, Vec2, World, physics};
 use wasm_bindgen::prelude::*;
 use std::collections::HashMap;
 use nohash_hasher::BuildNoHashHasher;
 use serde::Serialize;
+
+pub type BodyMap = HashMap<Id, Body, BuildNoHashHasher<Id>>;
 
 #[wasm_bindgen]
 #[derive(Serialize)]
@@ -14,7 +16,7 @@ pub struct RenderBody {
 #[wasm_bindgen]
 pub struct Engine {
 	world: World,
-	bodies: HashMap<Id, Body, BuildNoHashHasher<Id>>,
+	bodies: BodyMap,
 }
 #[wasm_bindgen]
 impl Engine {
@@ -72,6 +74,9 @@ impl Engine {
 	}
 	pub fn body_get_vertices(&self, body_id: Id) -> Vec<Vec2> {
 		self.bodies.get(&body_id).unwrap().get_vertices().clone()
+	}
+	pub fn body_get_bounds(&self, body_id: Id) -> Bounds {
+		self.bodies.get(&body_id).unwrap().get_bounds().clone()
 	}
 
 	//

@@ -6,7 +6,7 @@ use wasm_bindgen::prelude::*;
 use crate::Geo;
 
 #[wasm_bindgen]
-#[derive(Clone, PartialEq, Default, Debug, Serialize,  Deserialize)]
+#[derive(Clone, Copy, PartialEq, Default, Debug, Serialize,  Deserialize)]
 pub struct Vec2 {
 	pub x: Geo,
 	pub y: Geo,

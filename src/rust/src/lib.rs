@@ -24,4 +24,9 @@ pub use world::World;
 mod physics;
 
 mod engine;
-pub use engine::Engine;
+pub use engine::{Engine, BodyMap};
+
+mod bounds;
+pub use bounds::Bounds;
+
+// mod grid;

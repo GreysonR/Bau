@@ -36,20 +36,38 @@ export class Render {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		ctx.save();
 
+		const renderBounds = true;
+		const renderCollisions = false;
+		const renderPairs = false;
 		let bodyIds = engine.world_get_bodies();
-		// let pairs = engine.world_get_collision_pairs();
-		let pairs = [];
+		let pairs = renderPairs ? engine.world_get_collision_pairs() : [];
 		let collidingBodies = pairs.flatMap(pair => [pair.body_a, pair.body_b]);
 
-		// Render colliding bodies filled in
-		ctx.beginPath();
-		for (let id of bodyIds) {
-			if (collidingBodies.includes(id)) {
-				RenderMethods.polygon(engine.body_get_vertices(id), ctx);
+		// Render body bounds
+		if (renderBounds) {
+			ctx.beginPath();
+			for (let id of bodyIds) {
+				let bounds = engine.body_get_bounds(id);
+				let width = bounds.max.x - bounds.min.x;
+				let height = bounds.max.y - bounds.min.y;
+				RenderMethods.roundedRect(width, height, { x: bounds.min.x + width/2, y: bounds.min.y + height/2 }, 0, ctx);
 			}
+			ctx.strokeStyle = "#ffcf8152";
+			ctx.lineWidth = 1;
+			ctx.stroke();
 		}
-		ctx.fillStyle = "#4FC2B580";
-		ctx.fill();
+
+		// Render colliding bodies filled in
+		if (renderCollisions) {
+			ctx.beginPath();
+			for (let id of bodyIds) {
+				if (collidingBodies.includes(id)) {
+					RenderMethods.polygon(engine.body_get_vertices(id), ctx);
+				}
+			}
+			ctx.fillStyle = "#4FC2B580";
+			ctx.fill();
+		}
 		
 		// Render body outlines
 		ctx.beginPath();
@@ -61,26 +79,28 @@ export class Render {
 		ctx.stroke();
 
 		// Render collision points
-		for (let pair of pairs) {
-			let { body_a, body_b, contacts, depth, normal, tangent, normal_point } = pair;
-			if (contacts.length <= 0) continue;
+		if (renderPairs) {
+			for (let pair of pairs) {
+				let { body_a, body_b, contacts, depth, normal, tangent, normal_point } = pair;
+				if (contacts.length <= 0) continue;
 
-			for (let contact of contacts) {
-				let { incident, reference, vertex } = contact;
+				for (let contact of contacts) {
+					let { incident, reference, vertex } = contact;
+					ctx.beginPath();
+					ctx.arc(vertex.x, vertex.y, 3, 0, Math.PI * 2);
+					ctx.fillStyle = "white";
+					ctx.fill();
+				}
+
 				ctx.beginPath();
-				ctx.arc(vertex.x, vertex.y, 3, 0, Math.PI * 2);
-				ctx.fillStyle = "white";
-				ctx.fill();
+				ctx.moveTo(normal_point.x, normal_point.y);
+				ctx.lineTo(normal_point.x + normal.x * 10, normal_point.y + normal.y * 10);
+				ctx.moveTo(normal_point.x, normal_point.y);
+				ctx.lineTo(normal_point.x + tangent.x * 10, normal_point.y + tangent.y * 10);
+				ctx.strokeStyle = "#DF7157";
+				ctx.lineWidth = 3;
+				ctx.stroke();
 			}
-
-			ctx.beginPath();
-			ctx.moveTo(normal_point.x, normal_point.y);
-			ctx.lineTo(normal_point.x + normal.x * 10, normal_point.y + normal.y * 10);
-			ctx.moveTo(normal_point.x, normal_point.y);
-			ctx.lineTo(normal_point.x + tangent.x * 10, normal_point.y + tangent.y * 10);
-			ctx.strokeStyle = "#DF7157";
-			ctx.lineWidth = 3;
-			ctx.stroke();
 		}
 
 		ctx.restore();

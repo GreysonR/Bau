@@ -1,4 +1,4 @@
-use crate::{Vec2, Geo, Id};
+use crate::{Vec2, Geo, Id, Bounds};
 
 mod body_options;
 pub use body_options::BodyOptions;
@@ -18,6 +18,7 @@ pub struct Body {
 	pub inertia: Geo,
 	pub inverse_inertia: Geo,
 	pub inverse_mass: Geo,
+	pub bounds: Bounds,
 	
 	// Options
 	pub mass: Geo,
@@ -33,7 +34,8 @@ impl Body {
 
 	pub fn new(vertices: Vec<Vec2>, position: Vec2, options: BodyOptions) -> Body {
 		assert!(vertices.len() >= 3); // There should be at least 3 vertices for a valid body
-		
+
+		let bounds = Bounds::from_vertices(&vertices);
 		let mut body = Body {
 			id: rand::random(),
 
@@ -53,6 +55,7 @@ impl Body {
 			inverse_mass: 1.0 / options.mass,
 			inertia: 1.0,
 			inverse_inertia: 1.0,
+			bounds: bounds,
 		};
 
 		body.update_inertia();
@@ -139,7 +142,7 @@ impl Body {
 	pub fn get_inverse_mass(&self) -> Geo { self.inverse_mass }
 	pub fn get_inertia(&self) -> Geo { self.inertia }
 	pub fn get_inverse_inertia(&self) -> Geo { self.inverse_inertia }
-
+	pub fn get_bounds(&self) -> &Bounds { &self.bounds } 
 
 	//
 	// setters
@@ -155,6 +158,12 @@ impl Body {
 		for vertex in self.vertices.iter_mut() {
 			*vertex += &translation;
 		}
+
+		// Update bounds
+		self.bounds.min.x += translation.x;
+		self.bounds.min.y += translation.y;
+		self.bounds.max.x += translation.x;
+		self.bounds.max.y += translation.y;
 	}
 	
 	// velocity
@@ -177,6 +186,7 @@ impl Body {
 			vertice.y = position.y + (dist.x * sin + dist.y * cos);
 		}
 		self.axes = Body::get_axes(&self.vertices);
+		self.bounds.update_from_vertices(&self.vertices);
 	}
 	pub fn set_angle(&mut self, angle: Geo) {
 		self.translate_angle(angle - self.angle);

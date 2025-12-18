@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use crate::{Id, Vec2, Frame, Time, CollisionPair};
+use crate::{BodyMap, CollisionPair, Frame, Id, Time, Vec2};
 
 pub struct World {
 	pub gravity: Vec2,
@@ -27,17 +27,20 @@ impl World {
 	pub fn remove_body(&mut self, id: Id) {
 		self.bodies.remove(&id);
 	}
-	pub fn get_pairs(&self) -> Vec<(Id, Id)> {
+	pub fn get_pairs(&self, bodies: &BodyMap) -> Vec<(Id, Id)> {
 		let mut pairs = Vec::new();
 		let len = self.bodies.len();
 		let bodies_vec: Vec<&Id> = self.bodies.iter().collect();
 
 		for i in 0..len - 1 {
-			let body_a = *bodies_vec[i];
+			let body_a_id = *bodies_vec[i];
+			let body_a = bodies.get(&body_a_id).expect(&format!("Failed to get body_a {body_a_id} in World::get_pairs"));
 			for j in i + 1..len {
-				let body_b = *bodies_vec[j];
-				// todo: AABB collision test before pushing the pair
-				pairs.push((body_a, body_b));
+				let body_b_id = *bodies_vec[j];
+				let body_b = bodies.get(&body_a_id).expect(&format!("Failed to get body_b {body_b_id} in World::get_pairs"));
+				if body_a.bounds.overlaps_with(&body_b.bounds) {
+					pairs.push((body_a_id, body_b_id));
+				}
 			}
 		}
 

@@ -1,8 +1,6 @@
-use crate::{Body, Id, World, Time};
-use std::collections::HashMap;
-use nohash_hasher::BuildNoHashHasher;
+use crate::{BodyMap, World, Time};
 
-pub fn solve_velocity(world: &mut World, bodies: &mut HashMap<Id, Body, BuildNoHashHasher<Id>>, delta: Time) {
+pub fn solve_velocity(world: &mut World, bodies: &mut BodyMap, delta: Time) {
 	/*
 		For all collision pairs
 			For all collision contacts
