@@ -21,7 +21,7 @@ Add this to VSCode workspace settings.json to get rust-analyzer working:
 
 # Running
 `make run` or `npm start`<br>
-If that doesn't work, run in separate terminals, both from project root: `nodemon` and `npm run watch-wasm`.<br>
+If that doesn't work, or you want their outputs separated, run in separate terminals, both from project root: `nodemon` and `npm run watch-wasm`.<br>
 DO NOT run `nodemon .` (note the ".") as it will not work!<br>
 The app will then be available on localhost:80
 
