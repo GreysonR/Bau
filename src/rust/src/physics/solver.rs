@@ -11,7 +11,12 @@ pub fn solve_velocity(world: &mut World, bodies: &mut HashMap<Id, Body, BuildNoH
 				Update final vel / angular vel for 
 	*/
 
-	for pair in world.collision_pairs.iter() {
+	// Clear old collision pairs
+	world.collision_pairs.retain(|pair| {
+		if !pair.is_valid(world.frame) {
+			return false;
+		}
+
 		let body_a = bodies.get(&pair.body_a).expect("failed to get body_a in solver::solve_velocity");
 		let body_b = bodies.get(&pair.body_b).expect("failed to get body_b in solver::solve_velocity");
 		let normal = &pair.normal;
@@ -109,5 +114,7 @@ pub fn solve_velocity(world: &mut World, bodies: &mut HashMap<Id, Body, BuildNoH
 			body_b.set_velocity(vfb);
 			body_b.angular_velocity = wfb;
 		}
-	}
+
+		true // oh yeah this is a ::retain, almost forgot with all that stuff up there
+	});
 }
