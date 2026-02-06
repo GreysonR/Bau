@@ -75,7 +75,7 @@
 
 		for (let x = 0; x < width; ++x) {
 			for (let y = 0; y < height; ++y) {
-				let body = engine.body_create_rect(size, size, new Vec2(700 + size * (width/2 - x), 500 - y * size), {
+				let body = engine.body_create_rect(size, size, new Vec2(300 + size * (width/2 - x), 500 - y * size), {
 					friction: 0.5,
 					restitution: 0.2,
 				});

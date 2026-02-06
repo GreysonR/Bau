@@ -4,7 +4,7 @@ use crate::{BodyMap, CollisionPair, Frame, Id, Time, Vec2};
 
 pub struct World {
 	pub gravity: Vec2,
-	pub bodies: HashSet<Id>, // maybe use a hashset instead?
+	pub bodies: HashSet<Id>,
 	pub frame: Frame,
 	pub time: Time,
 	pub collision_pairs: HashSet<CollisionPair>,
@@ -37,7 +37,7 @@ impl World {
 			let body_a = bodies.get(&body_a_id).expect(&format!("Failed to get body_a {body_a_id} in World::get_pairs"));
 			for j in i + 1..len {
 				let body_b_id = *bodies_vec[j];
-				let body_b = bodies.get(&body_a_id).expect(&format!("Failed to get body_b {body_b_id} in World::get_pairs"));
+				let body_b = bodies.get(&body_b_id).expect(&format!("Failed to get body_b {body_b_id} in World::get_pairs"));
 				if body_a.bounds.overlaps_with(&body_b.bounds) {
 					pairs.push((body_a_id, body_b_id));
 				}

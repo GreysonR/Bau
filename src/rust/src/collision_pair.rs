@@ -40,7 +40,7 @@ impl CollisionPair {
 		y * y + x
 	}
 	pub fn unpair_id(id: PairId) -> (Id, Id) {
-		let z = (id as f64).sqrt().floor() as u64;
+		let z = (id as f64).sqrt() as u64; // we want id floor'd, so precision loss is correct
 		let l = id - z * z; // safety: z is sqrt'd, so squaring cannot overflow
 		if l < z { (l as Id, z as Id) } else { (z as Id, (l - z) as Id) }
 	}
