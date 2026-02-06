@@ -32,15 +32,15 @@ pub struct CollisionPair {
 impl CollisionPair {
 	pub fn pair_id(x: Id, y: Id) -> PairId { // returned type must be MORE THAN 2x the bytes of the ID type
 		// [elegant pairing](http://szudzik.com/ElegantPairing.pdf)
-		let x = x as u64;
-		let y = y as u64;
+		let x = x as PairId;
+		let y = y as PairId;
 		if x > y {
 			return x * x + x + y;
 		}
 		y * y + x
 	}
 	pub fn unpair_id(id: PairId) -> (Id, Id) {
-		let z = (id as f64).sqrt() as u64; // we want id floor'd, so precision loss is correct
+		let z = (id as f64).sqrt() as PairId; // we want id floor'd, so precision loss is correct
 		let l = id - z * z; // safety: z is sqrt'd, so squaring cannot overflow
 		if l < z { (l as Id, z as Id) } else { (z as Id, (l - z) as Id) }
 	}

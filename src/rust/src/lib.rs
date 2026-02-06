@@ -29,4 +29,5 @@ pub use engine::{Engine, BodyMap};
 mod bounds;
 pub use bounds::Bounds;
 
-// mod grid;
+mod grid;
+pub use grid::Grid;
