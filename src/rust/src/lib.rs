@@ -5,6 +5,9 @@ pub type PairId = u64;
 pub type Time = Geo;
 pub type Frame = u32;
 
+mod debug;
+use debug::log;
+
 
 mod vec2;
 pub use vec2::Vec2;

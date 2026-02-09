@@ -28,6 +28,9 @@ pub fn update(world: &mut World, bodies: &mut BodyMap, delta: Time) {
 
 	// todo: solve position constraints
 	apply_velocities(world, bodies, delta);
+	
+	// update broadphase grid with new positions
+	world.update_grid(bodies);
 
 	// Increment world time
 	world.frame += 1;

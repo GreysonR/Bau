@@ -52,6 +52,7 @@ impl World {
 
 		for i in 0..len - 1 {
 			let body_a_id = bucket[i];
+			crate::console_log!("body_a: {}", body_a_id);
 			let body_a = bodies.get(&body_a_id).expect(&format!("Failed to get body_a {body_a_id} in World::get_pairs"));
 			for j in i + 1..len {
 				let body_b_id = bucket[j];
@@ -60,6 +61,12 @@ impl World {
 					pairs.insert(CollisionPair::pair_id(body_a_id, body_b_id), (body_a_id, body_b_id));
 				}
 			}
+		}
+	}
+
+	pub fn update_grid(&mut self, bodies: &mut BodyMap) {
+		for (_id, body) in bodies.iter_mut() {
+			self.grid.update_body(body);
 		}
 	}
 }
