@@ -1,7 +1,7 @@
 use crate::{Body, BodyMap, Geo, Vec2, World, collision_pair::{CollisionPair, Contact}};
 
 pub fn find(world: &mut World, bodies: &mut BodyMap) {
-	let pairs = world.get_pairs(bodies);
+	let pairs = world.find_pairs(bodies);
 
 	for pair in pairs {
 		let body_a = bodies.get(&pair.0).unwrap();

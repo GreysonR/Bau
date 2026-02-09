@@ -22,8 +22,9 @@ pub struct Engine {
 impl Engine {
 	#[wasm_bindgen(constructor)]
 	pub fn new() -> Self {
+		let default_bucket_size = 200.0; // todo: let user change this
 		Self {
-			world: World::new(),
+			world: World::new(default_bucket_size),
 			bodies: HashMap::with_hasher(BuildNoHashHasher::default()),
 		}
 	}
@@ -86,12 +87,14 @@ impl Engine {
 	// Add a body to the world given its body_id
 	pub fn world_add_body(&mut self, body_id: Id) {
 		if !self.bodies.contains_key(&body_id) { return } // Body doesn't exist
-		self.world.add_body(body_id);
+		let body = self.bodies.get_mut(&body_id).unwrap(); // unwrap ok, already checked it exists
+		self.world.add_body(body);
 	}
 	// Remove a body from the world, given its body_id
 	pub fn world_remove_body(&mut self, body_id: Id) {
 		if !self.bodies.contains_key(&body_id) { return } // Body doesn't exist
-		self.world.remove_body(body_id);
+		let body = self.bodies.get_mut(&body_id).unwrap(); // unwrap ok, already checked it exists
+		self.world.remove_body(body);
 	}
 	// Get all bodies in the world
 	pub fn world_get_bodies(&self) -> JsValue {

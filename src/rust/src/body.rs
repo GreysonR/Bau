@@ -3,6 +3,8 @@ use crate::{Vec2, Geo, Id, Bounds};
 mod body_options;
 pub use body_options::BodyOptions;
 
+use crate::grid::GridPairId;
+
 pub struct Body {
 	pub id: Id,
 
@@ -25,6 +27,9 @@ pub struct Body {
 	pub is_static: bool,
 	pub friction: Geo,
 	pub restitution: Geo,
+
+	// Used by other parts of engine
+	pub grid_spaces: Vec<GridPairId>,
 }
 
 static mut GLOBAL_BODY_ID : Id = 0;
@@ -64,6 +69,8 @@ impl Body {
 			inertia: 1.0,
 			inverse_inertia: 1.0,
 			bounds: bounds,
+
+			grid_spaces: Vec::new(),
 		};
 
 		body.update_inertia();
