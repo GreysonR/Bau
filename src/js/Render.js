@@ -4,6 +4,9 @@ export class Render {
 	canvas;
 	ctx;
 
+	position = { x: 0, y: 0 };
+	scale = 1;
+
 	constructor(options = {}) {
 		// ...do something with options in future
 		
@@ -44,10 +47,14 @@ export class Render {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		ctx.save();
 
+		ctx.scale(this.scale, this.scale);
+		ctx.translate(this.position.x, this.position.y);
+
 		const renderBounds = false;
 		const renderCollisions = false;
 		const renderPairs = false;
 		const renderGrid = true;
+		const renderBodyIds = true;
 
 		let bodyIds = engine.world_get_bodies();
 		let pairs = renderPairs ? engine.world_get_collision_pairs() : [];
@@ -56,7 +63,7 @@ export class Render {
 		
 		// Render broadphase grid
 		if (renderGrid) {
-			const gridSize = 1000; // from engine code; TODO: get this value from engine
+			const gridSize = 100; // from engine code; TODO: get this value from engine
 			const margin = 2;
 
 			// console.log(grid);
@@ -69,9 +76,9 @@ export class Render {
 				ctx.beginPath();
 				let position = this.unpair(bucketId);
 				let bucketPosition = { x: position.x * gridSize, y: position.y * gridSize };
+
 				ctx.rect(bucketPosition.x + margin, bucketPosition.y + margin, gridSize - 2*margin, gridSize - 2*margin);
-				
-				ctx.globalAlpha = Math.min(1, grid[bucketId] / 6);
+				ctx.globalAlpha = Math.min(1, grid[bucketId] / 10);
 				ctx.fill();
 				ctx.stroke();
 
@@ -110,7 +117,28 @@ export class Render {
 		// Render body outlines
 		ctx.beginPath();
 		for (let id of bodyIds) {
-			RenderMethods.polygon(engine.body_get_vertices(id), ctx);
+			let vertices = engine.body_get_vertices(id);
+			if (renderBodyIds) {
+				let center = (() => {
+					let v = new Vec2(0, 0);
+					for (let x of vertices) {
+						v.x += x.x;
+						v.y += x.y;
+					}
+					v.x /= vertices.length;
+					v.y /= vertices.length;
+					return v;
+				})();
+				ctx.globalAlpha = 1;
+				let a = ctx.fillStyle;
+				ctx.textAlign = "center";
+				ctx.fillStyle = "#FFFFFF";
+				ctx.font = "16px Verdana";
+				ctx.fillText(id, center.x, center.y + 7)
+				ctx.fillStyle = a;
+			}
+
+			RenderMethods.polygon(vertices, ctx);
 		}
 		ctx.strokeStyle = "#4FC2B5";
 		ctx.lineWidth = 1.5;

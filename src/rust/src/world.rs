@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::{Body, BodyMap, CollisionPair, Frame, Grid, Id, PairId, Time, Vec2, grid::BucketSize};
+use crate::{Body, BodyMap, CollisionPair, Frame, Grid, Id, PairId, Time, Vec2, console_log, grid::BucketSize};
 
 pub struct World {
 	pub gravity: Vec2,
@@ -50,16 +50,17 @@ impl World {
 	fn pair_bucket(&self, bucket: &Vec<Id>, pairs: &mut HashMap<PairId, (Id, Id)>, bodies: &BodyMap) {
 		let len = bucket.len();
 
-		'outer: for i in 0..len - 1 {
+		for i in 0..len - 1 {
 			let body_a_id = bucket[i];
 			let body_a = bodies.get(&body_a_id).expect(&format!("Failed to get body_a {body_a_id} in World::pair_bucket"));
 			for j in i + 1..len {
 				let body_b_id = bucket[j];
-				if pairs.contains_key(&CollisionPair::pair_id(body_a_id, body_b_id)) { continue 'outer; } // already in pairs
+				let pair_id = CollisionPair::pair_id(body_a_id, body_b_id);
+				if pairs.contains_key(&pair_id) { continue; } // already in pairs
 
 				let body_b = bodies.get(&body_b_id).expect(&format!("Failed to get body_b {body_b_id} in World::pair_bucket"));
 				if body_a.bounds.overlaps_with(&body_b.bounds) {
-					pairs.insert(CollisionPair::pair_id(body_a_id, body_b_id), (body_a_id, body_b_id));
+					pairs.insert(pair_id, (body_a_id, body_b_id));
 				}
 			}
 		}

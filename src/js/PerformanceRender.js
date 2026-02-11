@@ -27,13 +27,13 @@ export default class PerformanceRender {
 		canvas.style.position = "absolute";
 		canvas.style.zIndex = "2";
 		canvas.style.top =  "20px";
-		canvas.style.right = "0px";
+		canvas.style.right = "16px";
 		canvas.style.left = "unset";
 		canvas.width =  scale * width;
 		canvas.height = scale * height;
 		canvas.style.background = "transparent";
 		canvas.style.pointerEvents = "none";
-		canvas.style.transformOrigin = "top left";
+		canvas.style.transformOrigin = "top right";
 		canvas.style.transform = `scale(${1 / scale}, ${1 / scale})`;
 		document.body.appendChild(canvas);
 

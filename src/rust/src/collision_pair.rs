@@ -35,9 +35,11 @@ impl CollisionPair {
 		let x = x as PairId;
 		let y = y as PairId;
 		if x > y {
-			return x * x + x + y;
+			x * x + x + y
 		}
-		y * y + x
+		else {
+			y * y + x
+		}
 	}
 	pub fn unpair_id(id: PairId) -> (Id, Id) {
 		let z = (id as f64).sqrt() as PairId; // we want id floor'd, so precision loss is correct

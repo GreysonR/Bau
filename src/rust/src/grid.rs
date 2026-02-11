@@ -46,10 +46,10 @@ impl Grid {
 	}
 
 	fn pair(point: &GridVec) -> GridPairId { // elegant pairing, modified to work with negative numbers
-		let x: GridPairId = if point.x >= 0 { point.x * 2 } else { point.x * -2 - 1 } as GridPairId; // safety: result is always positive, and GridPairId is larger type
+		let x: GridPairId = if point.x >= 0 { point.x * 2 } else { point.x * -2 - 1 } as GridPairId;
 		let y: GridPairId = if point.y >= 0 { point.y * 2 } else { point.y * -2 - 1 } as GridPairId;
 		if x >= y {
-			x * x + x + y // safety: bc we upcasted from i32, we will always have enough space in u128 for operation
+			x * x + x + y
 		}
 		else {
 			y * y + x
@@ -92,7 +92,7 @@ impl Grid {
 		);
 
 		if body.grid_spaces.len() > 0 {
-			panic!("body shouldn't be already in the grid before inserting"); // todo: not panic
+			self.remove_body(body);
 		}
 		// crate::console_log!("-- Inserting body {} --", body.id);
 		// crate::console_log!("grid bounds: {{ min: {}, {}; max: {}, {} }}", grid_bounds.min.x, grid_bounds.min.y, grid_bounds.max.x, grid_bounds.max.y);
@@ -124,7 +124,6 @@ impl Grid {
 	}
 	pub fn update_body(&mut self, body: &mut Body) {
 		// todo: optimize this
-		self.remove_body(body);
 		self.insert_body(body);
 	}
 }
