@@ -21,7 +21,7 @@ pub fn update(world: &mut World, bodies: &mut BodyMap, delta: Time) {
 	apply_forces(world, bodies, delta); // applies gravity (and other forces)
 	
 	// Solve velocities
-	let velocity_iterations = 15;
+	let velocity_iterations = 8;
 	for _ in 0..velocity_iterations {
 		solver::solve_velocity(world, bodies, delta / velocity_iterations as f32);
 	}

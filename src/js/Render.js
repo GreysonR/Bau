@@ -53,8 +53,8 @@ export class Render {
 		const renderBounds = false;
 		const renderCollisions = false;
 		const renderPairs = false;
-		const renderGrid = true;
-		const renderBodyIds = true;
+		const renderGrid = false;
+		const renderBodyIds = false;
 
 		let bodyIds = engine.world_get_bodies();
 		let pairs = renderPairs ? engine.world_get_collision_pairs() : [];
