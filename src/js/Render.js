@@ -30,6 +30,14 @@ export class Render {
 		}
 		return y * y + x
 	}
+	unpair(n) {
+		let sqrtz = Math.floor(Math.sqrt(n));
+		let sqz = sqrtz * sqrtz;
+		let result1 = ((n - sqz) >= sqrtz) ? { x: sqrtz, y: n - sqz - sqrtz } : { x: n - sqz, y: sqrtz };
+		let x = result1.x % 2 === 0 ? result1.x / 2 : (result1.x + 1) / -2;
+		let y = result1.y % 2 === 0 ? result1.y / 2 : (result1.y + 1) / -2;
+		return { x: x, y: y };
+	}
 	render(engine) {
 		let { canvas, ctx } = this;
 
@@ -39,9 +47,37 @@ export class Render {
 		const renderBounds = true;
 		const renderCollisions = false;
 		const renderPairs = false;
+		const renderGrid = true;
+
 		let bodyIds = engine.world_get_bodies();
 		let pairs = renderPairs ? engine.world_get_collision_pairs() : [];
 		let collidingBodies = pairs.flatMap(pair => [pair.body_a, pair.body_b]);
+		let grid = renderGrid ? engine.world_get_grid() : {};
+		
+		// Render broadphase grid
+		if (renderGrid) {
+			const gridSize = 200; // from engine code; TODO: get this value from engine
+			const margin = 2;
+			
+			ctx.fillStyle = "#FAD38960";
+			ctx.strokeStyle = "#FAD389a0";
+			ctx.lineWidth = 2;
+			
+			for (let bucketId in grid) {
+				ctx.beginPath();
+				let position = this.unpair(bucketId);
+				let bucketPosition = { x: position.x * gridSize, y: position.y * gridSize };
+				ctx.rect(bucketPosition.x + margin, bucketPosition.y + margin, gridSize - 2*margin, gridSize - 2*margin);
+				
+				ctx.globalAlpha = Math.min(1, grid[bucketId] / 6);
+				ctx.fill();
+				ctx.stroke();
+
+				// console.log(position.x, position.y, grid[bucketId]);
+			}
+
+			ctx.globalAlpha = 1;
+		}
 
 		// Render body bounds
 		if (renderBounds) {

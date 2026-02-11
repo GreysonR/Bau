@@ -29,8 +29,8 @@ impl GridBounds {
 }
 
 pub struct Grid {
-	bucket_size: BucketSize,
-	buckets: GridHashMap,
+	pub bucket_size: BucketSize,
+	pub buckets: GridHashMap,
 }
 
 impl Grid {
@@ -110,6 +110,11 @@ impl Grid {
 			let bucket = self.get_bucket(*bucket_id);
 			let index = bucket.iter().position(|x| *x == body_id).unwrap();
 			bucket.remove(index);
+
+			if bucket.len() == 0 {
+				self.buckets.remove(bucket_id);
+				crate::console_log!("Removed Bucket: {}", bucket_id);
+			}
 		}
 		body.grid_spaces.clear();
 	}

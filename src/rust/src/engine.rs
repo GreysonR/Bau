@@ -114,6 +114,21 @@ impl Engine {
 		serde_wasm_bindgen::to_value(&pairs).unwrap()
 	}
 
+	pub fn world_get_grid(&self) -> JsValue {
+		let value = self.world.get_buckets();
+		let obj = js_sys::Object::new();
+
+		for x in value.1.iter() {
+			js_sys::Reflect::set(
+				&obj,
+				&JsValue::from_f64(*x.0 as f64),
+				&JsValue::from_f64(x.1.len() as f64),
+			).unwrap();
+		}
+
+		obj.into()
+	}
+
 	// Update the physics
 	pub fn physics_update(&mut self, delta: Geo) {
 		physics::update(&mut self.world, &mut self.bodies, delta);

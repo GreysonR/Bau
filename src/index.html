@@ -48,7 +48,7 @@
 			friction: 0.5,
 			restitution: 0.5,
 		});
-		engine.world_add_body(bodyB);
+		// engine.world_add_body(bodyB);
 		
 		window.bodyA = bodyA;
 		window.bodyB = bodyB;
@@ -84,7 +84,7 @@
 		}
 	}
 	
-	multistack();
+	basic();
 
 	let floor = engine.body_create_rect(3000, 100, new Vec2(700, 800), {
 		is_static: true,

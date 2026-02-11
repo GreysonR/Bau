@@ -50,12 +50,15 @@ impl World {
 	fn pair_bucket(&self, bucket: &Vec<Id>, pairs: &mut HashMap<PairId, (Id, Id)>, bodies: &BodyMap) {
 		let len = bucket.len();
 
-		for i in 0..len - 1 {
+		'outer: for i in 0..len - 1 {
 			let body_a_id = bucket[i];
 			crate::console_log!("body_a: {}", body_a_id);
 			let body_a = bodies.get(&body_a_id).expect(&format!("Failed to get body_a {body_a_id} in World::get_pairs"));
 			for j in i + 1..len {
 				let body_b_id = bucket[j];
+				crate::console_log!("body_b: {}", body_b_id);
+				if pairs.contains_key(&CollisionPair::pair_id(body_a_id, body_b_id)) { continue 'outer; } // already in pairs
+
 				let body_b = bodies.get(&body_b_id).expect(&format!("Failed to get body_b {body_b_id} in World::get_pairs"));
 				if body_a.bounds.overlaps_with(&body_b.bounds) {
 					pairs.insert(CollisionPair::pair_id(body_a_id, body_b_id), (body_a_id, body_b_id));
@@ -66,7 +69,12 @@ impl World {
 
 	pub fn update_grid(&mut self, bodies: &mut BodyMap) {
 		for (_id, body) in bodies.iter_mut() {
+			if body.is_static { continue; }
 			self.grid.update_body(body);
 		}
+	}
+
+	pub fn get_buckets(&self) -> (BucketSize, &crate::grid::GridHashMap) {
+		(self.grid.bucket_size, &self.grid.buckets)
 	}
 }
