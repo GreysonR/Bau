@@ -44,7 +44,7 @@ export class Render {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		ctx.save();
 
-		const renderBounds = true;
+		const renderBounds = false;
 		const renderCollisions = false;
 		const renderPairs = false;
 		const renderGrid = true;
@@ -56,11 +56,13 @@ export class Render {
 		
 		// Render broadphase grid
 		if (renderGrid) {
-			const gridSize = 200; // from engine code; TODO: get this value from engine
+			const gridSize = 1000; // from engine code; TODO: get this value from engine
 			const margin = 2;
+
+			// console.log(grid);
 			
-			ctx.fillStyle = "#FAD38960";
-			ctx.strokeStyle = "#FAD389a0";
+			ctx.fillStyle = "#ffe78920";
+			ctx.strokeStyle = "#ffe78980";
 			ctx.lineWidth = 2;
 			
 			for (let bucketId in grid) {
@@ -101,7 +103,7 @@ export class Render {
 					RenderMethods.polygon(engine.body_get_vertices(id), ctx);
 				}
 			}
-			ctx.fillStyle = "#4FC2B580";
+			ctx.fillStyle = "#4FC2B5A0";
 			ctx.fill();
 		}
 		

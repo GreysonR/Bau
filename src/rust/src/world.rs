@@ -52,14 +52,12 @@ impl World {
 
 		'outer: for i in 0..len - 1 {
 			let body_a_id = bucket[i];
-			crate::console_log!("body_a: {}", body_a_id);
-			let body_a = bodies.get(&body_a_id).expect(&format!("Failed to get body_a {body_a_id} in World::get_pairs"));
+			let body_a = bodies.get(&body_a_id).expect(&format!("Failed to get body_a {body_a_id} in World::pair_bucket"));
 			for j in i + 1..len {
 				let body_b_id = bucket[j];
-				crate::console_log!("body_b: {}", body_b_id);
 				if pairs.contains_key(&CollisionPair::pair_id(body_a_id, body_b_id)) { continue 'outer; } // already in pairs
 
-				let body_b = bodies.get(&body_b_id).expect(&format!("Failed to get body_b {body_b_id} in World::get_pairs"));
+				let body_b = bodies.get(&body_b_id).expect(&format!("Failed to get body_b {body_b_id} in World::pair_bucket"));
 				if body_a.bounds.overlaps_with(&body_b.bounds) {
 					pairs.insert(CollisionPair::pair_id(body_a_id, body_b_id), (body_a_id, body_b_id));
 				}

@@ -84,7 +84,7 @@
 		}
 	}
 	
-	basic();
+	multistack();
 
 	let floor = engine.body_create_rect(3000, 100, new Vec2(700, 800), {
 		is_static: true,
@@ -92,8 +92,8 @@
 	});
 	engine.world_add_body(floor);
 
-	let mouseBody = engine.body_create_circle(5, new Vec2(10000, 10000), {
-		is_static: true,
+	let mouseBody = engine.body_create_circle(5, new Vec2(10, 10), {
+		is_static: false,
 		mass: 10,
 	});
 	engine.world_add_body(mouseBody);
@@ -101,9 +101,17 @@
 	window.engine = engine;
 	window.mouseBody = mouseBody;
 
+	let mousePosition = new Vec2(0, 0);
 	window.addEventListener("mousemove", event => {
 		let { clientX: mouseX, clientY: mouseY } = event;
-		engine.body_set_position(mouseBody, new Vec2(mouseX, mouseY));
+		mousePosition.x = mouseX;
+		mousePosition.y = mouseY;
+	});
+	ticker.on("physicsTick", () => {
+		if (window.runEngine) {
+			engine.body_set_position(mouseBody, new Vec2(mousePosition.x, mousePosition.y));
+			engine.body_set_velocity(mouseBody, new Vec2(0, 0));
+		}
 	});
 </script>
 </html>

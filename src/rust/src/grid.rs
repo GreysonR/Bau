@@ -94,9 +94,11 @@ impl Grid {
 		if body.grid_spaces.len() > 0 {
 			panic!("body shouldn't be already in the grid before inserting"); // todo: not panic
 		}
+		// crate::console_log!("-- Inserting body {} --", body.id);
+		// crate::console_log!("grid bounds: {{ min: {}, {}; max: {}, {} }}", grid_bounds.min.x, grid_bounds.min.y, grid_bounds.max.x, grid_bounds.max.y);
 
-		for y in grid_bounds.min.y..grid_bounds.max.y {
-			for x in grid_bounds.min.x..grid_bounds.max.x {
+		for y in grid_bounds.min.y..=grid_bounds.max.y {
+			for x in grid_bounds.min.x..=grid_bounds.max.x {
 				let bucket_id = Grid::pair(&GridVec::new(x, y));
 				let bucket = self.get_bucket(bucket_id);
 				bucket.push(body.id);
@@ -105,6 +107,9 @@ impl Grid {
 		}
 	}
 	pub fn remove_body(&mut self, body: &mut Body) {
+		// crate::console_log!("-- Removing body {} --", body.id);
+		// crate::console_log!("grid cells: {:?}", body.grid_spaces.iter().map(|x| Grid::unpair(*x)));
+
 		let body_id = body.id;
 		for bucket_id in body.grid_spaces.iter() {
 			let bucket = self.get_bucket(*bucket_id);
@@ -113,7 +118,6 @@ impl Grid {
 
 			if bucket.len() == 0 {
 				self.buckets.remove(bucket_id);
-				crate::console_log!("Removed Bucket: {}", bucket_id);
 			}
 		}
 		body.grid_spaces.clear();

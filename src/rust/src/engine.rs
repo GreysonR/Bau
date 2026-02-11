@@ -22,7 +22,7 @@ pub struct Engine {
 impl Engine {
 	#[wasm_bindgen(constructor)]
 	pub fn new() -> Self {
-		let default_bucket_size = 200.0; // todo: let user change this
+		let default_bucket_size = 1000.0; // todo: let user change this
 		Self {
 			world: World::new(default_bucket_size),
 			bodies: HashMap::with_hasher(BuildNoHashHasher::default()),
