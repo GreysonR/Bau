@@ -6,13 +6,15 @@ If using make, ensure you already have cargo and npm installed.
  * [cargo](https://rustup.rs/)
  * node and npm (if installing manually, don't forget to `npm install`)
  * nodemon: `npm i -g nodemon`
- * concurrently: `npm i -g concurrently`
- * watchexec: `cargo install watchexec`
  * wasm-pack: `cargo install wasm-pack`
- * Also make sure to build cargo before running webpack using `npm run build-wasm`, or else webpack will fail
+ * watchexec: `cargo install watchexec`
+
+On first run, make sure to build cargo before running webpack using `npm run build-wasm` or webpack will fail
 
 ## Optional
-Add this to VSCode workspace settings.json to get rust-analyzer working:
+ * concurrently: `npm i -g concurrently`
+
+Add this to VSCode workspace settings.json to set up rust-analyzer:
 ```JSON
 "rust-analyzer.linkedProjects": [
 	"src/rust/Cargo.toml"
