@@ -97,7 +97,7 @@
 
 	let mouseBody = engine.body_create_circle(5, new Vec2(10, 10), {
 		is_static: false,
-		mass: 10,
+		mass: 0.03,
 	});
 	engine.world_add_body(mouseBody);
 
@@ -124,11 +124,30 @@
 	});
 	ticker.on("physicsTick", () => {
 		if (window.runEngine) {
-			engine.body_set_position(mouseBody, new Vec2(mousePosition.x, mousePosition.y));
-			engine.body_set_velocity(mouseBody, new Vec2(0, 0));
+			let curPos = engine.body_get_position(mouseBody);
+			let velScale = 300;
+			let velocity = { x: mousePosition.x - curPos.x, y: mousePosition.y - curPos.y };
+			if (velocity.x ** 2 + velocity.y ** 2 < 200) {
+				velScale *= (velocity.x ** 2 + velocity.y ** 2) / 200
+			}
+			velocity.x = Math.abs(velocity.x) ** 0.5 * Math.sign(velocity.x) * velScale;
+			velocity.y = Math.abs(velocity.y) ** 0.5 * Math.sign(velocity.y) * velScale;
+			engine.body_set_velocity(mouseBody, new Vec2(velocity.x, velocity.y));
+			engine.body_set_angle(mouseBody, 0);
 		}
 	});
 
+	window.addEventListener("mouseover", event => {
+		let { clientX: mouseX, clientY: mouseY } = event;
+
+		screenMousePosition.x = mouseX;
+		screenMousePosition.y = mouseY;
+
+		let worldSpaceMouse = toWorldSpace(screenMousePosition);
+		mousePosition.x = worldSpaceMouse.x;
+		mousePosition.y = worldSpaceMouse.y;
+		engine.body_set_position(mouseBody, new Vec2(mousePosition.x, mousePosition.y));
+	});
 	window.addEventListener("mousedown", event => {
 		if (event.button == 1 || event.button == 2) {
 			let lastPos = { x: event.clientX, y: event.clientY };

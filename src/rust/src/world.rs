@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::{Body, BodyMap, CollisionPair, Frame, Grid, Id, PairId, Time, Vec2, console_log, grid::BucketSize};
+use crate::{Body, BodyMap, CollisionPair, Frame, Grid, Id, PairId, Time, Vec2, grid::BucketSize};
 
 pub struct World {
 	pub gravity: Vec2,
