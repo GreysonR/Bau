@@ -1,16 +1,7 @@
-# Install dependencies
-install:
-	npm i
-	npm i -g nodemon
-	npm i -g concurrently
-	cargo install watchexec-cli
-	cargo install wasm-pack
-	npm run build-wasm
+.PHONY: build run
 
-# Start hot reload for app
-run:
-	concurrently --kill-others "nodemon" "npm run watch-wasm"
-
-# Build final bundle
 build:
-	npm run build
+	cargo build -p bau_test_suite
+
+run:
+	cargo run -p bau_test_suite

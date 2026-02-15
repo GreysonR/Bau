@@ -1,31 +1,10 @@
-# Installation
-`make install` or install everything below manually
-If using make, ensure you already have cargo and npm installed.
+# About
+A simple physics engine written in Rust as a Bevy plugin. Currently *very* early and has few features implemented. It was recently rewritten from WASM-only to a Bevy plugin intended primarily for native builds. The old version is still available under the 0.0.7 branch. 
+The project is intended for learning about the fundamentals of physics engines, but not a complete physics solution for games. 
 
-## Required
- * [cargo](https://rustup.rs/)
- * node and npm (if installing manually, don't forget to `npm install`)
- * nodemon: `npm i -g nodemon`
- * wasm-pack: `cargo install wasm-pack`
- * watchexec: `cargo install watchexec`
+# Requirements
+[Bevy dependencies](https://bevy.org/learn/quick-start/getting-started/setup/)
+[LLD linker](https://bevy.org/learn/quick-start/getting-started/setup/#alternative-linkers)
 
-On first run, make sure to build cargo before running webpack using `npm run build-wasm` or webpack will fail
-
-## Optional
- * concurrently: `npm i -g concurrently`
-
-Add this to VSCode workspace settings.json to set up rust-analyzer:
-```JSON
-"rust-analyzer.linkedProjects": [
-	"src/rust/Cargo.toml"
-]
-```
-
-# Running
-`make run` or `npm start`<br>
-If that doesn't work, or you want their outputs separated, run in separate terminals, both from project root: `nodemon` and `npm run watch-wasm`.<br>
-DO NOT run `nodemon .` (note the ".") as it will not work!<br>
-The app will then be available on localhost:80
-
-# Building
-`make build` or `npm run build`
+# Running the testing GUI
+`make run` or `cargo run -p bau_test_suite`
