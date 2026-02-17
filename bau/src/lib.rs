@@ -27,11 +27,22 @@ pub enum Constraint {
 
 #[derive(Component, Debug)]
 pub struct Spring {
+	pub body: Entity,
 	pub position: Vec2,
 	pub length: f32,
 	pub stiffness: f32,
 	pub damping: f32,
-	pub body: Entity,
+}
+impl Default for Spring {
+	fn default() -> Self {
+		Self {
+			body: Entity::PLACEHOLDER,
+			position: Vec2::ZERO,
+			length: 100.0,
+			stiffness: 100.0,
+			damping: 2.0,
+		}
+	}
 }
 
 #[derive(Resource)]
@@ -48,30 +59,6 @@ impl Plugin for Engine {
 		app.insert_resource(Gravity(Vec2::new(0.0, -1000.0)));
 		app.add_systems(Update, ((solve_constraints, apply_body_forces), apply_impulses).chain()); // TODO: examine FixedUpdate vs Update here
 	}
-}
-
-pub fn add_constraint(commands: &mut Commands) -> (Entity, Entity) {
-	// add constraint; constraint can be customized later
-	let body = Body {
-		position: Vec2::new(200.0, 0.0),
-		velocity: Vec2::new(-40.0, 0.0),
-		mass: 1.0,
-		..default()
-	};
-	let body_entity = commands.spawn(body);
-	let body_id = body_entity.id();
-
-	let spring = Constraint::Spring(Spring {
-		position: Vec2::new(0.0, 0.0),
-		length: 100.0,
-		stiffness: 150.0,
-		damping: 2.0,
-		body: body_id,
-	});
-	let spring_entity = commands.spawn(spring);
-	let spring_id = spring_entity.id();
-
-	(body_id, spring_id)
 }
 
 // Main physics loop; Solves all constraints in the engine
