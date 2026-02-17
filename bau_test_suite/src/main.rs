@@ -7,12 +7,10 @@ mod render;
 
 
 fn main() {
-	println!("Bau: {}", bau::add(2, 2));
-	
 	App::new()
 		.add_plugins(DefaultPlugins)
 		// .add_systems(Update, print_mouse_position)
-		.add_plugins(render::Render)
+		.add_plugins((bau::Engine::default(), render::Render))
 		.run();
 
 }
