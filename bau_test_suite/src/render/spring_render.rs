@@ -59,14 +59,17 @@ impl SpringRenderBuilder {
 			margin: 6.0,
 		}
 	}
+	#[allow(unused)]
 	pub fn stroke(mut self, stroke: (Color, f32)) -> Self {
 		self.stroke = Some(stroke);
 		self
 	}
+	#[allow(unused)]
 	pub fn height(mut self, height: f32) -> Self {
 		self.height = height;
 		self
 	}
+	#[allow(unused)]
 	pub fn margin(mut self, margin: f32) -> Self {
 		self.margin = margin;
 		self

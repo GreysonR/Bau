@@ -17,14 +17,17 @@ impl BodyRenderBuilder {
 			radius: 5.0,
 		}
 	}
+	#[allow(unused)]
 	pub fn fill(mut self, color: Color) -> Self {
 		self.fill = Some(color);
 		self
 	}
+	#[allow(unused)]
 	pub fn stroke(mut self, stroke: (Color, f32)) -> Self {
 		self.stroke = Some(stroke);
 		self
 	}
+	#[allow(unused)]
 	pub fn radius(mut self, radius: f32) -> Self {
 		self.radius = radius;
 		self

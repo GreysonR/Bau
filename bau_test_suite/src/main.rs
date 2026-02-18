@@ -1,7 +1,7 @@
 use bevy::{ prelude::*, window::WindowCloseRequested };
 use bevy::window::PrimaryWindow;
 
-use bau::{ Body, Spring, Constraint };
+use bau::{ Body, BodyBuilder, Spring, Constraint };
 
 mod render;
 use render::{ color_hex, BodyRenderBuilder, SpringRenderBuilder };
@@ -22,22 +22,22 @@ struct MainSpring(Entity);
 
 fn add_bodies(mut commands: Commands) {
 	// Add bodies
-	let body_a = Body {
-		position: Vec2::new(200.0, 0.0),
-		velocity: Vec2::new(-40.0, 0.0),
-		mass: 1.0,
-		..Default::default()
-	};
+	let body_a = BodyBuilder::from_vertices(Vec::new())
+		.position(Vec2::new(200.0, 0.0))
+		.velocity(Vec2::new(-40.0, 0.0))
+		.mass(1.0)
+		.build();
+
 	let body_a_id = BodyRenderBuilder::new(body_a)
 		.fill(color_hex("#F0A152"))
 		.build(&mut commands);
 	
-	let body_b = Body {
-		position: Vec2::new(-500.0, -300.0),
-		velocity: Vec2::new(800.0, 1000.0),
-		mass: 1.0,
-		..Default::default()
-	};
+	let body_b = BodyBuilder::from_vertices(Vec::new())
+		.position(Vec2::new(-500.0, -300.0))
+		.velocity(Vec2::new(800.0, 1000.0))
+		.mass(1.0)
+		.build();
+	
 	let _body_b_id = BodyRenderBuilder::new(body_b)
 		.fill(color_hex("#E35531"))
 		.build(&mut commands);
@@ -61,6 +61,7 @@ fn add_bodies(mut commands: Commands) {
 
 // Mouse input
 fn move_spring(mouse_buttons: Res<ButtonInput<MouseButton>>, spring_id: Res<MainSpring>, camera: Query<(&Camera, &GlobalTransform), With<Camera2d>>, window: Single<&Window, With<PrimaryWindow>>, mut springs: Query<&mut Constraint>) {
+	// Moving main spring constraint by clicking on window
 	if let Some(position) = window.cursor_position() && mouse_buttons.pressed(MouseButton::Left) {
 		let mut constraint = springs.get_mut(spring_id.0).expect("spring should be in world");
 		match constraint.as_mut() {
@@ -71,7 +72,6 @@ fn move_spring(mouse_buttons: Res<ButtonInput<MouseButton>>, spring_id: Res<Main
 				spring.position.y = world_pos.y;
 			}
 		}
-		// println!("mouse is at ({}, {})", position.x, position.y);
 	}
 	// else not in window
 }
@@ -79,12 +79,15 @@ fn move_spring(mouse_buttons: Res<ButtonInput<MouseButton>>, spring_id: Res<Main
 
 // Keyboard input
 fn handle_input(keys: Res<ButtonInput<KeyCode>>, mut close_events: MessageWriter<WindowCloseRequested>, windows: Query<Entity, With<Window>>, bodies: Query<&mut Body>) {
+	// Quick exiting window with q
 	if keys.just_pressed(KeyCode::KeyQ) {
 		let window = windows.single();
 		if let Err(_) = window { return; }
 		let window = window.unwrap();
 		close_events.write(WindowCloseRequested { window });
 	}
+
+	// Applying force to 1st body with WASD
 	if keys.any_pressed([KeyCode::KeyW, KeyCode::KeyA, KeyCode::KeyS, KeyCode::KeyD]) {
 		let intent = Vec2::new(
 			(keys.pressed(KeyCode::KeyD) as i32 - keys.pressed(KeyCode::KeyA) as i32) as f32,
