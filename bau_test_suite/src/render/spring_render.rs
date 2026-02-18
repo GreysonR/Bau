@@ -16,7 +16,7 @@ impl SpringRender {
 		let dir = difference.normalize();
 		let length = difference.length();
 		let margin = self.margin.min(length * 0.5 - 0.01);
-		let n_pts = ((self.length - 2.0 * margin) / 10.0).floor() as i32;
+		let n_pts = ((self.length - 2.0 * margin) / 6.0).floor() as i32;
 		
 		// Build initial points
 		let mut points = Vec::new();
@@ -30,7 +30,7 @@ impl SpringRender {
 		points.push(Vec2::new(length - margin, 0.0));
 		points.push(Vec2::new(length, 0.0));
 
-		// Translate points to match
+		// Translate points to real positions
 		points.iter_mut().for_each(|point| {
 			*point = point.rotate(dir) + start;
 		});

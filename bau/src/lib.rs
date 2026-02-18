@@ -103,7 +103,7 @@ fn apply_impulses(time: Res<Time>, bodies: Query<&mut Body>) {
 	// println!("fps: {}; delta: {}", 1.0 / delta, delta);
 	
 	for mut body in bodies {
-		if now < 0.5 { // temporarily pause sim
+		if now < 0.5 { // temporarily pause sim at start so everything can load
 			body.accumulated_impulse = Vec2::ZERO;
 			continue;
 		}
