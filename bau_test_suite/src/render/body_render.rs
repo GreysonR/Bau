@@ -2,13 +2,12 @@ use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 use bau::{ Body };
 
-pub struct BodyRenderBuilder { // lmao
+pub struct BodyRenderBuilder {
 	body: Body,
 	fill: Option<Color>,
 	stroke: Option<(Color, f32)>,
 	radius: f32,
 }
-
 impl BodyRenderBuilder {
 	pub fn new(body: Body) -> Self {
 		Self {
