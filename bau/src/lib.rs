@@ -67,9 +67,11 @@ fn solve_constraints(constraints: Query<&Constraint>, mut bodies: Query<&mut Bod
 		match constraint {
 			Constraint::Spring(spring) => {
 				let mut body = bodies.get_mut(spring.body).expect("body should be in world"); // TODO: handle unwrap
+				
 				let ds = spring.position - body.position;
 				let spring_dir = ds.normalize_or(Vec2::new(1.0, 0.0));
 				let rel_vel = body.velocity.dot(spring_dir);
+
 				let mut impulse = (ds.length() - spring.length) * spring.stiffness;
 				impulse -= spring.damping * rel_vel;
 

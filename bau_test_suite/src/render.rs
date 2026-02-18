@@ -1,13 +1,13 @@
 use bevy::{ prelude::*, window::WindowCloseRequested };
 use bevy_prototype_lyon::prelude::*;
 
-use bau::{ Body, Spring };
+use bau::{ Body };
 
 mod body_render;
-use body_render::BodyBuilder;
+pub use body_render::BodyRenderBuilder;
 
 mod spring_render;
-use spring_render::SpringBuilder;
+pub use spring_render::SpringRenderBuilder;
 
 
 // Useful render methods
@@ -22,8 +22,7 @@ impl Plugin for Render {
 	fn build(&self, app: &mut App) {
 		app
 			.add_plugins(ShapePlugin)
-			.add_systems(Startup, (setup_render, add_bodies))
-			// .add_systems(Update, print_time)
+			.add_systems(Startup, setup_render)
 			.add_systems(Update, (body_render::update, spring_render::update))
 			.add_systems(Update, handle_input)
 			;
@@ -58,30 +57,4 @@ fn handle_input(keys: Res<ButtonInput<KeyCode>>, mut close_events: MessageWriter
 fn setup_render(mut commands: Commands) {
 	commands.spawn((Camera2d, Msaa::Sample4));
 	commands.insert_resource(ClearColor(color_hex("#0C4440")));
-}
-
-fn add_bodies(mut commands: Commands) {
-	// Add body
-	let body = Body {
-		position: Vec2::new(200.0, 0.0),
-		velocity: Vec2::new(-40.0, 0.0),
-		mass: 1.0,
-		..Default::default()
-	};
-	let body_id = BodyBuilder::new(body)
-		.fill(color_hex("#F0A152"))
-		.build(&mut commands);
-
-	// Add spring constraint
-	let spring = Spring {
-		position: Vec2::new(0.0, 0.0),
-		length: 100.0,
-		stiffness: 150.0,
-		damping: 2.0,
-		body: body_id,
-		..Default::default()
-	};
-	SpringBuilder::new(spring)
-		.stroke((color_hex("#f4fdd9b2"), 2.0))
-		.build(&mut commands);
 }
