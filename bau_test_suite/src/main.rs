@@ -22,7 +22,7 @@ struct MainSpring(Entity);
 
 fn add_bodies(mut commands: Commands) {
 	// Add bodies
-	let body_a = BodyBuilder::from_vertices(Vec::new())
+	let body_a = BodyBuilder::rect(100.0, 100.0)
 		.position(Vec2::new(200.0, 0.0))
 		.velocity(Vec2::new(-40.0, 0.0))
 		.mass(1.0)
@@ -32,7 +32,7 @@ fn add_bodies(mut commands: Commands) {
 		.fill(color_hex("#F0A152"))
 		.build(&mut commands);
 	
-	let body_b = BodyBuilder::from_vertices(Vec::new())
+	let body_b = BodyBuilder::circle(10.0)
 		.position(Vec2::new(-500.0, -300.0))
 		.velocity(Vec2::new(800.0, 1000.0))
 		.mass(1.0)

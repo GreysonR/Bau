@@ -11,10 +11,11 @@ pub struct BodyBuilder { // hell yeah
 	velocity: Vec2,
 	
 	// Inherent
-	mass: f32,
+	mass: Option<f32>, // if mass is not specified, it is a set based on a fixed density
 	friction_air: f32,
 	is_static: bool,
 }
+
 impl Default for BodyBuilder {
 	fn default() -> Self {
 		Self {
@@ -23,7 +24,7 @@ impl Default for BodyBuilder {
 			angle: 0.0,
 			velocity: Vec2::ZERO,
 
-			mass: 1.0,
+			mass: None,
 			friction_air: 1.0,
 			is_static: false,
 		}
@@ -32,6 +33,7 @@ impl Default for BodyBuilder {
 
 #[allow(unused)]
 impl BodyBuilder {
+	// Constructors for various primitive shapes
 	pub fn from_vertices(vertices: Vec<Vec2>) -> Self {
 		assert!(vertices.len() >= 3, "Body must have at least 3 vertices");
 
@@ -76,13 +78,15 @@ impl BodyBuilder {
 		}
 	}
 
+	// Setters
 	pub fn position(mut self, position: Vec2) -> Self { self.position = position; self }
 	pub fn angle(mut self, angle: f32) -> Self { self.angle = angle; self }
 	pub fn velocity(mut self, velocity: Vec2) -> Self { self.velocity = velocity; self }
-	pub fn mass(mut self, mass: f32) -> Self { self.mass = mass; self }
+	pub fn mass(mut self, mass: f32) -> Self { self.mass = Some(mass); self }
 	pub fn friction_air(mut self, friction_air: f32) -> Self { self.friction_air = friction_air; self }
 	pub fn is_static(mut self, is_static: bool) -> Self { self.is_static = is_static; self }
 
+	// Helper methods for build step
 	fn get_center_of_mass(&self) -> Vec2 {
 		let mut centroid = Vec2::ZERO;
 		let mut det = 0.0;
@@ -110,7 +114,8 @@ impl BodyBuilder {
 		}
 		area * 0.5
 	}
-	fn get_inertia(&self) -> f32 { // I found this algo somewhere in the great depths of the internet. It was ancient then and it's probably gone now, so I have preemptively given up trying to source it.
+	fn get_inertia(&self, mass: f32) -> f32 {
+		// I found this algo somewhere in the great depths of the internet. It was ancient then and it's probably gone now, so I have preemptively given up trying to source it.
 		if self.is_static { return f32::INFINITY }
 
 		let vertices = &self.vertices;
@@ -128,15 +133,19 @@ impl BodyBuilder {
 			denominator += cross;
 		}
 
-		(self.mass / 6.0) * (numerator / denominator)
+		(mass / 6.0) * (numerator / denominator)
 	}
+
+	// Builder - does a bunch of stuff under the hood to ensure body is correctly set up for solver
 	pub fn build(self) -> Body {
 		let is_static = self.is_static;
-		let inertia = self.get_inertia();
+		let mass = self.mass.unwrap_or(self.get_area() * 0.01); // 0.01 is an arbitrary density that gives reasonable mass values
+		let inertia = self.get_inertia(mass);
 		let inverse_inertia = if is_static { 0.0 } else { 1.0 / inertia };
-		let inverse_mass = if is_static { 0.0 } else { 1.0 / self.mass };
+		let inverse_mass = if is_static { 0.0 } else { 1.0 / mass };
 
 		// We need to transform the vertices from wherever they are to the desired position & angle
+		// TODO: ensure CCW, ensure convex, remove duplicated vertices
 		let true_position = self.get_center_of_mass();
 		let desired_position = self.position;
 		let angle_vec = Vec2::from_angle(self.angle);
@@ -150,7 +159,7 @@ impl BodyBuilder {
 			position: self.position,
 			velocity: self.velocity,
 
-			mass: self.mass,
+			mass,
 			friction_air: self.friction_air,
 			is_static,
 
