@@ -22,10 +22,11 @@ struct MainSpring(Entity);
 
 fn add_bodies(mut commands: Commands) {
 	// Add bodies
-	let body_a = BodyBuilder::rect(100.0, 100.0)
+	let body_a = BodyBuilder::rect(50.0, 50.0)
 		.position(Vec2::new(200.0, 0.0))
 		.velocity(Vec2::new(-40.0, 0.0))
-		.mass(1.0)
+		.angle(std::f32::consts::PI * 0.25)
+		// .mass(1.0)
 		.build();
 
 	let body_a_id = BodyRenderBuilder::new(body_a)

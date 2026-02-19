@@ -35,9 +35,11 @@ impl BodyRenderBuilder {
 	pub fn build(self, commands: &mut Commands) -> Entity {
 		assert!(self.fill.is_some() || self.stroke.is_some(), "Body should have a fill or a stroke before building");
 
-		let polygon = shapes::Circle {
-			center: Vec2::ZERO,
-			radius: self.radius,
+		let polygon = shapes::Polygon {
+			closed: true,
+			points: self.body.vertices.iter().map(|vertex| {
+				vertex - self.body.position
+			}).collect(), // yikes
 			..Default::default()
 		};
 
@@ -60,5 +62,6 @@ impl BodyRenderBuilder {
 pub fn update(query: Query<(&Body, &mut Transform)>) {
 	for (body, mut transform) in query {
 		transform.translation = body.position.extend(transform.translation.z);
+		transform.rotation = Quat::from_rotation_z(body.angle);
 	}
 }

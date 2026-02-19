@@ -59,7 +59,7 @@ impl BodyBuilder {
 	pub fn circle(radius: f32) -> Self {
 		assert!(radius > 0.0, "Radius must be positive");
 
-		let vertex_count = (radius.powf(0.333) * 1.0).round() as usize;
+		let vertex_count = (radius.powf(0.333) * 2.8).round().max(3.0) as usize;
 		let delta_angle = PI * 2.0 / (vertex_count as f32); // angle between each vertex
 		let mut vertices = Vec::new();
 		vertices.reserve_exact(vertex_count);
@@ -139,7 +139,7 @@ impl BodyBuilder {
 	// Builder - does a bunch of stuff under the hood to ensure body is correctly set up for solver
 	pub fn build(self) -> Body {
 		let is_static = self.is_static;
-		let mass = self.mass.unwrap_or(self.get_area() * 0.01); // 0.01 is an arbitrary density that gives reasonable mass values
+		let mass = self.mass.unwrap_or(self.get_area() * 0.003); // 0.003 is an arbitrary density that gives reasonable mass values
 		let inertia = self.get_inertia(mass);
 		let inverse_inertia = if is_static { 0.0 } else { 1.0 / inertia };
 		let inverse_mass = if is_static { 0.0 } else { 1.0 / mass };
