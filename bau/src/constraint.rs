@@ -5,7 +5,7 @@ mod spring;
 pub use spring::Spring;
 
 #[derive(Component)]
-pub enum Constraint { // TODO: make this a trait
+pub enum Constraint {
 	Spring(Spring),
 }
 
