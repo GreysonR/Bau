@@ -15,8 +15,15 @@
 	"rust-analyzer.procMacro.ignored": {
 		"bevy_ecs": []
 	},
-	"rust-analyzer.cargo.extraEnv": {
-		"RUSTFLAGS": "-Clinker=rust-lld.exe"
+	"[windows]": {
+		"rust-analyzer.cargo.extraEnv": {
+			"RUSTFLAGS": "-Clinker=rust-lld.exe"
+		},
+	},
+	"[linux]": {
+		"rust-analyzer.cargo.extraEnv": {
+			"RUSTFLAGS": "-Clinker=rust-lld"
+		},
 	},
 	"makefile.configureOnOpen": false
 }
