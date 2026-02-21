@@ -1,10 +1,10 @@
 use bevy::{ prelude::*, window::WindowCloseRequested };
 use bevy::window::PrimaryWindow;
 
-use bau::{ Body, BodyBuilder, Spring, Constraint };
+use bau::{ Body, BodyBuilder, Constraint, Spring, FixedDistance };
 
 mod render;
-use render::{ color_hex, BodyRenderBuilder, SpringRenderBuilder };
+use render::{ color_hex, BodyRenderBuilder, SpringRenderBuilder, DistanceRenderBuilder };
 
 fn main() {
 	App::new()
@@ -46,17 +46,29 @@ fn add_bodies(mut commands: Commands) {
 	// Add spring constraint
 	let spring = Spring {
 		position: Vec2::new(0.0, 0.0),
-		length: 100.0,
-		stiffness: 150.0,
-		damping: 2.0,
+		length: 60.0,
+		stiffness: 50.0,
+		damping: 0.2,
 		body: body_a_id,
 		..Default::default()
 	};
 	let spring = SpringRenderBuilder::new(spring)
 		.stroke((color_hex("#f4fdd9b2"), 2.0))
 		.build(&mut commands);
-
 	commands.insert_resource(MainSpring(spring));
+
+	// Add fixed distance constraint
+	let fixed_dist = FixedDistance {
+		position: Vec2::new(100.0, 0.0),
+		length: 100.0,
+		body: body_a_id,
+		..Default::default()
+	};
+	let distance_constraint_id = DistanceRenderBuilder::new(fixed_dist)
+		.stroke((color_hex("#f4fdd9b2"), 2.0))
+		.build(&mut commands);
+	commands.insert_resource(MainSpring(distance_constraint_id));
+
 }
 
 
@@ -66,12 +78,13 @@ fn move_spring(mouse_buttons: Res<ButtonInput<MouseButton>>, spring_id: Res<Main
 	if let Some(position) = window.cursor_position() && mouse_buttons.pressed(MouseButton::Left) {
 		let mut constraint = springs.get_mut(spring_id.0).expect("spring should be in world");
 		match constraint.as_mut() {
-			Constraint::Spring(spring) => {
+			Constraint::FixedDistance(spring) => {
 				let (camera, camera_transform) = camera.single().expect("camera should be in world");
 				let world_pos = camera.viewport_to_world_2d(camera_transform, position).unwrap();
 				spring.position.x = world_pos.x;
 				spring.position.y = world_pos.y;
-			}
+			},
+			_ => (),
 		}
 	}
 	// else not in window

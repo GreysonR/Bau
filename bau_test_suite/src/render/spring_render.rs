@@ -75,7 +75,7 @@ impl SpringRenderBuilder {
 		self
 	}
 
-	pub fn build(self, commands: &mut Commands) -> Entity {
+	pub fn build(self, commands: &mut Commands) -> Entity { // TODO: consider generalizing this, and/or turning this method into one that takes in options & the spring rather than a whole builder
 		let stroke = self.stroke.expect("Body should have a stroke before building");
 
 		// Pin at end of spring
@@ -125,7 +125,7 @@ pub fn update(query: Query<(&SpringRender, &mut Shape, &Constraint, &SpringRende
 		// Verify it is a spring & unwrap
 		let spring = match constraint {
 			Constraint::Spring(spring) => spring,
-			// _ => panic!("spring constraint render should contain a spring")
+			_ => panic!("spring constraint render should contain a spring")
 		};
 		
 		// Update spring path

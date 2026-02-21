@@ -7,6 +7,9 @@ pub use body_render::BodyRenderBuilder;
 mod spring_render;
 pub use spring_render::SpringRenderBuilder;
 
+mod distance_render;
+pub use distance_render::DistanceRenderBuilder;
+
 
 // Useful render methods
 pub fn color_hex(hex: &str) -> Color {
@@ -21,7 +24,7 @@ impl Plugin for Render {
 		app
 			.add_plugins(ShapePlugin)
 			.add_systems(Startup, init_render)
-			.add_systems(Update, (body_render::update, spring_render::update))
+			.add_systems(Update, (body_render::update, spring_render::update, distance_render::update))
 			;
 	}
 }

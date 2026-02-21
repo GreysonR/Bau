@@ -24,16 +24,17 @@ impl Default for Spring {
 }
 
 impl ConstraintSolver for Spring {
-	fn solve(&self, bodies: &mut Query<&mut Body>) {
+	fn solve_velocity(&self, bodies: &mut Query<&mut Body>, _delta_time: f32) {
 		let mut body = bodies.get_mut(self.body).expect("body should be in world"); // TODO: handle unwrap
 		
-		let ds = self.position - body.position;
+		let ds = body.position - self.position;
 		let dir = ds.normalize_or(Vec2::new(1.0, 0.0));
 		let rel_vel = body.velocity.dot(dir);
 
-		let mut impulse = (ds.length() - self.length) * self.stiffness;
+		let mut impulse = (self.length - ds.length()) * self.stiffness;
 		impulse -= self.damping * rel_vel;
 
-		body.accumulated_impulse += impulse * dir;
+		let p = impulse * body.inverse_mass;
+		body.velocity += p * dir;
 	}
 }

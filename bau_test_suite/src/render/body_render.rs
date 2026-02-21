@@ -6,7 +6,6 @@ pub struct BodyRenderBuilder {
 	body: Body,
 	fill: Option<Color>,
 	stroke: Option<(Color, f32)>,
-	radius: f32,
 }
 impl BodyRenderBuilder {
 	pub fn new(body: Body) -> Self {
@@ -14,7 +13,6 @@ impl BodyRenderBuilder {
 			body,
 			fill: None,
 			stroke: None,
-			radius: 5.0,
 		}
 	}
 	#[allow(unused)]
@@ -25,11 +23,6 @@ impl BodyRenderBuilder {
 	#[allow(unused)]
 	pub fn stroke(mut self, stroke: (Color, f32)) -> Self {
 		self.stroke = Some(stroke);
-		self
-	}
-	#[allow(unused)]
-	pub fn radius(mut self, radius: f32) -> Self {
-		self.radius = radius;
 		self
 	}
 	pub fn build(self, commands: &mut Commands) -> Entity {
