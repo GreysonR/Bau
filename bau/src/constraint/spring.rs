@@ -25,7 +25,7 @@ impl Default for Spring {
 	}
 }
 
-impl ConstraintSolver for Spring {
+impl ConstraintSolver for Spring { // TODO: make this work with multiple constraint iterations
 	fn solve_velocity(&self, bodies: &mut Query<&mut Body>, _delta_time: f32) {
 		let mut body = bodies.get_mut(self.body).expect("body should be in world"); // TODO: handle unwrap
 		
@@ -41,7 +41,6 @@ impl ConstraintSolver for Spring {
 		impulse -= self.damping * rel_vel;
 
 		let p = impulse * dir;
-		// body.velocity += p * body.inverse_mass;
 		body.apply_impulse(p, body_position);
 	}
 }

@@ -22,28 +22,32 @@ impl Default for FixedDistance {
 }
 
 impl ConstraintSolver for FixedDistance {
-	fn solve_velocity(&self, bodies: &mut Query<&mut Body>, _delta_time: f32) {
+	fn solve_velocity(&self, bodies: &mut Query<&mut Body>, delta_time: f32) {
 		let mut body = bodies.get_mut(self.body).expect("body should be in world"); // TODO: handle unwrap
 		
-		let ds = body.position - self.position;
+		let radius = self.position_offset.rotate(Vec2::from_angle(body.angle));
+		let body_position = body.position + radius;
+
+		let ds = body_position - self.position;
 		let dir = ds.normalize_or(Vec2::new(1.0, 0.0));
-		let rel_vel = body.velocity.dot(dir);
+		
+		let point_velocity = body.velocity + body.angular_velocity * radius.perp();
+		let rel_vel = point_velocity.dot(dir);
 
 		let impulse = -rel_vel; // velocity in dir should go to 0; i.e. impulse + rel_vel = 0; so impulse = -rel_vel
+		let stiffness: f32 = 0.01;
 
-		// sort of baumgarte stabilization like
-		// let c = ds.length() - self.length;
-		// let k = 100.0;
-		// let delta_impulse = -c * k;
-		// impulse += delta_impulse;
-
-		body.velocity += impulse * dir;
+		let p = impulse * dir;
+		body.apply_impulse(p * stiffness.powf(delta_time * 10.0), body_position);
 	}
 	fn solve_position(&self, bodies: &mut Query<&mut Body>, delta_time: f32) {
 		// return;
 		let mut body = bodies.get_mut(self.body).expect("body should be in world"); // TODO: handle unwrap
 		
-		let ds = body.position - self.position;
+		let radius = self.position_offset.rotate(Vec2::from_angle(body.angle));
+		let body_position = body.position + radius;
+
+		let ds = body_position - self.position;
 		let dir = ds.normalize_or(Vec2::new(1.0, 0.0));
 		
 		/*
@@ -57,9 +61,10 @@ impl ConstraintSolver for FixedDistance {
 			s / dir = L;	plug in |s| = s / dir
 			[ s = L * dir ]	soln
 		*/
-		let target = self.length * dir + self.position;
-		let diff = target - body.position;
-		let position_stiffness: f32 = 1.0e-2;
-		body.position += diff * position_stiffness.powf(delta_time * 10.0); // * 10.0 so position stiffness doesn't have to be absurdely low
+		let position_stiffness: f32 = 0.01;
+		let diff_len = (self.length - ds.length()) * position_stiffness.powf(delta_time * 10.0);
+		println!("ds: {}, self: {}, diff_len: {}", ds.length(), self.length, diff_len);
+		let diff = diff_len * dir;
+		body.translate_position(diff);
 	}
 }

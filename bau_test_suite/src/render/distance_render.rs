@@ -90,7 +90,7 @@ pub fn update(query: Query<(&mut Shape, &Constraint, &DistanceRenderPin)>, bodie
 		let new_shape = ShapeBuilder::with(
 			&shapes::Polygon {
 				closed: false,
-				points: vec![ body.position.clone(), constraint.position.clone() ],
+				points: vec![ body.position + constraint.position_offset.rotate(Vec2::from_angle(body.angle)), constraint.position.clone() ],
 			})
 			.stroke(shape.stroke.expect("constraint render should have a stroke"))
 			.build();

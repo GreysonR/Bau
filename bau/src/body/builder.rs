@@ -172,7 +172,6 @@ impl BodyBuilder {
 			inertia,
 			inverse_inertia,
 
-
 			..Default::default() // don't init any solver properties
 		}
 	}
