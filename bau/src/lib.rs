@@ -9,24 +9,42 @@ pub use constraint::{ Constraint, Spring, ConstraintSolver, FixedDistance };
 #[derive(Resource)]
 pub struct Gravity(Vec2);
 
-pub struct Engine;
+#[derive(Resource)]
+pub struct VelocityIterations(i32);
+
+#[derive(Resource)]
+pub struct PositionIterations(i32);
+
+pub struct Engine {
+	velocity_iterations: i32,
+	position_iterations: i32,
+	gravity: Vec2,
+}
 impl Default for Engine {
 	fn default() -> Self {
-		Self {}
+		Self {
+			velocity_iterations: 1,
+			position_iterations: 1,
+			gravity: Vec2::new(0.0, -1000.0),
+		}
 	}
 }
 impl Plugin for Engine {
 	fn build(&self, app: &mut App) {
-		app.insert_resource(Gravity(Vec2::new(0.0, -1000.0)));
+		// Engine globals
+		app.insert_resource(VelocityIterations(self.velocity_iterations));
+		app.insert_resource(PositionIterations(self.position_iterations));
+		app.insert_resource(Gravity(self.gravity));
+
 		app.add_systems(FixedUpdate, (apply_forces, solve_velocity_constraints, solve_position_constraints, apply_impulses).chain()); // TODO: examine FixedUpdate vs Update here
 	}
 }
 
 // Solves all constraints in the world
-fn solve_velocity_constraints(time: Res<Time>, constraints: Query<&Constraint>, mut bodies: Query<&mut Body>) {
+fn solve_velocity_constraints(time: Res<Time>, velocity_iterations: Res<VelocityIterations>, constraints: Query<&Constraint>, mut bodies: Query<&mut Body>) {
+	let velocity_iterations = velocity_iterations.0;
 	let delta = time.delta_secs();
-	let iteration_count = 1; // TODO: make this an engine option
-	for _ in 0..iteration_count {
+	for _ in 0..velocity_iterations {
 		for constraint in constraints {
 			match constraint {
 				Constraint::Spring(spring) => spring.solve_velocity(&mut bodies, delta),
@@ -35,10 +53,10 @@ fn solve_velocity_constraints(time: Res<Time>, constraints: Query<&Constraint>, 
 		}
 	}
 }
-fn solve_position_constraints(time: Res<Time>, constraints: Query<&Constraint>, mut bodies: Query<&mut Body>) {
+fn solve_position_constraints(time: Res<Time>, position_iterations: Res<PositionIterations>, constraints: Query<&Constraint>, mut bodies: Query<&mut Body>) {
+	let position_iterations = position_iterations.0;
 	let delta = time.delta_secs();
-	let iteration_count = 1; // TODO: make this an engine option
-	for _ in 0..iteration_count {
+	for _ in 0..position_iterations {
 		for constraint in constraints {
 			match constraint {
 				Constraint::Spring(spring) => spring.solve_position(&mut bodies, delta),

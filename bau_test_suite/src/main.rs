@@ -1,7 +1,7 @@
 use bevy::{ prelude::*, window::WindowCloseRequested };
 use bevy::window::PrimaryWindow;
 
-use bau::{ Body, BodyBuilder, Constraint, ConstraintSolver, FixedDistance, Spring };
+use bau::{ Body, BodyBuilder, Constraint, FixedDistance, Spring };
 
 mod render;
 use render::{ color_hex, BodyRenderBuilder, SpringRenderBuilder, DistanceRenderBuilder };
