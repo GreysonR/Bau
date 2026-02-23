@@ -8,6 +8,7 @@ pub struct FixedDistance {
 	pub body: Entity,
 	pub position: Vec2,
 	pub length: f32,
+	pub position_offset: Vec2,
 }
 impl Default for FixedDistance {
 	fn default() -> Self {
@@ -15,6 +16,7 @@ impl Default for FixedDistance {
 			body: Entity::PLACEHOLDER,
 			position: Vec2::ZERO,
 			length: 100.0,
+			position_offset: Vec2::ZERO,
 		}
 	}
 }

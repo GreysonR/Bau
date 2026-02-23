@@ -9,6 +9,7 @@ pub struct BodyBuilder { // hell yeah
 	position: Vec2,
 	angle: f32,
 	velocity: Vec2,
+	angular_velocity: f32,
 	
 	// Inherent
 	mass: Option<f32>, // if mass is not specified, it is a set based on a fixed density
@@ -23,6 +24,7 @@ impl Default for BodyBuilder {
 			position: Vec2::ZERO,
 			angle: 0.0,
 			velocity: Vec2::ZERO,
+			angular_velocity: 0.0,
 
 			mass: None,
 			friction_air: 1.0,
@@ -82,6 +84,7 @@ impl BodyBuilder {
 	pub fn position(mut self, position: Vec2) -> Self { self.position = position; self }
 	pub fn angle(mut self, angle: f32) -> Self { self.angle = angle; self }
 	pub fn velocity(mut self, velocity: Vec2) -> Self { self.velocity = velocity; self }
+	pub fn angular_velocity(mut self, angular_velocity: f32) -> Self { self.angular_velocity = angular_velocity; self }
 	pub fn mass(mut self, mass: f32) -> Self { self.mass = Some(mass); self }
 	pub fn friction_air(mut self, friction_air: f32) -> Self { self.friction_air = friction_air; self }
 	pub fn is_static(mut self, is_static: bool) -> Self { self.is_static = is_static; self }
@@ -157,7 +160,9 @@ impl BodyBuilder {
 		Body {
 			vertices,
 			position: self.position,
+			angle: self.angle,
 			velocity: self.velocity,
+			angular_velocity: self.angular_velocity,
 
 			mass,
 			friction_air: self.friction_air,
@@ -166,6 +171,7 @@ impl BodyBuilder {
 			inverse_mass,
 			inertia,
 			inverse_inertia,
+
 
 			..Default::default() // don't init any solver properties
 		}

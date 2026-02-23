@@ -33,23 +33,24 @@ fn add_bodies(mut commands: Commands) {
 		.fill(color_hex("#F0A152"))
 		.build(&mut commands);
 	
-	let body_b = BodyBuilder::circle(10.0)
-		.position(Vec2::new(-500.0, -300.0))
-		.velocity(Vec2::new(800.0, 1000.0))
-		.mass(1.0)
-		.build();
+	// let body_b = BodyBuilder::circle(10.0)
+	// 	.position(Vec2::new(-500.0, -300.0))
+	// 	.velocity(Vec2::new(800.0, 1000.0))
+	// 	.mass(1.0)
+	// 	.build();
 	
-	let _body_b_id = BodyRenderBuilder::new(body_b)
-		.fill(color_hex("#E35531"))
-		.build(&mut commands);
+	// let _body_b_id = BodyRenderBuilder::new(body_b)
+	// 	.fill(color_hex("#E35531"))
+	// 	.build(&mut commands);
 
 	// Add spring constraint
 	let spring = Spring {
 		position: Vec2::new(0.0, 0.0),
-		length: 60.0,
+		length: 100.0,
 		stiffness: 50.0,
 		damping: 0.2,
 		body: body_a_id,
+		position_offset: Vec2::new(25.0, 25.0),
 		..Default::default()
 	};
 	let spring = SpringRenderBuilder::new(spring)
@@ -58,16 +59,16 @@ fn add_bodies(mut commands: Commands) {
 	commands.insert_resource(MainSpring(spring));
 
 	// Add fixed distance constraint
-	let fixed_dist = FixedDistance {
-		position: Vec2::new(100.0, 0.0),
-		length: 100.0,
-		body: body_a_id,
-		..Default::default()
-	};
-	let distance_constraint_id = DistanceRenderBuilder::new(fixed_dist)
-		.stroke((color_hex("#f4fdd9b2"), 2.0))
-		.build(&mut commands);
-	commands.insert_resource(MainSpring(distance_constraint_id));
+	// let fixed_dist = FixedDistance {
+	// 	position: Vec2::new(100.0, 0.0),
+	// 	length: 100.0,
+	// 	body: body_a_id,
+	// 	..Default::default()
+	// };
+	// let distance_constraint_id = DistanceRenderBuilder::new(fixed_dist)
+	// 	.stroke((color_hex("#f4fdd9b2"), 2.0))
+	// 	.build(&mut commands);
+	// commands.insert_resource(MainSpring(spring));
 
 }
 
@@ -78,7 +79,7 @@ fn move_spring(mouse_buttons: Res<ButtonInput<MouseButton>>, spring_id: Res<Main
 	if let Some(position) = window.cursor_position() && mouse_buttons.pressed(MouseButton::Left) {
 		let mut constraint = springs.get_mut(spring_id.0).expect("spring should be in world");
 		match constraint.as_mut() {
-			Constraint::FixedDistance(spring) => {
+			Constraint::Spring(spring) => {
 				let (camera, camera_transform) = camera.single().expect("camera should be in world");
 				let world_pos = camera.viewport_to_world_2d(camera_transform, position).unwrap();
 				spring.position.x = world_pos.x;

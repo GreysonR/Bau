@@ -130,7 +130,7 @@ pub fn update(query: Query<(&SpringRender, &mut Shape, &Constraint, &SpringRende
 		
 		// Update spring path
 		let body = bodies.get(spring.body).expect("body in spring constraint should be in world");
-		let points = spring_render.get_points(&spring.position, &body.position);
+		let points = spring_render.get_points(&spring.position, &(body.position + spring.position_offset.rotate(Vec2::from_angle(body.angle))));
 		
 		let new_shape = ShapeBuilder::with(
 			&shapes::Polygon {

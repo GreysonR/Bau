@@ -11,6 +11,7 @@ pub struct Body {
 	pub position: Vec2,
 	pub angle: f32,
 	pub velocity: Vec2,
+	pub angular_velocity: f32,
 	
 	// Inherent
 	pub mass: f32,
@@ -21,9 +22,6 @@ pub struct Body {
 	pub inverse_mass: f32,
 	pub inertia: f32, // calculated from vertices
 	pub inverse_inertia: f32,
-
-	// Solved
-	pub accumulated_impulse: Vec2,
 }
 
 impl Default for Body {
@@ -33,6 +31,7 @@ impl Default for Body {
 			position: Vec2::ZERO,
 			angle: 0.0,
 			velocity: Vec2::ZERO,
+			angular_velocity: 0.0,
 			
 			mass: 1.0,
 			inertia: 1.0,
@@ -41,8 +40,6 @@ impl Default for Body {
 
 			inverse_mass: 1.0,
 			inverse_inertia: 1.0,
-
-			accumulated_impulse: Vec2::ZERO,
 		}
 	}
 }
@@ -64,5 +61,31 @@ impl Body {
 	pub fn set_velocity(&mut self, velocity: &Vec2) { self.velocity.x = velocity.x; self.velocity.y = velocity.y; }
 	*/
 
-	
+	pub fn translate_position(&mut self, translation: Vec2) {
+		for vertex in self.vertices.iter_mut() {
+			*vertex += translation;
+		}
+		self.position += translation;
+	}
+	pub fn translate_angle(&mut self, translation: f32) {
+		let angle_vec = Vec2::from_angle(translation);
+		for vertex in self.vertices.iter_mut() {
+			*vertex = (*vertex - self.position).rotate(angle_vec) + self.position;
+		}
+		self.angle += translation;
+	}
+	pub fn set_position(&mut self, position: Vec2) {
+		self.translate_position(position - self.position);
+	}
+	pub fn set_angle(&mut self, angle: f32) {
+		self.translate_angle(angle - self.angle);
+	}
+
+	pub fn apply_impulse(&mut self, impulse: Vec2, position: Vec2) {
+		let radius = position - self.position;
+		let cross = radius.perp_dot(impulse);
+
+		self.velocity += impulse * self.inverse_mass;
+		self.angular_velocity += cross * self.inverse_inertia;
+	}
 }

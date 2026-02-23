@@ -52,9 +52,19 @@ impl BodyRenderBuilder {
 	}
 }
 
-pub fn update(query: Query<(&Body, &mut Transform)>) {
-	for (body, mut transform) in query {
-		transform.translation = body.position.extend(transform.translation.z);
-		transform.rotation = Quat::from_rotation_z(body.angle);
+pub fn update(query: Query<(&Body, &mut Shape)>) {
+	for (body, mut shape) in query {
+		let polygon = shapes::Polygon {
+			closed: true,
+			points: body.vertices.clone(), // yikes
+			..Default::default()
+		};
+
+		*shape = match (shape.fill, shape.stroke) {
+			(Some(fill), Some(stroke)) => ShapeBuilder::with(&polygon).fill(fill).stroke(stroke).build(),
+			(Some(fill), None) => ShapeBuilder::with(&polygon).fill(fill).build(),
+			(None, Some(stroke)) => ShapeBuilder::with(&polygon).stroke(stroke).build(),
+			(None, None) => unreachable!(),
+		};
 	}
 }

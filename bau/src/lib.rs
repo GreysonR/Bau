@@ -49,17 +49,19 @@ fn solve_position_constraints(time: Res<Time>, constraints: Query<&Constraint>, 
 }
 
 // Apply various simple forces to bodies; i.e. air friction, gravity
-fn apply_forces(gravity: Res<Gravity>, bodies: Query<&mut Body>) {
+fn apply_forces(time: Res<Time>, gravity: Res<Gravity>, bodies: Query<&mut Body>) {
+	let delta = time.delta_secs();
 	let gravity = gravity.0;
 
 	for mut body in bodies {
+		let inverse_mass = body.inverse_mass;
 		// Apply air friction
 		let friction_air = body.friction_air * body.velocity * body.mass;
-		body.accumulated_impulse -= friction_air;
+		body.velocity -= friction_air * inverse_mass * delta;
 
 		// Apply gravity
 		let force_gravity = gravity * body.mass;
-		body.accumulated_impulse += force_gravity;
+		body.velocity += force_gravity * inverse_mass * delta;
 	}
 }
 
@@ -70,15 +72,15 @@ fn apply_impulses(time: Res<Time>, bodies: Query<&mut Body>) {
 	
 	for mut body in bodies {
 		if now < 0.5 { // temporarily pause sim at start so everything can load
-			body.accumulated_impulse = Vec2::ZERO;
+			body.velocity = Vec2::ZERO; // TODO: this messes up initial velocities
+			body.angular_velocity = 0.0;
 			continue;
 		}
 
-		let delta_velocity = delta * body.accumulated_impulse / body.mass;
-		body.velocity += delta_velocity;
-
 		let delta_position = delta * body.velocity;
-		body.position += delta_position;
-		body.accumulated_impulse = Vec2::ZERO;
+		body.translate_position(delta_position);
+
+		let delta_angle = delta * body.angular_velocity;
+		body.translate_angle(delta_angle);
 	}
 }
