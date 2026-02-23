@@ -1,7 +1,7 @@
 use bevy::{ prelude::*, window::WindowCloseRequested };
 use bevy::window::PrimaryWindow;
 
-use bau::{ Body, BodyBuilder, Constraint, Spring, FixedDistance };
+use bau::{ Body, BodyBuilder, Constraint, ConstraintSolver, FixedDistance, Spring };
 
 mod render;
 use render::{ color_hex, BodyRenderBuilder, SpringRenderBuilder, DistanceRenderBuilder };
@@ -76,17 +76,29 @@ fn add_bodies(mut commands: Commands) {
 // Mouse input
 fn move_spring(mouse_buttons: Res<ButtonInput<MouseButton>>, spring_id: Res<MainSpring>, camera: Query<(&Camera, &GlobalTransform), With<Camera2d>>, window: Single<&Window, With<PrimaryWindow>>, mut springs: Query<&mut Constraint>) {
 	// Moving main spring constraint by clicking on window
-	if let Some(position) = window.cursor_position() && mouse_buttons.pressed(MouseButton::Left) {
-		let mut constraint = springs.get_mut(spring_id.0).expect("spring should be in world");
-		match constraint.as_mut() {
-			Constraint::Spring(spring) => {
-				let (camera, camera_transform) = camera.single().expect("camera should be in world");
-				let world_pos = camera.viewport_to_world_2d(camera_transform, position).unwrap();
-				spring.position.x = world_pos.x;
-				spring.position.y = world_pos.y;
-			},
-			_ => (),
-		}
+	if window.cursor_position().is_none() || !mouse_buttons.pressed(MouseButton::Left) {
+		return; // cursor not in window or not clicking
+	}
+	let position = window.cursor_position().unwrap(); // guaranteed successful unwrwap
+
+	let constraint = springs.get_mut(spring_id.0);
+	if constraint.is_err() {
+		return; // Don't do anything if constraint isn't in world
+	}
+	match constraint.unwrap().as_mut() {
+		Constraint::Spring(spring) => {
+			let (camera, camera_transform) = camera.single().expect("camera should be in world");
+			let world_pos = camera.viewport_to_world_2d(camera_transform, position).unwrap();
+			spring.position.x = world_pos.x;
+			spring.position.y = world_pos.y;
+		},
+		Constraint::FixedDistance(spring) => {
+			let (camera, camera_transform) = camera.single().expect("camera should be in world");
+			let world_pos = camera.viewport_to_world_2d(camera_transform, position).unwrap();
+			spring.position.x = world_pos.x;
+			spring.position.y = world_pos.y;
+		},
+		// _ => (),
 	}
 	// else not in window
 }
