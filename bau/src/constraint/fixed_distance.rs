@@ -63,7 +63,6 @@ impl ConstraintSolver for FixedDistance {
 		*/
 		let position_stiffness: f32 = 0.01;
 		let diff_len = (self.length - ds.length()) * position_stiffness.powf(delta_time * 10.0);
-		println!("ds: {}, self: {}, diff_len: {}", ds.length(), self.length, diff_len);
 		let diff = diff_len * dir;
 		body.translate_position(diff);
 	}

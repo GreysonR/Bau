@@ -53,7 +53,7 @@ fn add_bodies(mut commands: Commands) {
 		position_offset: Vec2::new(25.0, 25.0),
 		..Default::default()
 	};
-	let spring = SpringRenderBuilder::new(spring)
+	let _spring = SpringRenderBuilder::new(spring)
 		.stroke((color_hex("#f4fdd9b2"), 2.0))
 		.build(&mut commands);
 	// commands.insert_resource(MainSpring(spring));
