@@ -38,7 +38,7 @@ impl ConstraintSolver for Spring { // TODO: make this work with multiple constra
 		let rel_vel = point_velocity.dot(dir);
 
 		let mut impulse = (self.length - ds.length()).min(0.0) * self.stiffness;
-		impulse -= self.damping * rel_vel;
+		impulse -= self.damping * rel_vel.min(0.0);
 
 		let p = impulse * dir;
 		body.apply_impulse(p, body_position);
