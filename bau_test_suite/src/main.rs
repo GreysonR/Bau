@@ -33,16 +33,18 @@ fn add_bodies(mut commands: Commands) {
 		.fill(color_hex("#F0A152"))
 		.build(&mut commands);
 	
-	// let body_b = BodyBuilder::circle(10.0)
-	// 	.position(Vec2::new(-500.0, -300.0))
-	// 	.velocity(Vec2::new(800.0, 1000.0))
-	// 	.mass(1.0)
-	// 	.build();
+	let body_b = BodyBuilder::circle(10.0)
+		.position(Vec2::new(-500.0, -300.0))
+		.velocity(Vec2::new(800.0, 1000.0))
+		.angular_velocity(6.0)
+		.mass(1.0)
+		.build();
 	
-	// let _body_b_id = BodyRenderBuilder::new(body_b)
-	// 	.fill(color_hex("#E35531"))
-	// 	.build(&mut commands);
+	let _body_b_id = BodyRenderBuilder::new(body_b)
+		.fill(color_hex("#E35531"))
+		.build(&mut commands);
 
+	
 	// Add spring constraint
 	let spring = Spring {
 		position: Vec2::new(0.0, 0.0),
@@ -57,6 +59,20 @@ fn add_bodies(mut commands: Commands) {
 		.stroke((color_hex("#f4fdd9b2"), 2.0))
 		.build(&mut commands);
 	commands.insert_resource(MainSpring(spring));
+	
+	let spring2 = Spring {
+		position: Vec2::new(0.0, -100.0),
+		length: 150.0,
+		stiffness: 5.0,
+		damping: 0.01,
+		body: body_a_id,
+		position_offset: Vec2::new(-25.0, 25.0),
+		..Default::default()
+	};
+	let spring2 = SpringRenderBuilder::new(spring2)
+		.stroke((color_hex("#fdf2d9b2"), 2.0))
+		.build(&mut commands);
+
 
 	// Add fixed distance constraint
 	let fixed_dist = FixedDistance {
@@ -69,7 +85,7 @@ fn add_bodies(mut commands: Commands) {
 	let fixed_dist = DistanceRenderBuilder::new(fixed_dist)
 		.stroke((color_hex("#f4fdd9b2"), 2.0))
 		.build(&mut commands);
-	commands.insert_resource(MainSpring(fixed_dist));
+	// commands.insert_resource(MainSpring(fixed_dist));
 }
 
 

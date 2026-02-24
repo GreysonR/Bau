@@ -27,8 +27,8 @@ impl Default for BodyBuilder {
 			angular_velocity: 0.0,
 
 			mass: None,
-			friction_air: 1.0,
-			friction_angular: 0.2,
+			friction_air: 0.1,
+			friction_angular: 0.05,
 			is_static: false,
 		}
 	}

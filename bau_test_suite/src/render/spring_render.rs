@@ -81,7 +81,7 @@ impl SpringRenderBuilder {
 		// Pin at end of spring
 		let pin = ShapeBuilder::with(
 			&shapes::Circle {
-				center: self.spring.position.clone(),
+				center: Vec2::ZERO,
 				radius: stroke.1 * 1.2,
 				..Default::default()
 			})

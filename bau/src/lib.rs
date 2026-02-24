@@ -82,8 +82,11 @@ fn apply_forces(time: Res<Time>, gravity: Res<Gravity>, bodies: Query<&mut Body>
 	for mut body in bodies {
 		let inverse_mass = body.inverse_mass;
 		// Apply air friction
-		let friction_air = body.friction_air * body.velocity * body.mass;
-		body.velocity -= friction_air * inverse_mass * delta;
+		let friction_air = (1.0 - body.friction_air).powf(delta * 10.0); // * 10.0 so friction_air doesn't have to be as absurd (0.99999... just to be damped)
+		body.velocity *= friction_air;
+
+		let friction_angular = (1.0 - body.friction_angular).powf(delta * 10.0);
+		body.angular_velocity *= friction_angular;
 
 		// Apply gravity
 		let force_gravity = gravity * body.mass;
