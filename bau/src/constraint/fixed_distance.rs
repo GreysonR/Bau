@@ -22,7 +22,7 @@ impl Default for FixedDistance {
 }
 
 impl ConstraintSolver for FixedDistance {
-	fn solve_velocity(&self, bodies: &mut Query<&mut Body>, delta_time: f32) {
+	fn solve_velocity(&self, bodies: &mut Query<&mut Body>, delta_time: f32, iterations: i32) {
 		let mut body = bodies.get_mut(self.body).expect("body should be in world"); // TODO: handle unwrap
 		
 		let radius = self.position_offset.rotate(Vec2::from_angle(body.angle));
@@ -37,10 +37,10 @@ impl ConstraintSolver for FixedDistance {
 		let impulse = -rel_vel; // velocity in dir should go to 0; i.e. impulse + rel_vel = 0; so impulse = -rel_vel
 		let stiffness: f32 = 0.01;
 
-		let p = impulse * dir;
+		let p = impulse / iterations as f32 * dir;
 		body.apply_impulse(p * stiffness.powf(delta_time * 10.0), body_position);
 	}
-	fn solve_position(&self, bodies: &mut Query<&mut Body>, delta_time: f32) {
+	fn solve_position(&self, bodies: &mut Query<&mut Body>, delta_time: f32, iterations: i32) {
 		// return;
 		let mut body = bodies.get_mut(self.body).expect("body should be in world"); // TODO: handle unwrap
 		
@@ -64,6 +64,6 @@ impl ConstraintSolver for FixedDistance {
 		let position_stiffness: f32 = 0.01;
 		let diff_len = (self.length - ds.length()) * position_stiffness.powf(delta_time * 10.0);
 		let diff = diff_len * dir;
-		body.translate_position(diff);
+		body.translate_position(diff / (iterations as f32));
 	}
 }

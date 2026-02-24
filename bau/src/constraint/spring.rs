@@ -25,8 +25,8 @@ impl Default for Spring {
 	}
 }
 
-impl ConstraintSolver for Spring { // TODO: make this work with multiple constraint iterations
-	fn solve_velocity(&self, bodies: &mut Query<&mut Body>, _delta_time: f32) {
+impl ConstraintSolver for Spring {
+	fn solve_velocity(&self, bodies: &mut Query<&mut Body>, _delta_time: f32, iterations: i32) {
 		let mut body = bodies.get_mut(self.body).expect("body should be in world"); // TODO: handle unwrap
 		
 		let radius = self.position_offset.rotate(Vec2::from_angle(body.angle));
@@ -39,6 +39,7 @@ impl ConstraintSolver for Spring { // TODO: make this work with multiple constra
 
 		let mut impulse = (self.length - ds.length()).min(0.0) * self.stiffness;
 		impulse -= self.damping * rel_vel.min(0.0);
+		impulse /= iterations as f32;
 
 		let p = impulse * dir;
 		body.apply_impulse(p, body_position);

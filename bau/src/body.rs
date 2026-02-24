@@ -16,6 +16,7 @@ pub struct Body {
 	// Inherent
 	pub mass: f32,
 	pub friction_air: f32,
+	pub friction_angular: f32,
 	pub is_static: bool,
 	
 	// Calculated from other properties
@@ -36,6 +37,7 @@ impl Default for Body {
 			mass: 1.0,
 			inertia: 1.0,
 			friction_air: 0.5,
+			friction_angular: 0.1,
 			is_static: false,
 
 			inverse_mass: 1.0,

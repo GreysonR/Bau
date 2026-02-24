@@ -2,7 +2,6 @@ use bevy::prelude::*;
 use super::Body;
 use std::f32::consts::PI;
 
-#[allow(unused)] // TODO: maybe remove these allows
 pub struct BodyBuilder { // hell yeah
 	// Stateful properties
 	vertices: Vec<Vec2>, // vertices must be convex and counter clockwise winding (CCW)
@@ -12,8 +11,9 @@ pub struct BodyBuilder { // hell yeah
 	angular_velocity: f32,
 	
 	// Inherent
-	mass: Option<f32>, // if mass is not specified, it is a set based on a fixed density
+	mass: Option<f32>, // if mass is not specified, it is set based on a fixed density
 	friction_air: f32,
+	friction_angular: f32,
 	is_static: bool,
 }
 
@@ -28,12 +28,12 @@ impl Default for BodyBuilder {
 
 			mass: None,
 			friction_air: 1.0,
+			friction_angular: 0.2,
 			is_static: false,
 		}
 	}
 }
 
-#[allow(unused)]
 impl BodyBuilder {
 	// Constructors for various primitive shapes
 	pub fn from_vertices(vertices: Vec<Vec2>) -> Self {
@@ -87,13 +87,14 @@ impl BodyBuilder {
 	pub fn angular_velocity(mut self, angular_velocity: f32) -> Self { self.angular_velocity = angular_velocity; self }
 	pub fn mass(mut self, mass: f32) -> Self { self.mass = Some(mass); self }
 	pub fn friction_air(mut self, friction_air: f32) -> Self { self.friction_air = friction_air; self }
+	pub fn friction_angular(mut self, friction_angular: f32) -> Self { self.friction_angular = friction_angular; self }
 	pub fn is_static(mut self, is_static: bool) -> Self { self.is_static = is_static; self }
 
 	// Helper methods for build step
 	fn get_center_of_mass(&self) -> Vec2 {
 		let mut centroid = Vec2::ZERO;
 		let mut det = 0.0;
-		let mut temp_det = 0.0;
+		let mut temp_det;
 		let num_vertices = self.vertices.len();
 
 		for i in 0..num_vertices {
@@ -166,6 +167,7 @@ impl BodyBuilder {
 
 			mass,
 			friction_air: self.friction_air,
+			friction_angular: self.friction_angular,
 			is_static,
 
 			inverse_mass,

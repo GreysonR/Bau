@@ -44,32 +44,40 @@ impl Plugin for Engine {
 fn solve_velocity_constraints(time: Res<Time>, velocity_iterations: Res<VelocityIterations>, constraints: Query<&Constraint>, mut bodies: Query<&mut Body>) {
 	let velocity_iterations = velocity_iterations.0;
 	let delta = time.delta_secs();
+
+	if time.elapsed_secs() < 0.5 { // temporarily pause sim at start so everything can load
+		return;
+	}
+
 	for _ in 0..velocity_iterations {
 		for constraint in constraints {
-			match constraint {
-				Constraint::Spring(spring) => spring.solve_velocity(&mut bodies, delta),
-				Constraint::FixedDistance(constraint) => constraint.solve_velocity(&mut bodies, delta),
-			};
+			constraint.solve_velocity(&mut bodies, delta, velocity_iterations);
 		}
 	}
 }
 fn solve_position_constraints(time: Res<Time>, position_iterations: Res<PositionIterations>, constraints: Query<&Constraint>, mut bodies: Query<&mut Body>) {
 	let position_iterations = position_iterations.0;
 	let delta = time.delta_secs();
+	
+	if time.elapsed_secs() < 0.5 { // temporarily pause sim at start so everything can load
+		return;
+	}
+
 	for _ in 0..position_iterations {
 		for constraint in constraints {
-			match constraint {
-				Constraint::Spring(spring) => spring.solve_position(&mut bodies, delta),
-				Constraint::FixedDistance(constraint) => constraint.solve_position(&mut bodies, delta),
-			};
+			constraint.solve_position(&mut bodies, delta, position_iterations);
 		}
 	}
 }
 
 // Apply various simple forces to bodies; i.e. air friction, gravity
 fn apply_forces(time: Res<Time>, gravity: Res<Gravity>, bodies: Query<&mut Body>) {
-	let delta = time.delta_secs();
 	let gravity = gravity.0;
+	let delta = time.delta_secs();
+
+	if time.elapsed_secs() < 0.5 { // temporarily pause sim at start so everything can load
+		return;
+	}
 
 	for mut body in bodies {
 		let inverse_mass = body.inverse_mass;
@@ -86,14 +94,12 @@ fn apply_forces(time: Res<Time>, gravity: Res<Gravity>, bodies: Query<&mut Body>
 // Apply accumulated impulses for this frame to bodies
 fn apply_impulses(time: Res<Time>, bodies: Query<&mut Body>) {
 	let delta = time.delta_secs();
-	let now = time.elapsed_secs();
+
+	if time.elapsed_secs() < 0.5 { // temporarily pause sim at start so everything can load
+		return;
+	}
 	
 	for mut body in bodies {
-		if now < 0.5 { // temporarily pause sim at start so everything can load
-			body.velocity = Vec2::ZERO; // TODO: this messes up initial velocities
-			body.angular_velocity = 0.0;
-			continue;
-		}
 
 		let delta_position = delta * body.velocity;
 		body.translate_position(delta_position);

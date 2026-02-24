@@ -47,7 +47,7 @@ fn add_bodies(mut commands: Commands) {
 	let spring = Spring {
 		position: Vec2::new(0.0, 0.0),
 		length: 100.0,
-		stiffness: 5.0,
+		stiffness: 50.0,
 		damping: 0.01,
 		body: body_a_id,
 		position_offset: Vec2::new(25.0, 25.0),
@@ -66,10 +66,10 @@ fn add_bodies(mut commands: Commands) {
 		position_offset: Vec2::new(-25.0, -25.0),
 		..Default::default()
 	};
-	let _fixed_dist = DistanceRenderBuilder::new(fixed_dist)
+	let fixed_dist = DistanceRenderBuilder::new(fixed_dist)
 		.stroke((color_hex("#f4fdd9b2"), 2.0))
 		.build(&mut commands);
-	// commands.insert_resource(MainSpring(fixed_dist));
+	commands.insert_resource(MainSpring(fixed_dist));
 }
 
 
@@ -100,7 +100,6 @@ fn move_spring(mouse_buttons: Res<ButtonInput<MouseButton>>, spring_id: Res<Main
 		},
 		// _ => (),
 	}
-	// else not in window
 }
 
 
