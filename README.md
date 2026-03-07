@@ -8,4 +8,4 @@ The project is intended for learning about the fundamentals of physics engines, 
 - [LLD linker](https://bevy.org/learn/quick-start/getting-started/setup/#alternative-linkers)
 
 # Running the testing GUI
-`make run` or `cargo run -p bau_test_suite`
+`cargo run`
