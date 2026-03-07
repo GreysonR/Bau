@@ -7,22 +7,28 @@ use super::ConstraintSolver;
 pub struct Spring {
 	pub body: Entity,
 	pub position: Vec2,
+	
 	pub length: f32,
 	pub frequency: f32,
 	pub damping: f32,
+	pub stiffness: f32,
+
 	pub position_offset: Vec2,
-	pub constrain_negative_stretch: bool,
+	pub constrain_compression: bool,
 }
 impl Default for Spring {
 	fn default() -> Self {
 		Self {
 			body: Entity::PLACEHOLDER,
 			position: Vec2::ZERO,
+
 			length: 100.0,
 			frequency: 5.0,
 			damping: 0.1,
+			stiffness: 50.0,
+
 			position_offset: Vec2::ZERO,
-			constrain_negative_stretch: true,
+			constrain_compression: true,
 		}
 	}
 }
@@ -37,13 +43,15 @@ impl Spring {
 		let ds = body_position - self.position;
 		let dir = ds.normalize_or(Vec2::new(1.0, 0.0));
 
-		let stiffness: f32 = 100.0; // self.stiffness;
+		let stiffness: f32 = self.stiffness;
 		
 		let point_velocity = body.velocity + body.angular_velocity * radius.perp();
 		let rel_vel = point_velocity.dot(dir);
+		let x1 = ds.length() - self.length;
+		if !self.constrain_compression && x1 < 0.0 { return; } // don't eval constraint if less than max length
 
-		let mut impulse = (self.length - ds.length()).min(0.0) * stiffness;
-		impulse -= self.damping * rel_vel.min(0.0);
+		let mut impulse = -x1 * stiffness;
+		impulse -= self.damping * rel_vel;
 		impulse /= iterations as f32;
 
 		let p = impulse * dir;
@@ -58,7 +66,7 @@ impl Spring {
 		let ds = position - self.position;
 		let dir = ds.normalize_or(Vec2::new(1.0, 0.0));
 		let x1 = ds.length() - self.length;
-		if self.constrain_negative_stretch && x1 < 0.0 { return; } // don't eval constraint if less than max length
+		if !self.constrain_compression && x1 < 0.0 { return; } // don't eval constraint if less than max length
 
 		let point_velocity = body.velocity + body.angular_velocity * radius.perp();
 		let rel_vel = point_velocity.dot(dir);

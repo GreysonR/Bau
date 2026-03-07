@@ -49,8 +49,9 @@ fn add_bodies(mut commands: Commands) {
 	let spring = Spring {
 		position: Vec2::new(0.0, 0.0),
 		length: 100.0,
-		frequency: 8.0,
+		frequency: 20.0,
 		damping: 0.01,
+		stiffness: 40.0,
 		body: body_a_id,
 		position_offset: Vec2::new(25.0, 25.0),
 		..Default::default()
@@ -58,12 +59,13 @@ fn add_bodies(mut commands: Commands) {
 	let spring = SpringRenderBuilder::new(spring)
 		.stroke((color_hex("#f4fdd9b2"), 2.0))
 		.build(&mut commands);
-	// commands.insert_resource(MainSpring(spring));
+	commands.insert_resource(MainSpring(spring));
 	
 	let spring2 = Spring {
 		position: Vec2::new(0.0, -100.0),
 		length: 150.0,
 		frequency: 20.0,
+		stiffness: 40.0,
 		damping: 0.01,
 		body: body_a_id,
 		position_offset: Vec2::new(-25.0, 25.0),
