@@ -49,7 +49,7 @@ fn add_bodies(mut commands: Commands) {
 	let spring = Spring {
 		position: Vec2::new(0.0, 0.0),
 		length: 100.0,
-		stiffness: 50.0,
+		frequency: 8.0,
 		damping: 0.01,
 		body: body_a_id,
 		position_offset: Vec2::new(25.0, 25.0),
@@ -58,18 +58,18 @@ fn add_bodies(mut commands: Commands) {
 	let spring = SpringRenderBuilder::new(spring)
 		.stroke((color_hex("#f4fdd9b2"), 2.0))
 		.build(&mut commands);
-	commands.insert_resource(MainSpring(spring));
+	// commands.insert_resource(MainSpring(spring));
 	
 	let spring2 = Spring {
 		position: Vec2::new(0.0, -100.0),
 		length: 150.0,
-		stiffness: 5.0,
+		frequency: 20.0,
 		damping: 0.01,
 		body: body_a_id,
 		position_offset: Vec2::new(-25.0, 25.0),
 		..Default::default()
 	};
-	let spring2 = SpringRenderBuilder::new(spring2)
+	let _spring2 = SpringRenderBuilder::new(spring2)
 		.stroke((color_hex("#fdf2d9b2"), 2.0))
 		.build(&mut commands);
 
@@ -85,7 +85,7 @@ fn add_bodies(mut commands: Commands) {
 	let fixed_dist = DistanceRenderBuilder::new(fixed_dist)
 		.stroke((color_hex("#f4fdd9b2"), 2.0))
 		.build(&mut commands);
-	// commands.insert_resource(MainSpring(fixed_dist));
+	commands.insert_resource(MainSpring(fixed_dist));
 }
 
 
@@ -95,7 +95,7 @@ fn move_spring(mouse_buttons: Res<ButtonInput<MouseButton>>, spring_id: Res<Main
 	if window.cursor_position().is_none() || !mouse_buttons.pressed(MouseButton::Left) {
 		return; // cursor not in window or not clicking
 	}
-	let position = window.cursor_position().unwrap(); // guaranteed successful unwrwap
+	let position = window.cursor_position().unwrap(); // guaranteed successful unwrap
 
 	let constraint = springs.get_mut(spring_id.0);
 	if constraint.is_err() {

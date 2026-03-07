@@ -23,7 +23,7 @@ pub struct Engine {
 impl Default for Engine {
 	fn default() -> Self {
 		Self {
-			velocity_iterations: 1,
+			velocity_iterations: 10,
 			position_iterations: 1,
 			gravity: Vec2::new(0.0, -1000.0),
 		}
