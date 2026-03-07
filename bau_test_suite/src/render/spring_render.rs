@@ -39,10 +39,6 @@ impl SpringRender {
 	}
 }
 
-
-#[derive(Component)]
-pub struct SpringRenderPin(Entity);
-
 pub struct SpringRenderBuilder {
 	spring: Spring,
 	stroke: Option<(Color, f32)>,
@@ -78,17 +74,6 @@ impl SpringRenderBuilder {
 	pub fn build(self, commands: &mut Commands) -> Entity { // TODO: consider generalizing this, and/or turning this method into one that takes in options & the spring rather than a whole builder
 		let stroke = self.stroke.expect("Body should have a stroke before building");
 
-		// Pin at end of spring
-		let pin = ShapeBuilder::with(
-			&shapes::Circle {
-				center: Vec2::ZERO,
-				radius: stroke.1 * 1.2,
-				..Default::default()
-			})
-			.fill(stroke.0.clone())
-			.build();
-
-
 		// Jagged spring line
 		let polygon = shapes::Polygon {
 			closed: false,
@@ -102,16 +87,10 @@ impl SpringRenderBuilder {
 			margin: self.margin,
 			length: self.spring.length,
 		};
-
-		let pin_id = commands.spawn((
-			pin,
-			Transform::from_translation(Vec3::new(0.0, 0.0, 0.0))
-				.with_rotation(Quat::from_rotation_z(0.0)),
-		)).id();
+		
 		commands.spawn((
 			Constraint::Spring(self.spring),
 			shape,
-			SpringRenderPin(pin_id),
 			spring_render,
 			Transform::from_translation(Vec3::new(0.0, 0.0, 0.0))
 				.with_rotation(Quat::from_rotation_z(0.0)),
@@ -120,8 +99,8 @@ impl SpringRenderBuilder {
 }
 
 
-pub fn update(query: Query<(&SpringRender, &mut Shape, &Constraint, &SpringRenderPin)>, bodies: Query<&Body>, mut shapes: Query<&mut Transform, With<Shape>>) {
-	for (spring_render, mut shape, constraint, pin_id) in query {
+pub fn update(query: Query<(&SpringRender, &mut Shape, &Constraint)>, bodies: Query<&Body>) {
+	for (spring_render, mut shape, constraint) in query {
 		// Verify it is a spring & unwrap
 		let spring = match constraint {
 			Constraint::Spring(spring) => spring,
@@ -129,8 +108,12 @@ pub fn update(query: Query<(&SpringRender, &mut Shape, &Constraint, &SpringRende
 		};
 		
 		// Update spring path
-		let body = bodies.get(spring.body).expect("body in spring constraint should be in world");
-		let points = spring_render.get_points(&spring.position, &(body.position + spring.position_offset.rotate(Vec2::from_angle(body.angle))));
+		let body_a = bodies.get(spring.body_a).expect("body in spring constraint should be in world");
+		let body_b = bodies.get(spring.body_b).expect("body in spring constraint should be in world");
+		let points = spring_render.get_points(
+			&(body_a.position + spring.body_a_offset.rotate(Vec2::from_angle(body_a.angle))),
+			&(body_b.position + spring.body_b_offset.rotate(Vec2::from_angle(body_b.angle)))
+		);
 		
 		let new_shape = ShapeBuilder::with(
 			&shapes::Polygon {
@@ -141,10 +124,5 @@ pub fn update(query: Query<(&SpringRender, &mut Shape, &Constraint, &SpringRende
 			.build();
 
 		*shape = new_shape;
-
-		// Update pin location (if the spring ever moves)
-		let mut pin = shapes.get_mut(pin_id.0).expect("Spring pin should be in the world");
-		pin.translation.x = spring.position.x;
-		pin.translation.y = spring.position.y;
 	}
 }

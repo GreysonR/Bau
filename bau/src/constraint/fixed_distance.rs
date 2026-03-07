@@ -85,8 +85,8 @@ impl ConstraintSolver for FixedDistance {
 		let rel_vel = point_velocity.dot(dir);
 
 
-		let zeta: f32 = 0.01; // damping ratio, zeta
-		let omega: f32 = 25.0; // oscillation frequency, omega
+		let zeta: f32 = 1.0; // damping ratio, zeta
+		let omega: f32 = 40.0; // oscillation frequency, omega
 
 		let k = body.mass * omega.powf(2.0);
 		let c = 2.0 * body.mass * omega * zeta;

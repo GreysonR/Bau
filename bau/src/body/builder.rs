@@ -61,7 +61,7 @@ impl BodyBuilder {
 	pub fn circle(radius: f32) -> Self {
 		assert!(radius > 0.0, "Radius must be positive");
 
-		let vertex_count = (radius.powf(0.333) * 2.8).round().max(3.0) as usize;
+		let vertex_count = (radius.powf(0.333) * 4.0).round().max(3.0) as usize;
 		let delta_angle = PI * 2.0 / (vertex_count as f32); // angle between each vertex
 		let mut vertices = Vec::new();
 		vertices.reserve_exact(vertex_count);

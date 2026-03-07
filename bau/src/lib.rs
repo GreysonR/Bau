@@ -36,7 +36,7 @@ impl Plugin for Engine {
 		app.insert_resource(PositionIterations(self.position_iterations));
 		app.insert_resource(Gravity(self.gravity));
 
-		app.add_systems(Update, (apply_forces, solve_velocity_constraints, solve_position_constraints, apply_impulses).chain()); // TODO: examine FixedUpdate vs Update here
+		app.add_systems(FixedUpdate, (apply_forces, solve_velocity_constraints, solve_position_constraints, apply_impulses).chain()); // TODO: examine FixedUpdate vs Update here
 	}
 }
 

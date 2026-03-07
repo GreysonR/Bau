@@ -18,7 +18,7 @@ fn main() {
 }
 
 #[derive(Resource)]
-struct MainSpring(Entity);
+struct MouseBody(Entity);
 
 fn add_bodies(mut commands: Commands) {
 	// Add bodies
@@ -28,47 +28,55 @@ fn add_bodies(mut commands: Commands) {
 		.angle(std::f32::consts::PI * 0.25)
 		// .mass(1.0)
 		.build();
-
 	let body_a_id = BodyRenderBuilder::new(body_a)
 		.fill(color_hex("#F0A152"))
 		.build(&mut commands);
 	
-	let body_b = BodyBuilder::circle(10.0)
-		.position(Vec2::new(-500.0, -300.0))
-		.velocity(Vec2::new(800.0, 1000.0))
-		.angular_velocity(6.0)
-		.mass(1.0)
+
+	let body_b = BodyBuilder::circle(3.0)
+		.position(Vec2::new(0.0, 0.0))
+		.is_static(true)
 		.build();
-	
-	let _body_b_id = BodyRenderBuilder::new(body_b)
+	let body_b_id = BodyRenderBuilder::new(body_b)
 		.fill(color_hex("#E35531"))
+		.build(&mut commands);
+	commands.insert_resource(MouseBody(body_b_id));
+	
+	let body_c = BodyBuilder::rect(30.0, 30.0)
+		.position(Vec2::new(200.0, 0.0))
+		.velocity(Vec2::new(-40.0, 0.0))
+		.build();
+	let body_c_id = BodyRenderBuilder::new(body_c)
+		.fill(color_hex("#F0A152"))
 		.build(&mut commands);
 
 	
-	// Add spring constraint
+	// Add spring constraints
 	let spring = Spring {
-		position: Vec2::new(0.0, 0.0),
+		body_a: body_a_id,
+		body_a_offset: Vec2::new(25.0, 25.0),
+		body_b: body_b_id,
+
 		length: 100.0,
-		frequency: 20.0,
+		frequency: 6.0,
 		damping: 0.01,
-		stiffness: 40.0,
-		body: body_a_id,
-		position_offset: Vec2::new(25.0, 25.0),
+
 		..Default::default()
 	};
-	let spring = SpringRenderBuilder::new(spring)
+	let _spring = SpringRenderBuilder::new(spring)
 		.stroke((color_hex("#f4fdd9b2"), 2.0))
 		.build(&mut commands);
-	commands.insert_resource(MainSpring(spring));
 	
 	let spring2 = Spring {
-		position: Vec2::new(0.0, -100.0),
-		length: 150.0,
-		frequency: 20.0,
-		stiffness: 40.0,
-		damping: 0.01,
-		body: body_a_id,
-		position_offset: Vec2::new(-25.0, 25.0),
+		body_a: body_a_id,
+		body_a_offset: Vec2::new(-25.0, 25.0),
+		body_b: body_c_id,
+		body_b_offset: Vec2::new(0.0, 15.0),
+
+		length: 50.0,
+		frequency: 40.0,
+		damping: 0.1,
+
 		..Default::default()
 	};
 	let _spring2 = SpringRenderBuilder::new(spring2)
@@ -84,40 +92,30 @@ fn add_bodies(mut commands: Commands) {
 		position_offset: Vec2::new(-25.0, -25.0),
 		..Default::default()
 	};
-	let fixed_dist = DistanceRenderBuilder::new(fixed_dist)
+	let _fixed_dist = DistanceRenderBuilder::new(fixed_dist)
 		.stroke((color_hex("#f4fdd9b2"), 2.0))
 		.build(&mut commands);
-	commands.insert_resource(MainSpring(fixed_dist));
 }
 
 
 // Mouse input
-fn move_spring(mouse_buttons: Res<ButtonInput<MouseButton>>, spring_id: Res<MainSpring>, camera: Query<(&Camera, &GlobalTransform), With<Camera2d>>, window: Single<&Window, With<PrimaryWindow>>, mut springs: Query<&mut Constraint>) {
+fn move_spring(mouse_buttons: Res<ButtonInput<MouseButton>>, body_id: Res<MouseBody>, camera: Query<(&Camera, &GlobalTransform), With<Camera2d>>, window: Single<&Window, With<PrimaryWindow>>, mut bodies: Query<&mut Body>) {
 	// Moving main spring constraint by clicking on window
 	if window.cursor_position().is_none() || !mouse_buttons.pressed(MouseButton::Left) {
 		return; // cursor not in window or not clicking
 	}
 	let position = window.cursor_position().unwrap(); // guaranteed successful unwrap
 
-	let constraint = springs.get_mut(spring_id.0);
-	if constraint.is_err() {
+	let body = bodies.get_mut(body_id.0);
+	if body.is_err() {
 		return; // Don't do anything if constraint isn't in world
 	}
-	match constraint.unwrap().as_mut() {
-		Constraint::Spring(spring) => {
-			let (camera, camera_transform) = camera.single().expect("camera should be in world");
-			let world_pos = camera.viewport_to_world_2d(camera_transform, position).unwrap();
-			spring.position.x = world_pos.x;
-			spring.position.y = world_pos.y;
-		},
-		Constraint::FixedDistance(spring) => {
-			let (camera, camera_transform) = camera.single().expect("camera should be in world");
-			let world_pos = camera.viewport_to_world_2d(camera_transform, position).unwrap();
-			spring.position.x = world_pos.x;
-			spring.position.y = world_pos.y;
-		},
-		// _ => (),
-	}
+
+	let mut body = body.unwrap();
+	let (camera, camera_transform) = camera.single().expect("camera should be in world");
+	let world_pos = camera.viewport_to_world_2d(camera_transform, position).unwrap();
+	body.set_position(world_pos);
+	body.velocity = Vec2::ZERO;
 }
 
 
