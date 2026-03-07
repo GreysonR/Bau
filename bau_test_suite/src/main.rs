@@ -45,6 +45,7 @@ fn add_bodies(mut commands: Commands) {
 	let body_c = BodyBuilder::rect(30.0, 30.0)
 		.position(Vec2::new(200.0, 0.0))
 		.velocity(Vec2::new(-40.0, 0.0))
+		// .mass(150.0)
 		.build();
 	let body_c_id = BodyRenderBuilder::new(body_c)
 		.fill(color_hex("#F0A152"))
@@ -58,7 +59,7 @@ fn add_bodies(mut commands: Commands) {
 		body_b: body_b_id,
 
 		length: 100.0,
-		frequency: 6.0,
+		frequency: 2.0,
 		damping: 0.01,
 
 		..Default::default()
@@ -74,8 +75,8 @@ fn add_bodies(mut commands: Commands) {
 		body_b_offset: Vec2::new(0.0, 15.0),
 
 		length: 50.0,
-		frequency: 40.0,
-		damping: 0.1,
+		frequency: 1.0,
+		damping: 0.01,
 
 		..Default::default()
 	};

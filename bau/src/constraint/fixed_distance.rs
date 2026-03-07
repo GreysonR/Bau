@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use std::f32::consts::PI;
 
 use super::Body;
 use super::ConstraintSolver;
@@ -86,7 +87,7 @@ impl ConstraintSolver for FixedDistance {
 
 
 		let zeta: f32 = 1.0; // damping ratio, zeta
-		let omega: f32 = 40.0; // oscillation frequency, omega
+		let omega: f32 = 2.0 * PI * 6.0; // oscillation frequency, omega
 
 		let k = body.mass * omega.powf(2.0);
 		let c = 2.0 * body.mass * omega * zeta;

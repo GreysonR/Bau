@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use std::f32::consts::PI;
 
 use super::Body;
 use super::ConstraintSolver;
@@ -64,8 +65,7 @@ impl Spring {
 		body.apply_impulse(p, body_position);
 	} */
 	fn solve_soft(&self, bodies: &mut Query<&mut Body>, h: f32, iterations: i32) {
-		let body_a = bodies.get(self.body_a).expect("body should be in world"); // TODO: handle unwrap
-		let body_b = bodies.get(self.body_b).expect("body should be in world");
+		let [mut body_a, mut body_b] = bodies.get_many_mut([self.body_a, self.body_b]).expect("bodies should be in world & distinct"); // TODO: handle unwrap
 
 		let radius_a = self.body_a_offset.rotate(Vec2::from_angle(body_a.angle));
 		let position_a = body_a.position + radius_a;
@@ -88,7 +88,7 @@ impl Spring {
 
 		// Calculate soft constraint parameters
 		let zeta: f32 = self.damping; // damping ratio, zeta
-		let omega: f32 = self.frequency; // oscillation frequency, omega
+		let omega: f32 = 2.0 * PI * self.frequency; // oscillation frequency, omega
 
 		let k = effective_mass * omega.powf(2.0);
 		let c = 2.0 * effective_mass * omega * zeta;
@@ -103,13 +103,8 @@ impl Spring {
 
 		// Apply impulses
 		let p = -impulse * dir;
-		bodies.get_mut(self.body_a)
-			.unwrap()
-			.apply_impulse(p, position_a);
-
-		bodies.get_mut(self.body_b)
-			.unwrap()
-			.apply_impulse(-p, position_b);
+		body_a.apply_impulse(p, position_a);
+		body_b.apply_impulse(-p, position_b);
 	}
 }
 
