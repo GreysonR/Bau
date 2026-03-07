@@ -90,4 +90,21 @@ impl Body {
 		self.velocity += impulse * self.inverse_mass;
 		self.angular_velocity += cross * self.inverse_inertia;
 	}
+
+	pub fn contains_point(&self, point: Vec2) -> bool {
+		let vertices = &self.vertices;
+		let len = vertices.len();
+		for i in 0..len {
+			let j = (i + 1) % len;
+			let va = vertices[i];
+			let vb = vertices[j];
+			let axis = vb - va;
+
+			let dist = axis.perp_dot(point - va);
+			if dist < 0.0 {
+				return false;
+			}
+		}
+		true
+	}
 }

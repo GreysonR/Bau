@@ -8,9 +8,9 @@ pub use constraint::{ Constraint, Spring, ConstraintSolver, FixedDistance };
 
 #[derive(Resource, Clone)]
 pub struct Engine {
-	velocity_iterations: i32,
-	position_iterations: i32,
-	gravity: Vec2,
+	pub velocity_iterations: i32,
+	pub position_iterations: i32,
+	pub gravity: Vec2,
 }
 impl Default for Engine {
 	fn default() -> Self {

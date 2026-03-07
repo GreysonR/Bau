@@ -1,7 +1,7 @@
 use bevy::{ prelude::*, window::WindowCloseRequested };
 use bevy::window::PrimaryWindow;
 
-use bau::{ Body, BodyBuilder, Constraint, FixedDistance, Spring };
+use bau::{ Body, BodyBuilder, FixedDistance, Spring };
 
 mod render;
 use render::{ color_hex, BodyRenderBuilder, SpringRenderBuilder, DistanceRenderBuilder };
@@ -12,35 +12,33 @@ fn main() {
 		// .add_systems(Update, print_mouse_position)
 		.add_plugins((bau::Engine::default(), render::Render))
 		.add_systems(Startup, add_bodies)
-		.add_systems(Update, (move_spring, handle_input))
+		.add_systems(Update, (handle_mouse, handle_input))
 		.run();
 
 }
 
-#[derive(Resource)]
-struct MouseBody(Entity);
 
 fn add_bodies(mut commands: Commands) {
+	commands.insert_resource(MouseBody(None));
 	// Add bodies
 	let body_a = BodyBuilder::rect(50.0, 50.0)
 		.position(Vec2::new(200.0, 0.0))
-		.velocity(Vec2::new(-40.0, 0.0))
-		.angle(std::f32::consts::PI * 0.25)
+		// .velocity(Vec2::new(-40.0, 0.0))
+		.angle(std::f32::consts::PI * 0.2)
 		// .mass(1.0)
 		.build();
 	let body_a_id = BodyRenderBuilder::new(body_a)
 		.fill(color_hex("#F0A152"))
 		.build(&mut commands);
 	
-
-	let body_b = BodyBuilder::circle(3.0)
+	
+	let body_b = BodyBuilder::circle(10.0)
 		.position(Vec2::new(0.0, 0.0))
 		.is_static(true)
 		.build();
 	let body_b_id = BodyRenderBuilder::new(body_b)
 		.fill(color_hex("#E35531"))
 		.build(&mut commands);
-	commands.insert_resource(MouseBody(body_b_id));
 	
 	let body_c = BodyBuilder::rect(30.0, 30.0)
 		.position(Vec2::new(200.0, 0.0))
@@ -100,23 +98,35 @@ fn add_bodies(mut commands: Commands) {
 
 
 // Mouse input
-fn move_spring(mouse_buttons: Res<ButtonInput<MouseButton>>, body_id: Res<MouseBody>, camera: Query<(&Camera, &GlobalTransform), With<Camera2d>>, window: Single<&Window, With<PrimaryWindow>>, mut bodies: Query<&mut Body>) {
+#[derive(Resource)]
+struct MouseBody(Option<(Entity, Vec2)>);
+
+fn handle_mouse(mouse_buttons: Res<ButtonInput<MouseButton>>, mut mouse_state: ResMut<MouseBody>, camera: Query<(&Camera, &GlobalTransform), With<Camera2d>>, window: Single<&Window, With<PrimaryWindow>>, mut bodies: Query<(Entity, &mut Body)>) {
 	// Moving main spring constraint by clicking on window
-	if window.cursor_position().is_none() || !mouse_buttons.pressed(MouseButton::Left) {
-		return; // cursor not in window or not clicking
-	}
+	if window.cursor_position().is_none() { return; } // cursor not in window or not clicking
 	let position = window.cursor_position().unwrap(); // guaranteed successful unwrap
+	let (camera, camera_transform) = camera.single().expect("camera should be in world");
+	let mouse_world_pos = camera.viewport_to_world_2d(camera_transform, position).unwrap();
 
-	let body = bodies.get_mut(body_id.0);
-	if body.is_err() {
-		return; // Don't do anything if constraint isn't in world
+	if mouse_buttons.just_released(MouseButton::Left) {
+		mouse_state.0 = None;
 	}
 
-	let mut body = body.unwrap();
-	let (camera, camera_transform) = camera.single().expect("camera should be in world");
-	let world_pos = camera.viewport_to_world_2d(camera_transform, position).unwrap();
-	body.set_position(world_pos);
-	body.velocity = Vec2::ZERO;
+	if mouse_state.0.is_none() && mouse_buttons.pressed(MouseButton::Left) {
+		for (entity, body) in bodies.iter() {
+			if body.contains_point(mouse_world_pos) {
+				let offset = body.position - mouse_world_pos;
+				mouse_state.0 = Some((entity, offset));
+				break;
+			}
+		}
+	}
+
+	if mouse_buttons.pressed(MouseButton::Left) && let Some(mouse_state) = mouse_state.0 {
+		let (_, mut body) = bodies.get_mut(mouse_state.0).unwrap();
+		body.set_position(mouse_world_pos + mouse_state.1);
+		body.velocity = Vec2::ZERO;
+	}
 }
 
 
