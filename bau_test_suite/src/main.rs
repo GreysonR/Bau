@@ -101,7 +101,7 @@ fn add_bodies(mut commands: Commands) {
 #[derive(Resource)]
 struct MouseBody(Option<(Entity, Vec2)>);
 
-fn handle_mouse(mouse_buttons: Res<ButtonInput<MouseButton>>, mut mouse_state: ResMut<MouseBody>, camera: Query<(&Camera, &GlobalTransform), With<Camera2d>>, window: Single<&Window, With<PrimaryWindow>>, mut bodies: Query<(Entity, &mut Body)>) {
+fn handle_mouse(mouse_buttons: Res<ButtonInput<MouseButton>>, mut commands: Commands, mut mouse_state: ResMut<MouseBody>, camera: Query<(&Camera, &GlobalTransform), With<Camera2d>>, window: Single<&Window, With<PrimaryWindow>>, mut bodies: Query<(Entity, &mut Body)>) {
 	// Moving main spring constraint by clicking on window
 	if window.cursor_position().is_none() { return; } // cursor not in window or not clicking
 	let position = window.cursor_position().unwrap(); // guaranteed successful unwrap
@@ -112,12 +112,18 @@ fn handle_mouse(mouse_buttons: Res<ButtonInput<MouseButton>>, mut mouse_state: R
 		mouse_state.0 = None;
 	}
 
-	if mouse_state.0.is_none() && mouse_buttons.pressed(MouseButton::Left) {
+	
+	if mouse_state.0.is_none() {
 		for (entity, body) in bodies.iter() {
 			if body.contains_point(mouse_world_pos) {
-				let offset = body.position - mouse_world_pos;
-				mouse_state.0 = Some((entity, offset));
-				break;
+				if mouse_buttons.pressed(MouseButton::Left) { // Drag left clicked body
+					let offset = body.position - mouse_world_pos;
+					mouse_state.0 = Some((entity, offset));
+					break;
+				}
+				if mouse_buttons.pressed(MouseButton::Right) { // Despawn right clicked body
+					commands.entity(entity).try_despawn();
+				}
 			}
 		}
 	}

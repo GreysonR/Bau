@@ -76,8 +76,8 @@ impl DistanceRenderBuilder {
 }
 
 
-pub fn update(query: Query<(&mut Shape, &Constraint, &DistanceRenderPin)>, bodies: Query<&Body>, mut shapes: Query<&mut Transform, With<Shape>>) {
-	for (mut shape, constraint, pin_id) in query {
+pub fn update(query: Query<(Entity, &mut Shape, &Constraint, &DistanceRenderPin)>, mut commands: Commands, bodies: Query<&Body>, mut shapes: Query<&mut Transform, With<Shape>>) {
+	for (entity, mut shape, constraint, pin_id) in query {
 		// Verify it is the correct constraint type & unwrap
 		let constraint = match constraint {
 			Constraint::FixedDistance(constraint) => constraint,
@@ -85,7 +85,13 @@ pub fn update(query: Query<(&mut Shape, &Constraint, &DistanceRenderPin)>, bodie
 		};
 		
 		// Update spring path
-		let body = bodies.get(constraint.body).expect("body in constraint should be in world");
+		let body = bodies.get(constraint.body);
+		if body.is_err() {
+			commands.entity(entity).try_despawn();
+			warn!("Removed FixedDistanceRender {entity}: at least one of its bodies wasn't in the world");
+			return;
+		}
+		let body = body.unwrap();
 		
 		let new_shape = ShapeBuilder::with(
 			&shapes::Polygon {

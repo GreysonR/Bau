@@ -31,7 +31,7 @@ impl Plugin for Engine {
 }
 
 // Solves all constraints in the world
-fn solve_velocity_constraints(time: Res<Time>, engine: Res<Engine>, constraints: Query<&Constraint>, mut bodies: Query<&mut Body>) {
+fn solve_velocity_constraints(time: Res<Time>, engine: Res<Engine>, mut commands: Commands, constraints: Query<(Entity, &Constraint)>, mut bodies: Query<&mut Body>) {
 	let velocity_iterations = engine.velocity_iterations;
 	let delta = time.delta_secs();
 
@@ -40,8 +40,12 @@ fn solve_velocity_constraints(time: Res<Time>, engine: Res<Engine>, constraints:
 	}
 
 	for _ in 0..velocity_iterations {
-		for constraint in constraints {
-			constraint.solve_velocity(&mut bodies, delta, velocity_iterations);
+		for (entity, constraint) in constraints {
+			let _ = constraint.solve_velocity(&mut bodies, delta, velocity_iterations).map_err(|_| {
+				// despawn constraint if it's broken
+				warn!("Constraint {} had error while solving - despawning", entity);
+				commands.entity(entity).try_despawn();
+			});
 		}
 	}
 }

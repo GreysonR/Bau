@@ -48,6 +48,10 @@ pub struct SpringRenderBuilder {
 }
 impl SpringRenderBuilder {
 	pub fn new(spring: Spring) -> Self {
+		// bodies in the spring should be defined
+		assert!(spring.body_a != Entity::PLACEHOLDER, "spring.body_a should be defined before adding to SpringRender"); // TODO: move this check to the engine somehow
+		assert!(spring.body_b != Entity::PLACEHOLDER, "spring.body_b should be defined before adding to SpringRender");
+
 		Self {
 			spring,
 			stroke: None,
@@ -99,8 +103,8 @@ impl SpringRenderBuilder {
 }
 
 
-pub fn update(query: Query<(&SpringRender, &mut Shape, &Constraint)>, bodies: Query<&Body>) {
-	for (spring_render, mut shape, constraint) in query {
+pub fn update(mut commands: Commands, query: Query<(Entity, &SpringRender, &mut Shape, &Constraint)>, bodies: Query<&Body>) {
+	for (entity, spring_render, mut shape, constraint) in query {
 		// Verify it is a spring & unwrap
 		let spring = match constraint {
 			Constraint::Spring(spring) => spring,
@@ -108,8 +112,13 @@ pub fn update(query: Query<(&SpringRender, &mut Shape, &Constraint)>, bodies: Qu
 		};
 		
 		// Update spring path
-		let body_a = bodies.get(spring.body_a).expect("body in spring constraint should be in world");
-		let body_b = bodies.get(spring.body_b).expect("body in spring constraint should be in world");
+		let result = bodies.get_many([spring.body_a, spring.body_b]);
+		if result.is_err() { // at least one of the bodies is not in the world anymore, so remove the spring render
+			commands.entity(entity).try_despawn();
+			warn!("Removed SpringRender {entity}: at least one of its bodies wasn't in the world");
+			return;
+		}
+		let [body_a, body_b] = result.unwrap();
 		let points = spring_render.get_points(
 			&(body_a.position + spring.body_a_offset.rotate(Vec2::from_angle(body_a.angle))),
 			&(body_b.position + spring.body_b_offset.rotate(Vec2::from_angle(body_b.angle)))

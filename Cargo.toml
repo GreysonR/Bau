@@ -3,7 +3,7 @@ resolver = "3"
 members = ["bau", "bau_test_suite"]
 
 [workspace.dependencies]
-bevy = { version = "0.18.0", features = ["dynamic_linking"] }
+bevy = { version = "0.18.0", features = ["dynamic_linking", "debug"] }
 bevy_prototype_lyon = "0.16.0"
 bau = { path = "bau" }
 
