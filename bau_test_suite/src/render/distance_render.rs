@@ -88,6 +88,7 @@ pub fn update(query: Query<(Entity, &mut Shape, &Constraint, &DistanceRenderPin)
 		let body = bodies.get(constraint.body);
 		if body.is_err() {
 			commands.entity(entity).try_despawn();
+			// TODO: also remove pin
 			warn!("Removed FixedDistanceRender {entity}: at least one of its bodies wasn't in the world");
 			return;
 		}
