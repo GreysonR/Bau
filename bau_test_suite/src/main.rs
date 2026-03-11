@@ -40,6 +40,7 @@ fn add_bodies(mut commands: Commands) {
 		.fill(color_hex("#E35531"))
 		.build(&mut commands);
 	
+	
 	let body_c = BodyBuilder::rect(30.0, 30.0)
 		.position(Vec2::new(200.0, 0.0))
 		.velocity(Vec2::new(-40.0, 0.0))
@@ -48,6 +49,7 @@ fn add_bodies(mut commands: Commands) {
 	let body_c_id = BodyRenderBuilder::new(body_c)
 		.fill(color_hex("#F0A152"))
 		.build(&mut commands);
+	
 
 	let pin = BodyBuilder::circle(3.0)
 		.position(Vec2::new(100.0, 0.0))
@@ -56,6 +58,23 @@ fn add_bodies(mut commands: Commands) {
 	let pin_id = BodyRenderBuilder::new(pin)
 		.fill(color_hex("#c1c1c168"))
 		.build(&mut commands);
+
+
+	let body_d = BodyBuilder::rect(50.0, 50.0)
+		.position(Vec2::new(200.0, 400.0))
+		// .velocity(Vec2::new(-40.0, 0.0))
+		.angle(std::f32::consts::PI * 0.1)
+		// .mass(1.0)
+		.build();
+	let body_d_id = BodyRenderBuilder::new(body_d)
+		.fill(color_hex("#8ae977"))
+		.build(&mut commands);
+
+
+	// TODO: make mouse constraint an actual constraint so it applies forces to bodies
+	// TODO: add gear constraint
+	// 	v_a = -v_b, where v is the tangent velocity of a point outside the center of the body
+	// 	alternatively, calculate max radius r of body and use that as the point
 
 	
 	// Add spring constraints
@@ -74,6 +93,7 @@ fn add_bodies(mut commands: Commands) {
 		.stroke((color_hex("#f4fdd9b2"), 2.0))
 		.build(&mut commands);
 	
+
 	let spring2 = Spring {
 		body_a: body_a_id,
 		body_a_offset: Vec2::new(-25.0, 25.0),

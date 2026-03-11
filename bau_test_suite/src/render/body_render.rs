@@ -30,9 +30,7 @@ impl BodyRenderBuilder {
 
 		let polygon = shapes::Polygon {
 			closed: true,
-			points: self.body.vertices.iter().map(|vertex| {
-				vertex - self.body.position
-			}).collect(), // yikes
+			points: self.body.vertices.clone(),
 			..Default::default()
 		};
 
