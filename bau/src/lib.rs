@@ -24,7 +24,7 @@ impl Default for Engine {
 impl Plugin for Engine {
 	fn build(&self, app: &mut App) {
 		// Engine globals
-		app.add_systems(Update, (apply_forces, solve_velocity_constraints, solve_position_constraints, apply_impulses).chain()); // TODO: examine FixedUpdate vs Update here
+		app.add_systems(FixedUpdate, (apply_forces, solve_velocity_constraints, solve_position_constraints, apply_impulses).chain()); // TODO: examine FixedUpdate vs Update here
 		
 		app.insert_resource(self.clone());
 	}

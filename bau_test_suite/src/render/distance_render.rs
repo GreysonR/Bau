@@ -3,7 +3,7 @@ use bevy_prototype_lyon::prelude::*;
 use bau::{ Body, FixedDistance, Constraint };
 
 #[derive(Component)]
-pub struct DistanceRenderPin(Entity);
+pub struct DistanceRender; // marker component
 
 pub struct DistanceRenderBuilder {
 	constraint: FixedDistance,
@@ -40,18 +40,7 @@ impl DistanceRenderBuilder {
 	pub fn build(self, commands: &mut Commands) -> Entity { // TODO: consider generalizing this, and/or turning this method into one that takes in options & the spring rather than a whole builder
 		let stroke = self.stroke.expect("Body should have a stroke before building");
 
-		// Pin at end of spring
-		let pin = ShapeBuilder::with(
-			&shapes::Circle {
-				center: Vec2::ZERO,
-				radius: stroke.1 * 1.2,
-				..Default::default()
-			})
-			.fill(stroke.0.clone())
-			.build();
-
-
-		// Jagged spring line
+		// Line between bodies
 		let polygon = shapes::Polygon {
 			closed: false,
 			points: vec![Vec2::new(0.0, 0.0), Vec2::new(100.0, 0.0)],
@@ -60,15 +49,10 @@ impl DistanceRenderBuilder {
 			.stroke(stroke)
 			.build();
 
-		let pin_id = commands.spawn((
-			pin,
-			Transform::from_translation(Vec3::new(0.0, 0.0, 0.0))
-				.with_rotation(Quat::from_rotation_z(0.0)),
-		)).id();
 		commands.spawn((
 			Constraint::FixedDistance(self.constraint),
+			DistanceRender,
 			shape,
-			DistanceRenderPin(pin_id),
 			Transform::from_translation(Vec3::new(0.0, 0.0, 0.0))
 				.with_rotation(Quat::from_rotation_z(0.0)),
 		)).id()
@@ -76,37 +60,34 @@ impl DistanceRenderBuilder {
 }
 
 
-pub fn update(query: Query<(Entity, &mut Shape, &Constraint, &DistanceRenderPin)>, mut commands: Commands, bodies: Query<&Body>, mut shapes: Query<&mut Transform, With<Shape>>) {
-	for (entity, mut shape, constraint, pin_id) in query {
+pub fn update(query: Query<(Entity, &mut Shape, &Constraint, &DistanceRender)>, mut commands: Commands, bodies: Query<&Body>) {
+	for (entity, mut shape, constraint, _) in query {
 		// Verify it is the correct constraint type & unwrap
 		let constraint = match constraint {
 			Constraint::FixedDistance(constraint) => constraint,
-			_ => panic!("spring constraint render should contain a FixedDistance constraint")
+			_ => panic!("distance constraint render should contain a FixedDistance constraint")
 		};
 		
 		// Update spring path
-		let body = bodies.get(constraint.body);
-		if body.is_err() {
+		let body_query = bodies.get_many([constraint.body_a, constraint.body_b]);
+		if body_query.is_err() {
 			commands.entity(entity).try_despawn();
-			// TODO: also remove pin
 			warn!("Removed FixedDistanceRender {entity}: at least one of its bodies wasn't in the world");
 			return;
 		}
-		let body = body.unwrap();
+		let [body_a, body_b] = body_query.unwrap();
 		
 		let new_shape = ShapeBuilder::with(
 			&shapes::Polygon {
 				closed: false,
-				points: vec![ body.position + constraint.position_offset.rotate(Vec2::from_angle(body.angle)), constraint.position.clone() ],
+				points: vec![
+					body_a.position + constraint.body_a_offset.rotate(Vec2::from_angle(body_a.angle)),
+					body_b.position + constraint.body_b_offset.rotate(Vec2::from_angle(body_b.angle)),
+				],
 			})
 			.stroke(shape.stroke.expect("constraint render should have a stroke"))
 			.build();
 
 		*shape = new_shape;
-
-		// Update pin location (if the spring ever moves)
-		let mut pin = shapes.get_mut(pin_id.0).expect("Constraint pin should be in the world");
-		pin.translation.x = constraint.position.x;
-		pin.translation.y = constraint.position.y;
 	}
 }

@@ -49,6 +49,14 @@ fn add_bodies(mut commands: Commands) {
 		.fill(color_hex("#F0A152"))
 		.build(&mut commands);
 
+	let pin = BodyBuilder::circle(3.0)
+		.position(Vec2::new(100.0, 0.0))
+		.is_static(true)
+		.build();
+	let pin_id = BodyRenderBuilder::new(pin)
+		.fill(color_hex("#c1c1c168"))
+		.build(&mut commands);
+
 	
 	// Add spring constraints
 	let spring = Spring {
@@ -85,10 +93,13 @@ fn add_bodies(mut commands: Commands) {
 
 	// Add fixed distance constraint
 	let fixed_dist = FixedDistance {
-		position: Vec2::new(100.0, 0.0),
+		body_a: body_a_id,
+		body_a_offset: Vec2::new(-25.0, -25.0),
+
+		body_b: pin_id,
+
 		length: 100.0,
-		body: body_a_id,
-		position_offset: Vec2::new(-25.0, -25.0),
+
 		..Default::default()
 	};
 	let _fixed_dist = DistanceRenderBuilder::new(fixed_dist)
