@@ -71,11 +71,17 @@ fn add_bodies(mut commands: Commands) {
 		.build(&mut commands);
 
 
-	// TODO: make mouse constraint an actual constraint so it applies forces to bodies
-	// TODO: add gear constraint
-	// 	v_a = -v_b, where v is the tangent velocity of a point outside the center of the body
-	// 	alternatively, calculate max radius r of body and use that as the point
-
+	/*
+	TODO: make mouse constraint an actual constraint so it applies forces to bodies
+		- update error handling so constraints aren't deleted when broken; maybe just don't solve them?
+			- throw warnings vs silently fail vs panic
+				- unfortunately, can't really let user wrap engine funcs for them to handle errors, so maybe full-on panic and force them to remove constraints?
+				- but then user must have reference to constraint when they might remove a body, which isn't always practical or ergonomic or fast
+			- also stop render updates, so when a constraint breaks, the renderer keeps constraint on screen but doesn't change position, encouraging proper removal
+	TODO: add gear constraint
+		v_a = -v_b, where v is the tangent velocity of a point outside the center of the body
+		alternatively, calculate max radius r of body and use that as the point
+	*/
 	
 	// Add spring constraints
 	let spring = Spring {
