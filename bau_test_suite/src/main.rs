@@ -140,7 +140,10 @@ struct MouseBody(Option<(Entity, Vec2)>);
 
 fn handle_mouse(mouse_buttons: Res<ButtonInput<MouseButton>>, mut commands: Commands, mut mouse_state: ResMut<MouseBody>, camera: Query<(&Camera, &GlobalTransform), With<Camera2d>>, window: Single<&Window, With<PrimaryWindow>>, mut bodies: Query<(Entity, &mut Body)>) {
 	// Moving main spring constraint by clicking on window
-	if window.cursor_position().is_none() { return; } // cursor not in window or not clicking
+	if window.cursor_position().is_none() { // cursor not in window
+		mouse_state.0 = None;
+		return;
+	}
 	let position = window.cursor_position().unwrap(); // guaranteed successful unwrap
 	let (camera, camera_transform) = camera.single().expect("camera should be in world");
 	let mouse_world_pos = camera.viewport_to_world_2d(camera_transform, position).unwrap();
