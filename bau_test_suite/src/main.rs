@@ -12,7 +12,7 @@ fn main() {
 		// .add_systems(Update, print_mouse_position)
 		.add_plugins((bau::Engine::default(), render::Render))
 		.add_systems(Startup, add_bodies)
-		.add_systems(Update, (handle_mouse, handle_input))
+		.add_systems(FixedUpdate, (handle_mouse, handle_input))
 		.run();
 
 }
@@ -80,7 +80,7 @@ fn add_bodies(mut commands: Commands) {
 			- also stop render updates, so when a constraint breaks, the renderer keeps constraint on screen but doesn't change position, encouraging proper removal
 	TODO: add gear constraint
 		v_a = -v_b, where v is the tangent velocity of a point outside the center of the body
-		alternatively, calculate max radius r of body and use that as the point
+			- maybe calculate max radius r of body and use that as the point
 	*/
 	
 	// Add spring constraints
