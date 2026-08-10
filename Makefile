@@ -1,7 +1,11 @@
-.PHONY: build run
+.PHONY: *
 
 build:
-	cargo build -p bau_test_suite
+	distrobox enter bevy-dev -- cargo build --release
 
 run:
-	cargo run -p bau_test_suite
+	distrobox enter bevy-dev -- cargo build
+	cargo run
+
+clean:
+	cargo clean
