@@ -44,7 +44,7 @@ impl BodyRenderBuilder {
 		commands.spawn((
 			self.body,
 			shape,
-			Transform::from_translation(Vec3::new(0.0, 0.0, 1.0))
+			Transform::from_translation(Vec3::new(0.0, 0.0, 0.0))
 				.with_rotation(Quat::from_rotation_z(0.0)),
 		)).id()
 	}

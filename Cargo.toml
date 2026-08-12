@@ -3,8 +3,8 @@ resolver = "3"
 members = ["bau", "bau_test_suite"]
 
 [workspace.dependencies]
-bevy = { version = "0.18.0", features = ["dynamic_linking", "debug"] }
-bevy_prototype_lyon = "0.16.0"
+bevy = { version = "0.19.0", default-features = false, features = ["dynamic_linking", "2d", "debug"] }
+bevy_prototype_lyon = "0.17.0"
 bau = { path = "bau" }
 
 # Enable a small amount of optimization in the dev profile.

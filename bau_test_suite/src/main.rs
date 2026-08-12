@@ -12,7 +12,7 @@ fn main() {
 		// .add_systems(Update, print_mouse_position)
 		.add_plugins((bau::Engine::default(), render::Render))
 		.add_systems(Startup, add_bodies)
-		.add_systems(FixedUpdate, (handle_mouse, handle_input))
+		.add_systems(Update, (handle_mouse, handle_input))
 		.run();
 
 }
@@ -21,52 +21,57 @@ fn main() {
 fn add_bodies(mut commands: Commands) {
 	commands.insert_resource(MouseBody(None));
 	// Add bodies
-	let body_a = BodyBuilder::rect(50.0, 50.0)
-		.position(Vec2::new(200.0, 0.0))
-		// .velocity(Vec2::new(-40.0, 0.0))
-		.angle(std::f32::consts::PI * 0.2)
-		// .mass(1.0)
-		.build();
-	let body_a_id = BodyRenderBuilder::new(body_a)
+	let body_a_id = BodyRenderBuilder::new(
+			BodyBuilder::rect(50.0, 50.0)
+			.position(Vec2::new(200.0, 0.0))
+			// .velocity(Vec2::new(-40.0, 0.0))
+			.angle(std::f32::consts::PI * 0.2)
+			// .mass(1.0)
+			.build()
+		)
 		.fill(color_hex("#F0A152"))
 		.build(&mut commands);
 	
 	
-	let body_b = BodyBuilder::circle(10.0)
-		.position(Vec2::new(0.0, 0.0))
-		.is_static(true)
-		.build();
-	let body_b_id = BodyRenderBuilder::new(body_b)
+	let body_b_id = BodyRenderBuilder::new(
+			BodyBuilder::circle(10.0)
+			.position(Vec2::new(0.0, 0.0))
+			.is_static(true)
+			.build()
+		)
 		.fill(color_hex("#E35531"))
 		.build(&mut commands);
 	
 	
-	let body_c = BodyBuilder::rect(30.0, 30.0)
-		.position(Vec2::new(200.0, 0.0))
-		.velocity(Vec2::new(-40.0, 0.0))
-		// .mass(150.0)
-		.build();
-	let body_c_id = BodyRenderBuilder::new(body_c)
-		.fill(color_hex("#F0A152"))
+	let body_c_id = BodyRenderBuilder::new(
+			BodyBuilder::rect(30.0, 30.0)
+			.position(Vec2::new(200.0, 0.0))
+			.velocity(Vec2::new(-40.0, 0.0))
+			// .mass(150.0)
+			.build()
+		)
+		.stroke((color_hex("#F0A152"), 1.0))
 		.build(&mut commands);
 	
 
-	let pin = BodyBuilder::circle(3.0)
-		.position(Vec2::new(100.0, 0.0))
-		.is_static(true)
-		.build();
-	let pin_id = BodyRenderBuilder::new(pin)
+	let pin_id = BodyRenderBuilder::new(
+			BodyBuilder::circle(3.0)
+			.position(Vec2::new(100.0, 0.0))
+			.is_static(true)
+			.build()
+		)
 		.fill(color_hex("#c1c1c168"))
 		.build(&mut commands);
 
 
-	let body_d = BodyBuilder::rect(50.0, 50.0)
-		.position(Vec2::new(200.0, 400.0))
-		// .velocity(Vec2::new(-40.0, 0.0))
-		.angle(std::f32::consts::PI * 0.1)
-		// .mass(1.0)
-		.build();
-	let body_d_id = BodyRenderBuilder::new(body_d)
+	let body_d_id = BodyRenderBuilder::new(
+			BodyBuilder::rect(50.0, 50.0)
+			.position(Vec2::new(200.0, 400.0))
+			// .velocity(Vec2::new(-40.0, 0.0))
+			.angle(std::f32::consts::PI * 0.1)
+			// .mass(1.0)
+			.build()
+		)
 		.fill(color_hex("#8ae977"))
 		.build(&mut commands);
 
@@ -84,51 +89,54 @@ fn add_bodies(mut commands: Commands) {
 	*/
 	
 	// Add spring constraints
-	let spring = Spring {
-		body_a: body_a_id,
-		body_a_offset: Vec2::new(25.0, 25.0),
-		body_b: body_b_id,
+	let _spring = SpringRenderBuilder::new(
+			Spring {
+				body_a: body_a_id,
+				body_a_offset: Vec2::new(25.0, 25.0),
+				body_b: body_b_id,
 
-		length: 100.0,
-		frequency: 2.0,
-		damping: 0.01,
+				length: 100.0,
+				frequency: 2.0,
+				damping: 0.01,
 
-		..Default::default()
-	};
-	let _spring = SpringRenderBuilder::new(spring)
+				..Default::default()
+			}
+		)
 		.stroke((color_hex("#f4fdd9b2"), 2.0))
 		.build(&mut commands);
 	
 
-	let spring2 = Spring {
-		body_a: body_a_id,
-		body_a_offset: Vec2::new(-25.0, 25.0),
-		body_b: body_c_id,
-		body_b_offset: Vec2::new(0.0, 15.0),
+	let _spring2 = SpringRenderBuilder::new(
+		Spring {
+			body_a: body_a_id,
+			body_a_offset: Vec2::new(-25.0, 25.0),
+			body_b: body_c_id,
+			body_b_offset: Vec2::new(0.0, 15.0),
 
-		length: 50.0,
-		frequency: 1.0,
-		damping: 0.01,
+			length: 50.0,
+			frequency: 1.0,
+			damping: 0.01,
 
-		..Default::default()
-	};
-	let _spring2 = SpringRenderBuilder::new(spring2)
+			..Default::default()
+		}
+	)
 		.stroke((color_hex("#fdf2d9b2"), 2.0))
 		.build(&mut commands);
 
 
 	// Add fixed distance constraint
-	let fixed_dist = FixedDistance {
-		body_a: body_a_id,
-		body_a_offset: Vec2::new(-25.0, -25.0),
+	let _fixed_dist = DistanceRenderBuilder::new(
+			FixedDistance {
+				body_a: body_a_id,
+				body_a_offset: Vec2::new(-25.0, -25.0),
 
-		body_b: pin_id,
+				body_b: pin_id,
 
-		length: 100.0,
+				length: 100.0,
 
-		..Default::default()
-	};
-	let _fixed_dist = DistanceRenderBuilder::new(fixed_dist)
+				..Default::default()
+			}
+		)
 		.stroke((color_hex("#f4fdd9b2"), 2.0))
 		.build(&mut commands);
 }
