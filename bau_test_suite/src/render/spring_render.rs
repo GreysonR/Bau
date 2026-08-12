@@ -6,17 +6,17 @@ use bau::{ Body, Spring, Constraint };
 #[derive(Component)]
 pub struct SpringRender {
 	height: f32,
-	length: f32, // Spring initial length
+	unstretched_length: f32, // Spring initial length
 	margin: f32,
 }
 impl SpringRender {
-	fn get_points(&self, start: &Vec2, end: &Vec2) -> Vec<Vec2> { // dir is the vector from the start of the spring to the 
+	fn get_points(&self, start: &Vec2, end: &Vec2) -> Vec<Vec2> {
 		// Basic calculations
 		let difference = end - start;
 		let dir = difference.normalize();
 		let length = difference.length();
 		let margin = self.margin.min(length * 0.5 - 0.01);
-		let n_pts = ((self.length - 2.0 * margin) / 6.0).floor() as i32;
+		let n_pts = ((self.unstretched_length - 2.0 * margin) / 6.0).floor() as i32;
 		
 		// Build initial points
 		let mut points = Vec::new();
@@ -48,10 +48,6 @@ pub struct SpringRenderBuilder {
 }
 impl SpringRenderBuilder {
 	pub fn new(spring: Spring) -> Self {
-		// bodies in the spring should be defined
-		assert!(spring.body_a != Entity::PLACEHOLDER, "spring.body_a should be defined before adding to SpringRender"); // TODO: move this check to the engine somehow
-		assert!(spring.body_b != Entity::PLACEHOLDER, "spring.body_b should be defined before adding to SpringRender");
-
 		Self {
 			spring,
 			stroke: None,
@@ -89,7 +85,7 @@ impl SpringRenderBuilder {
 		let spring_render = SpringRender {
 			height: self.height,
 			margin: self.margin,
-			length: self.spring.length,
+			unstretched_length: self.spring.unstretched_length,
 		};
 		
 		commands.spawn((
@@ -103,19 +99,35 @@ impl SpringRenderBuilder {
 }
 
 
-pub fn update(mut commands: Commands, query: Query<(Entity, &SpringRender, &mut Shape, &Constraint)>, bodies: Query<&Body>) {
-	for (entity, spring_render, mut shape, constraint) in query {
+pub fn update(query: Query<(&SpringRender, &mut Shape, &mut Constraint)>, bodies: Query<&Body>) {
+	for (spring_render, mut shape, mut constraint) in query {
 		// Verify it is a spring & unwrap
-		let spring = match constraint {
+		let spring = match &mut *constraint {
 			Constraint::Spring(spring) => spring,
 			_ => panic!("spring constraint render should contain a spring")
 		};
 		
 		// Update spring path
-		let result = bodies.get_many([spring.body_a, spring.body_b]);
-		if result.is_err() { // at least one of the bodies is not in the world anymore, so remove the spring render
-			commands.entity(entity).try_despawn();
-			warn!("Removed SpringRender {entity}: at least one of its bodies wasn't in the world");
+		if spring.body_a.is_none() || spring.body_b.is_none() {
+			// Make invisible & return if either body is None
+			let new_shape = ShapeBuilder::with(
+				&shapes::Polygon {
+					closed: false,
+					points: vec![Vec2::ZERO, Vec2::ONE], // todo: hide the constraint properly
+				})
+				.stroke(shape.stroke.expect("constraint render should have a stroke"))
+				.build();
+
+			*shape = new_shape;
+
+			return;
+		}
+
+		let result = bodies.get_many([spring.body_a.unwrap(), spring.body_b.unwrap()]);
+		if result.is_err() { // at least one of the bodies is not in the world anymore, so set that body to None in the constraint
+			if bodies.get(spring.body_a.unwrap()).is_err() {
+				spring.body_a = None;
+			}
 			return;
 		}
 		let [body_a, body_b] = result.unwrap();

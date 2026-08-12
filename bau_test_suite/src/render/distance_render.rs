@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{math::VectorSpace, prelude::*};
 use bevy_prototype_lyon::prelude::*;
 use bau::{ Body, FixedDistance, Constraint };
 
@@ -69,7 +69,21 @@ pub fn update(query: Query<(Entity, &mut Shape, &Constraint, &DistanceRender)>, 
 		};
 		
 		// Update spring path
-		let body_query = bodies.get_many([constraint.body_a, constraint.body_b]);
+		if constraint.body_a.is_none() || constraint.body_b.is_none() {
+			// Make invisible & return if either body is None
+			let new_shape = ShapeBuilder::with(
+				&shapes::Polygon {
+					closed: false,
+					points: vec![Vec2::ZERO, Vec2::ONE], // todo: hide the constraint properly
+				})
+				.stroke(shape.stroke.expect("constraint render should have a stroke"))
+				.build();
+
+			*shape = new_shape;
+
+			return;
+		}
+		let body_query = bodies.get_many([constraint.body_a.unwrap(), constraint.body_b.unwrap()]);
 		if body_query.is_err() {
 			commands.entity(entity).try_despawn();
 			warn!("Removed FixedDistanceRender {entity}: at least one of its bodies wasn't in the world");

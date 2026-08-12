@@ -6,13 +6,13 @@ use super::ConstraintSolver;
 
 #[derive(Component, Debug)]
 pub struct Spring {
-	pub body_a: Entity,
+	pub body_a: Option<Entity>,
 	pub body_a_offset: Vec2,
 
-	pub body_b: Entity,
+	pub body_b: Option<Entity>,
 	pub body_b_offset: Vec2,
 	
-	pub length: f32,
+	pub unstretched_length: f32,
 	pub frequency: f32,
 	pub damping: f32,
 
@@ -21,13 +21,13 @@ pub struct Spring {
 impl Default for Spring {
 	fn default() -> Self {
 		Self {
-			body_a: Entity::PLACEHOLDER,
+			body_a: None, // todo: use options instead
 			body_a_offset: Vec2::ZERO,
 
-			body_b: Entity::PLACEHOLDER,
+			body_b: None,
 			body_b_offset: Vec2::ZERO,
 
-			length: 100.0,
+			unstretched_length: 100.0,
 			frequency: 5.0,
 			damping: 0.1,
 
@@ -38,7 +38,16 @@ impl Default for Spring {
 
 impl ConstraintSolver for Spring {
 	fn solve_velocity(&self, bodies: &mut Query<&mut Body>, h: f32, iterations: i32) -> Result<(), BevyError> {
-		let [mut body_a, mut body_b] = bodies.get_many_mut([self.body_a, self.body_b])?;
+		if self.body_a.is_none() || self.body_b.is_none() {
+			return Ok(()); // return Ok() for now, todo: maybe return error
+		}
+		let mut body_a;
+		let mut body_b;
+		if let Ok([a, b]) = bodies.get_many_mut([self.body_a.unwrap(), self.body_b.unwrap()]) {
+			body_a = a;
+			body_b = b;
+		}
+		else { return Ok(()); }
 
 		let radius_a = self.body_a_offset.rotate(Vec2::from_angle(body_a.angle));
 		let position_a = body_a.position + radius_a;
@@ -48,7 +57,7 @@ impl ConstraintSolver for Spring {
 		
 		let ds = position_b - position_a;
 		let dir = ds.normalize_or(Vec2::X);
-		let position_error = ds.length() - self.length; // constraint-space position
+		let position_error = ds.length() - self.unstretched_length; // constraint-space position
 		if self.allow_compression && position_error < 0.0 { return Ok(()); } // don't eval constraint if in compression
 
 		let point_a_velocity = body_a.velocity + body_a.angular_velocity * radius_a.perp();

@@ -1,7 +1,7 @@
 use bevy::{ prelude::*, window::WindowCloseRequested };
 use bevy::window::PrimaryWindow;
 
-use bau::{ Body, BodyBuilder, FixedDistance, Spring };
+use bau::{ Body, BodyBuilder, Constraint, FixedDistance, Spring };
 
 mod render;
 use render::{ color_hex, BodyRenderBuilder, SpringRenderBuilder, DistanceRenderBuilder };
@@ -19,7 +19,6 @@ fn main() {
 
 
 fn add_bodies(mut commands: Commands) {
-	commands.insert_resource(MouseBody(None));
 	// Add bodies
 	let body_a_id = BodyRenderBuilder::new(
 			BodyBuilder::rect(50.0, 50.0)
@@ -64,7 +63,7 @@ fn add_bodies(mut commands: Commands) {
 		.build(&mut commands);
 
 
-	let body_d_id = BodyRenderBuilder::new(
+	let _body_d_id = BodyRenderBuilder::new(
 			BodyBuilder::rect(50.0, 50.0)
 			.position(Vec2::new(200.0, 400.0))
 			// .velocity(Vec2::new(-40.0, 0.0))
@@ -77,12 +76,6 @@ fn add_bodies(mut commands: Commands) {
 
 
 	/*
-	TODO: make mouse constraint an actual constraint so it applies forces to bodies
-		- update error handling so constraints aren't deleted when broken; maybe just don't solve them?
-			- throw warnings vs silently fail vs panic
-				- unfortunately, can't really let user wrap engine funcs for them to handle errors, so maybe full-on panic and force them to remove constraints?
-				- but then user must have reference to constraint when they might remove a body, which isn't always practical or ergonomic or fast
-			- also stop render updates, so when a constraint breaks, the renderer keeps constraint on screen but doesn't change position, encouraging proper removal
 	TODO: add gear constraint
 		v_a = -v_b, where v is the tangent velocity of a point outside the center of the body
 			- maybe calculate max radius r of body and use that as the point
@@ -91,11 +84,11 @@ fn add_bodies(mut commands: Commands) {
 	// Add spring constraints
 	let _spring = SpringRenderBuilder::new(
 			Spring {
-				body_a: body_a_id,
+				body_a: Some(body_a_id),
 				body_a_offset: Vec2::new(25.0, 25.0),
-				body_b: body_b_id,
+				body_b: Some(body_b_id),
 
-				length: 100.0,
+				unstretched_length: 100.0,
 				frequency: 2.0,
 				damping: 0.01,
 
@@ -108,12 +101,12 @@ fn add_bodies(mut commands: Commands) {
 
 	let _spring2 = SpringRenderBuilder::new(
 		Spring {
-			body_a: body_a_id,
+			body_a: Some(body_a_id),
 			body_a_offset: Vec2::new(-25.0, 25.0),
-			body_b: body_c_id,
+			body_b: Some(body_c_id),
 			body_b_offset: Vec2::new(0.0, 15.0),
 
-			length: 50.0,
+			unstretched_length: 50.0,
 			frequency: 1.0,
 			damping: 0.01,
 
@@ -127,10 +120,10 @@ fn add_bodies(mut commands: Commands) {
 	// Add fixed distance constraint
 	let _fixed_dist = DistanceRenderBuilder::new(
 			FixedDistance {
-				body_a: body_a_id,
+				body_a: Some(body_a_id),
 				body_a_offset: Vec2::new(-25.0, -25.0),
 
-				body_b: pin_id,
+				body_b: Some(pin_id),
 
 				length: 100.0,
 
@@ -139,47 +132,95 @@ fn add_bodies(mut commands: Commands) {
 		)
 		.stroke((color_hex("#f4fdd9b2"), 2.0))
 		.build(&mut commands);
+
+	
+	// Mouse control
+	let mouse_body = BodyRenderBuilder::new(
+			BodyBuilder::circle(4.0)
+			.position(Vec2::new(0.0, 0.0))
+			// .velocity(Vec2::new(-40.0, 0.0))
+			// .mass(1.0)
+			.is_static(true)
+			.build()
+		)
+		.stroke((color_hex("#f9f9f9a9"), 1.0))
+		.build(&mut commands);
+	let mouse_constraint = DistanceRenderBuilder::new(
+			FixedDistance {
+				body_a: Some(mouse_body),
+				// body_a_offset: Vec2::new(-25.0, -25.0),
+				body_b: None,
+				length: 0.0,
+				..Default::default()
+			}
+		)
+		.stroke((color_hex("#f4fdd9b2"), 2.0))
+		.build(&mut commands);
+	commands.insert_resource(Mouse {
+		body: mouse_body,
+		constraint: mouse_constraint,
+		holding: None,
+	});
 }
 
 
 // Mouse input
 #[derive(Resource)]
-struct MouseBody(Option<(Entity, Vec2)>);
+struct Mouse {
+	body: Entity,
+	constraint: Entity,
+	holding: Option<Entity>
+}
 
-fn handle_mouse(mouse_buttons: Res<ButtonInput<MouseButton>>, mut commands: Commands, mut mouse_state: ResMut<MouseBody>, camera: Query<(&Camera, &GlobalTransform), With<Camera2d>>, window: Single<&Window, With<PrimaryWindow>>, mut bodies: Query<(Entity, &mut Body)>) {
-	// Moving main spring constraint by clicking on window
-	if window.cursor_position().is_none() { // cursor not in window
-		mouse_state.0 = None;
+fn handle_mouse(mouse_buttons: Res<ButtonInput<MouseButton>>, mut commands: Commands, mut mouse_state: ResMut<Mouse>, camera: Query<(&Camera, &GlobalTransform), With<Camera2d>>, window: Single<&Window, With<PrimaryWindow>>, mut bodies: Query<(Entity, &mut Body)>, mut constraints: Query<&mut Constraint>) {
+	let mut mouse_constraint = constraints.get_mut(mouse_state.constraint).expect("Mouse constraint not found");
+	let mouse_constraint = match &mut *mouse_constraint {
+		Constraint::FixedDistance(s) => s,
+		_ => panic!("Expected mouse constraint to be FixedDistance")
+	};
+
+	if mouse_buttons.just_released(MouseButton::Left) || window.cursor_position().is_none() { // no longer clicking or off window
+		mouse_state.holding = None;
+		mouse_constraint.body_b = None;
 		return;
 	}
-	let position = window.cursor_position().unwrap(); // guaranteed successful unwrap
+	let position = window.cursor_position().unwrap(); // already checked; guaranteed successful unwrap
 	let (camera, camera_transform) = camera.single().expect("camera should be in world");
 	let mouse_world_pos = camera.viewport_to_world_2d(camera_transform, position).unwrap();
 
-	if mouse_buttons.just_released(MouseButton::Left) {
-		mouse_state.0 = None;
-	}
 
-	
-	if mouse_state.0.is_none() {
-		for (entity, body) in bodies.iter() {
-			if body.contains_point(mouse_world_pos) {
-				if mouse_buttons.pressed(MouseButton::Left) { // Drag left clicked body
-					let offset = body.position - mouse_world_pos;
-					mouse_state.0 = Some((entity, offset));
-					break;
-				}
-				if mouse_buttons.pressed(MouseButton::Right) { // Despawn right clicked body
-					commands.entity(entity).try_despawn();
-				}
-			}
+	// Update mouse body position
+	let (_, mut mouse_body) = bodies.get_mut(mouse_state.body).expect("Mouse body not found");
+	mouse_body.set_position(mouse_world_pos);
+
+	// Move static bodies by directly setting their position
+	if mouse_buttons.pressed(MouseButton::Left) && let Some(mouse_holding) = mouse_state.holding {
+		let (_, mut body) = bodies.get_mut(mouse_holding).unwrap();
+		if body.is_static {
+			body.set_position(mouse_world_pos + mouse_constraint.body_b_offset);
 		}
 	}
+	
+	
+	// Find new bodies to hold or delete
+	if mouse_state.holding.is_none() {
+		for (entity, body) in bodies.iter() {
+			if !body.contains_point(mouse_world_pos) || entity == mouse_state.body { continue; }
 
-	if mouse_buttons.pressed(MouseButton::Left) && let Some(mouse_state) = mouse_state.0 {
-		let (_, mut body) = bodies.get_mut(mouse_state.0).unwrap();
-		body.set_position(mouse_world_pos + mouse_state.1);
-		body.velocity = Vec2::ZERO;
+			if mouse_buttons.pressed(MouseButton::Left) { // Drag left clicked body
+				let offset = body.position - mouse_world_pos;
+				
+				mouse_state.holding = Some(entity);
+				mouse_constraint.body_b = Some(entity);
+				mouse_constraint.body_b_offset = offset.rotate(Vec2::from_angle(-body.angle));
+				
+				break;
+			}
+			else if mouse_buttons.pressed(MouseButton::Right) { // Despawn right clicked body
+				commands.entity(entity).try_despawn();
+				break;
+			}
+		}
 	}
 }
 

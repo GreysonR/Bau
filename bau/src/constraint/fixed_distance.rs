@@ -6,10 +6,10 @@ use super::ConstraintSolver;
 
 #[derive(Component, Debug)]
 pub struct FixedDistance {
-	pub body_a: Entity,
+	pub body_a: Option<Entity>,
 	pub body_a_offset: Vec2,
 
-	pub body_b: Entity,
+	pub body_b: Option<Entity>,
 	pub body_b_offset: Vec2,
 
 	pub length: f32,
@@ -17,10 +17,10 @@ pub struct FixedDistance {
 impl Default for FixedDistance {
 	fn default() -> Self {
 		Self {
-			body_a: Entity::PLACEHOLDER,
+			body_a: None,
 			body_a_offset: Vec2::ZERO,
 
-			body_b: Entity::PLACEHOLDER,
+			body_b: None,
 			body_b_offset: Vec2::ZERO,
 
 			length: 100.0,
@@ -30,7 +30,20 @@ impl Default for FixedDistance {
 
 impl ConstraintSolver for FixedDistance {
 	fn solve_velocity(&self, bodies: &mut Query<&mut Body>, h: f32, iterations: i32) -> Result<(), BevyError> {
-		let [mut body_a, mut body_b] = bodies.get_many_mut([self.body_a, self.body_b])?;
+		if self.body_a.is_none() || self.body_b.is_none() {
+			return Ok(()); // Ok() for now; todo: maybe throw error
+		}
+		let mut body_a;
+		let mut body_b;
+		if let Ok([a, b]) = bodies.get_many_mut([self.body_a.unwrap(), self.body_b.unwrap()]) {
+			body_a = a;
+			body_b = b;
+		}
+		else { return Ok(()); }
+		
+		if body_a.is_static && body_b.is_static {
+			return Ok(()); // don't do anything if both are static
+		}
 
 		let radius_a = self.body_a_offset.rotate(Vec2::from_angle(body_a.angle));
 		let position_a = body_a.position + radius_a;
@@ -51,7 +64,7 @@ impl ConstraintSolver for FixedDistance {
 
 
 		// Calculate soft constraint parameters
-		let zeta: f32 = 1.0; // damping ratio, zeta; value is arbitrary, chosen to behave nicely
+		let zeta: f32 = 0.2; // damping ratio, zeta; value is arbitrary, chosen to behave nicely
 		let omega: f32 = 2.0 * PI * 6.0; // oscillation frequency, omega; value is arbitrary, chosen to behave nicely
 
 		let k = effective_mass * omega.powf(2.0);
