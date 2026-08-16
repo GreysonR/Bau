@@ -60,8 +60,8 @@ impl ConstraintSolver for Spring {
 		let position_error = ds.length() - self.unstretched_length; // constraint-space position
 		if self.allow_compression && position_error < 0.0 { return Ok(()); } // don't eval constraint if in compression
 
-		let point_a_velocity = body_a.velocity + body_a.angular_velocity * radius_a.perp();
-		let point_b_velocity = body_b.velocity + body_b.angular_velocity * radius_b.perp();
+		let point_a_velocity = body_a.get_velocity_at_point(position_a);
+		let point_b_velocity = body_b.get_velocity_at_point(position_b);
 		let rel_vel = (point_b_velocity - point_a_velocity).dot(dir);
 		
 		let inverse_effective_mass = body_a.inverse_mass + body_b.inverse_mass + radius_a.perp_dot(dir) * body_a.inverse_inertia + radius_b.perp_dot(dir) * body_b.inverse_inertia;

@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use bevy::{ prelude::*, window::WindowCloseRequested };
 use bevy::window::PrimaryWindow;
 
@@ -68,6 +70,7 @@ fn add_bodies(mut commands: Commands) {
 			.position(Vec2::new(200.0, 400.0))
 			// .velocity(Vec2::new(-40.0, 0.0))
 			.angle(std::f32::consts::PI * 0.1)
+			.friction_air(0.9)
 			// .mass(1.0)
 			.build()
 		)
@@ -104,7 +107,7 @@ fn add_bodies(mut commands: Commands) {
 			body_a: Some(body_a_id),
 			body_a_offset: Vec2::new(-25.0, 25.0),
 			body_b: Some(body_c_id),
-			body_b_offset: Vec2::new(0.0, 15.0),
+			body_b_offset: Vec2::new(0.0, -15.0),
 
 			unstretched_length: 50.0,
 			frequency: 1.0,
@@ -212,7 +215,8 @@ fn handle_mouse(mouse_buttons: Res<ButtonInput<MouseButton>>, mut commands: Comm
 				
 				mouse_state.holding = Some(entity);
 				mouse_constraint.body_b = Some(entity);
-				mouse_constraint.body_b_offset = offset.rotate(Vec2::from_angle(-body.angle));
+				mouse_constraint.body_b_offset = offset.rotate(Vec2::from_angle(-body.angle + PI));
+				// mouse_constraint.body_b_offset = offset;
 				
 				break;
 			}
@@ -243,8 +247,9 @@ fn handle_input(keys: Res<ButtonInput<KeyCode>>, mut close_events: MessageWriter
 		).normalize();
 
 		for mut body in bodies {
+			let velocity = body.get_velocity();
 			let impulse = 100.0 * body.mass;
-			body.velocity += impulse * intent;
+			body.set_velocity(velocity + impulse * intent);
 			break; // only apply to 1st body
 		}
 	}

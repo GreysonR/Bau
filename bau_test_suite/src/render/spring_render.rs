@@ -128,6 +128,9 @@ pub fn update(query: Query<(&SpringRender, &mut Shape, &mut Constraint)>, bodies
 			if bodies.get(spring.body_a.unwrap()).is_err() {
 				spring.body_a = None;
 			}
+			if bodies.get(spring.body_b.unwrap()).is_err() {
+				spring.body_b = None;
+			}
 			return;
 		}
 		let [body_a, body_b] = result.unwrap();

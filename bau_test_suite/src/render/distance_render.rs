@@ -1,4 +1,4 @@
-use bevy::{math::VectorSpace, prelude::*};
+use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 use bau::{ Body, FixedDistance, Constraint };
 
@@ -60,17 +60,16 @@ impl DistanceRenderBuilder {
 }
 
 
-pub fn update(query: Query<(Entity, &mut Shape, &Constraint, &DistanceRender)>, mut commands: Commands, bodies: Query<&Body>) {
-	for (entity, mut shape, constraint, _) in query {
+pub fn update(query: Query<(&mut Shape, &mut Constraint, &DistanceRender)>, bodies: Query<&Body>) {
+	for (mut shape, mut constraint, _) in query {
 		// Verify it is the correct constraint type & unwrap
-		let constraint = match constraint {
+		let constraint = match &mut *constraint {
 			Constraint::FixedDistance(constraint) => constraint,
 			_ => panic!("distance constraint render should contain a FixedDistance constraint")
 		};
-		
+
 		// Update spring path
-		if constraint.body_a.is_none() || constraint.body_b.is_none() {
-			// Make invisible & return if either body is None
+		if constraint.body_a.is_none() || constraint.body_b.is_none() { // Make invisible if either body is None
 			let new_shape = ShapeBuilder::with(
 				&shapes::Polygon {
 					closed: false,
@@ -83,14 +82,21 @@ pub fn update(query: Query<(Entity, &mut Shape, &Constraint, &DistanceRender)>, 
 
 			return;
 		}
+
+		// Check bodies are in the world
 		let body_query = bodies.get_many([constraint.body_a.unwrap(), constraint.body_b.unwrap()]);
-		if body_query.is_err() {
-			commands.entity(entity).try_despawn();
-			warn!("Removed FixedDistanceRender {entity}: at least one of its bodies wasn't in the world");
+		if body_query.is_err() { // at least one of the bodies is not in the world anymore, so set that body to None in the constraint
+			if bodies.get(constraint.body_a.unwrap()).is_err() {
+				constraint.body_a = None;
+			}
+			if bodies.get(constraint.body_b.unwrap()).is_err() {
+				constraint.body_b = None;
+			}
 			return;
 		}
-		let [body_a, body_b] = body_query.unwrap();
 		
+		// Update as normal
+		let [body_a, body_b] = body_query.unwrap();
 		let new_shape = ShapeBuilder::with(
 			&shapes::Polygon {
 				closed: false,

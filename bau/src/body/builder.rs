@@ -62,7 +62,6 @@ impl BodyBuilder {
 		assert!(radius > 0.0, "Radius must be positive");
 
 		let vertex_count = (radius.powf(0.5) * 3.5).round().max(3.0) as usize;
-		println!("vertex count: {vertex_count}");
 		let delta_angle = PI * 2.0 / (vertex_count as f32); // angle between each vertex
 		let mut vertices = Vec::new();
 		vertices.reserve_exact(vertex_count);
@@ -162,9 +161,9 @@ impl BodyBuilder {
 		Body {
 			vertices,
 			position: self.position,
+			last_position: self.position - self.velocity,
 			angle: self.angle,
-			velocity: self.velocity,
-			angular_velocity: self.angular_velocity,
+			last_angle: self.angle - self.angular_velocity,
 
 			mass,
 			friction_air: self.friction_air,

@@ -74,17 +74,20 @@ fn apply_forces(time: Res<Time>, engine: Res<Engine>, bodies: Query<&mut Body>) 
 	}
 
 	for mut body in bodies {
+		let velocity = body.get_velocity();
+		let angular_velocity = body.get_angular_velocity();
 		let inverse_mass = body.inverse_mass;
-		// Apply air friction
-		let friction_air = (1.0 - body.friction_air).powf(delta * 10.0); // * 10.0 so friction_air doesn't have to be as absurd (0.99999... just to be damped)
-		body.velocity *= friction_air;
 
-		let friction_angular = (1.0 - body.friction_angular).powf(delta * 10.0);
-		body.angular_velocity *= friction_angular;
+		// Apply air friction
+		let friction_air = (1.0 - body.friction_air).powf(delta * 1000.0); // 1000.0 is arbitrary, used so friction_air doesn't have to be as absurd (0.99999... just to be damped)
+		body.set_velocity(velocity * friction_air);
+
+		let friction_angular = (1.0 - body.friction_angular).powf(delta * 1000.0);
+		body.set_angular_velocity(angular_velocity * friction_angular);
 
 		// Apply gravity
 		let force_gravity = gravity * body.mass;
-		body.velocity += force_gravity * inverse_mass * delta;
+		body.set_velocity(velocity + force_gravity * inverse_mass * delta);
 	}
 }
 
@@ -98,10 +101,10 @@ fn apply_impulses(time: Res<Time>, bodies: Query<&mut Body>) {
 	
 	for mut body in bodies {
 
-		let delta_position = delta * body.velocity;
+		let delta_position = delta * body.get_velocity();
 		body.translate_position(delta_position);
 
-		let delta_angle = delta * body.angular_velocity;
+		let delta_angle = delta * body.get_angular_velocity();
 		body.translate_angle(delta_angle);
 	}
 }

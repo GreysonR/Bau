@@ -42,7 +42,7 @@ impl ConstraintSolver for FixedDistance {
 		else { return Ok(()); }
 		
 		if body_a.is_static && body_b.is_static {
-			return Ok(()); // don't do anything if both are static
+			return Ok(()); // don't do anything if both are static; otherwise sim will break from NaN's
 		}
 
 		let radius_a = self.body_a_offset.rotate(Vec2::from_angle(body_a.angle));
@@ -55,8 +55,8 @@ impl ConstraintSolver for FixedDistance {
 		let dir = ds.normalize_or(Vec2::X);
 		let position_error = ds.length() - self.length; // constraint-space position
 
-		let point_a_velocity = body_a.velocity + body_a.angular_velocity * radius_a.perp();
-		let point_b_velocity = body_b.velocity + body_b.angular_velocity * radius_b.perp();
+		let point_a_velocity = body_a.get_velocity_at_point(position_a);
+		let point_b_velocity = body_b.get_velocity_at_point(position_b);
 		let rel_vel = (point_b_velocity - point_a_velocity).dot(dir);
 		
 		let inverse_effective_mass = body_a.inverse_mass + body_b.inverse_mass + radius_a.perp_dot(dir) * body_a.inverse_inertia + radius_b.perp_dot(dir) * body_b.inverse_inertia;
@@ -64,8 +64,8 @@ impl ConstraintSolver for FixedDistance {
 
 
 		// Calculate soft constraint parameters
-		let zeta: f32 = 0.2; // damping ratio, zeta; value is arbitrary, chosen to behave nicely
-		let omega: f32 = 2.0 * PI * 6.0; // oscillation frequency, omega; value is arbitrary, chosen to behave nicely
+		let zeta: f32 = 0.8; // damping ratio, zeta; value is arbitrary
+		let omega: f32 = 2.0 * PI * 30.0; // oscillation frequency, omega; value is arbitrary
 
 		let k = effective_mass * omega.powf(2.0);
 		let c = 2.0 * effective_mass * omega * zeta;

@@ -5,7 +5,7 @@ The project is intended for learning about the fundamentals of physics engines, 
 
 # Requirements
 - [Bevy dependencies](https://bevy.org/learn/quick-start/getting-started/setup/)
-- [LLD linker](https://bevy.org/learn/quick-start/getting-started/setup/#alternative-linkers)
+- [LLD linker](https://bevy.org/learn/quick-start/getting-started/setup/#alternative-linkers) (optional, Windows only as it's already the default on Linux)
 
 # Running the testing GUI
 `cargo run`

@@ -9,9 +9,9 @@ pub struct Body {
 	// Stateful properties
 	pub vertices: Vec<Vec2>,
 	pub position: Vec2,
+	pub last_position: Vec2,
 	pub angle: f32,
-	pub velocity: Vec2,
-	pub angular_velocity: f32,
+	pub last_angle: f32,
 	
 	// Inherent
 	pub mass: f32,
@@ -30,9 +30,9 @@ impl Default for Body {
 		Self {
 			vertices: Vec::new(),
 			position: Vec2::ZERO,
+			last_position: Vec2::ZERO,
 			angle: 0.0,
-			velocity: Vec2::ZERO,
-			angular_velocity: 0.0,
+			last_angle: 0.0,
 			
 			mass: 1.0,
 			inertia: 1.0,
@@ -68,6 +68,7 @@ impl Body {
 			*vertex += translation;
 		}
 		self.position += translation;
+		self.last_position += translation;
 	}
 	pub fn translate_angle(&mut self, translation: f32) {
 		let angle_vec = Vec2::from_angle(translation);
@@ -75,6 +76,7 @@ impl Body {
 			*vertex = (*vertex - self.position).rotate(angle_vec) + self.position;
 		}
 		self.angle += translation;
+		self.last_angle += translation;
 	}
 	pub fn set_position(&mut self, position: Vec2) {
 		self.translate_position(position - self.position);
@@ -83,12 +85,25 @@ impl Body {
 		self.translate_angle(angle - self.angle);
 	}
 
+	pub fn get_velocity(&self) -> Vec2 {
+		self.position - self.last_position
+	}
+	pub fn set_velocity(&mut self, new_velocity: Vec2) {
+		self.last_position = self.position - new_velocity;
+	}
+	pub fn get_angular_velocity(&self) -> f32 {
+		self.angle - self.last_angle
+	}
+	pub fn set_angular_velocity(&mut self, new_angular_velocity: f32) {
+		self.last_angle = self.angle - new_angular_velocity;
+	}
+
 	pub fn apply_impulse(&mut self, impulse: Vec2, position: Vec2) {
 		let radius = position - self.position;
 		let cross = radius.perp_dot(impulse);
 
-		self.velocity += impulse * self.inverse_mass;
-		self.angular_velocity += cross * self.inverse_inertia;
+		self.set_velocity(self.get_velocity() + impulse * self.inverse_mass);
+		self.set_angular_velocity(self.get_angular_velocity() + cross * self.inverse_inertia);
 	}
 
 	pub fn contains_point(&self, point: Vec2) -> bool {
@@ -106,5 +121,10 @@ impl Body {
 			}
 		}
 		true
+	}
+
+	// Finds the velocity of the given point on the body, taking into account both linear and angular velocity
+	pub fn get_velocity_at_point(&self, point: Vec2) -> Vec2 {
+		self.get_velocity() + self.get_angular_velocity() * (point - self.position).perp()
 	}
 }
