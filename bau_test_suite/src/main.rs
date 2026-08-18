@@ -3,10 +3,10 @@ use std::f32::consts::PI;
 use bevy::{ prelude::*, window::WindowCloseRequested };
 use bevy::window::PrimaryWindow;
 
-use bau::{ Body, BodyBuilder, Constraint, FixedDistance, Spring };
+use bau::*;
 
 mod render;
-use render::{ color_hex, BodyRenderBuilder, SpringRenderBuilder, DistanceRenderBuilder };
+use render::{ color_hex };
 
 fn main() {
 	App::new()
@@ -14,26 +14,27 @@ fn main() {
 		// .add_systems(Update, print_mouse_position)
 		.add_plugins((bau::Engine::default(), render::Render))
 		.add_systems(Startup, add_bodies)
-		.add_systems(Update, (handle_mouse, handle_input))
+		.add_systems(Update, handle_input)
 		.run();
 
 }
 
 
-fn add_bodies(mut commands: Commands) {
+fn add_bodies(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut materials: ResMut<Assets<ColorMaterial>>) {
 	// Add bodies
-	let body_a_id = BodyRenderBuilder::new(
-			BodyBuilder::rect(50.0, 50.0)
-			.position(Vec2::new(200.0, 0.0))
-			// .velocity(Vec2::new(-40.0, 0.0))
-			.angle(std::f32::consts::PI * 0.2)
-			// .mass(1.0)
-			.build()
-		)
-		.fill(color_hex("#F0A152"))
-		.build(&mut commands);
+
+	commands.spawn((
+		RigidBody::Dynamic,
+		Mass::new(1.0),
+		Velocity(Vec2::new(0.0, -20.0)),
+		// Collider::rectangle(50.0, 50.0),
+		Transform::from_xyz(0.0, 0.0, 0.0).rotate_z(0.2 * PI),
+
+		Mesh2d(meshes.add(Rectangle::new(50.0, 50.0))),
+		MeshMaterial2d(materials.add(color_hex("#F0A152")))
+	));
 	
-	
+	/*
 	let body_b_id = BodyRenderBuilder::new(
 			BodyBuilder::circle(10.0)
 			.position(Vec2::new(0.0, 0.0))
@@ -77,12 +78,6 @@ fn add_bodies(mut commands: Commands) {
 		.fill(color_hex("#8ae977"))
 		.build(&mut commands);
 
-
-	/*
-	TODO: add gear constraint
-		v_a = -v_b, where v is the tangent velocity of a point outside the center of the body
-			- maybe calculate max radius r of body and use that as the point
-	*/
 	
 	// Add spring constraints
 	let _spring = SpringRenderBuilder::new(
@@ -164,6 +159,7 @@ fn add_bodies(mut commands: Commands) {
 		constraint: mouse_constraint,
 		holding: None,
 	});
+	// */
 }
 
 
@@ -175,12 +171,8 @@ struct Mouse {
 	holding: Option<Entity>
 }
 
-fn handle_mouse(mouse_buttons: Res<ButtonInput<MouseButton>>, mut commands: Commands, mut mouse_state: ResMut<Mouse>, camera: Query<(&Camera, &GlobalTransform), With<Camera2d>>, window: Single<&Window, With<PrimaryWindow>>, mut bodies: Query<(Entity, &mut Body)>, mut constraints: Query<&mut Constraint>) {
+fn handle_mouse(mouse_buttons: Res<ButtonInput<MouseButton>>, mut commands: Commands, mut mouse_state: ResMut<Mouse>, camera: Query<(&Camera, &GlobalTransform), With<Camera2d>>, window: Single<&Window, With<PrimaryWindow>>, mut bodies: Query<(Entity, &mut RigidBody)>, mut constraints: Query<&mut FixedDistance>) {
 	let mut mouse_constraint = constraints.get_mut(mouse_state.constraint).expect("Mouse constraint not found");
-	let mouse_constraint = match &mut *mouse_constraint {
-		Constraint::FixedDistance(s) => s,
-		_ => panic!("Expected mouse constraint to be FixedDistance")
-	};
 
 	if mouse_buttons.just_released(MouseButton::Left) || window.cursor_position().is_none() { // no longer clicking or off window
 		mouse_state.holding = None;
@@ -230,7 +222,7 @@ fn handle_mouse(mouse_buttons: Res<ButtonInput<MouseButton>>, mut commands: Comm
 
 
 // Keyboard input
-fn handle_input(keys: Res<ButtonInput<KeyCode>>, mut close_events: MessageWriter<WindowCloseRequested>, windows: Query<Entity, With<Window>>, bodies: Query<&mut Body>) {
+fn handle_input(keys: Res<ButtonInput<KeyCode>>, mut close_events: MessageWriter<WindowCloseRequested>, windows: Query<Entity, With<Window>>, bodies: Query<&mut RigidBody>) {
 	// Quick exiting window with q
 	if keys.just_pressed(KeyCode::KeyQ) {
 		let window = windows.single();
@@ -254,3 +246,4 @@ fn handle_input(keys: Res<ButtonInput<KeyCode>>, mut close_events: MessageWriter
 		}
 	}
 }
+

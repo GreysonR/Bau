@@ -1,34 +1,20 @@
 use bevy::prelude::*;
-use super::body::Body;
+
+mod constraint_options;
+pub use constraint_options::*;
 
 mod spring;
 pub use spring::Spring;
 
-mod fixed_distance;
-pub use fixed_distance::FixedDistance;
 
-#[derive(Component)]
-pub enum Constraint {
-	Spring(Spring),
-	FixedDistance(FixedDistance),
-}
+// mod fixed_distance;
+// pub use fixed_distance::FixedDistance;
 
-pub trait ConstraintSolver {
-	fn solve_velocity(&self, bodies: &mut Query<&mut Body>, delta_time: f32, iterations: i32) -> Result<(), BevyError>;
-	fn solve_position(&self, _bodies: &mut Query<&mut Body>, _delta_time: f32, _iterations: i32) {}
-}
+use crate::RigidBody;
 
-impl ConstraintSolver for Constraint {
-	fn solve_velocity(&self, mut bodies: &mut Query<&mut Body>, delta: f32, iterations: i32) -> Result<(), BevyError> {
-		match self {
-			Constraint::Spring(spring) => spring.solve_velocity(&mut bodies, delta, iterations),
-			Constraint::FixedDistance(constraint) => constraint.solve_velocity(&mut bodies, delta, iterations),
-		}
-	}
-	fn solve_position(&self, mut bodies: &mut Query<&mut Body>, delta: f32, iterations: i32) {
-		match self {
-			Constraint::Spring(spring) => spring.solve_position(&mut bodies, delta, iterations),
-			Constraint::FixedDistance(constraint) => constraint.solve_position(&mut bodies, delta, iterations),
-		};
-	}
+#[bevy_trait_query::queryable]
+#[allow(unused)]
+pub trait Constraint {
+	fn solve_velocity(&self, bodies: &mut Query<&mut RigidBody>, delta_time: f32, iterations: i32) -> Result<(), BevyError> { Ok(()) }
+	fn solve_position(&self, bodies: &mut Query<&mut RigidBody>, delta_time: f32, iterations: i32) -> Result<(), BevyError> { Ok(()) }
 }

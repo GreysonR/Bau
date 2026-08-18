@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 use std::f32::consts::PI;
 
-use super::Body;
-use super::ConstraintSolver;
+use super::RigidBody;
+use super::Constraint;
 
 #[derive(Component, Debug)]
 pub struct FixedDistance {
@@ -25,64 +25,5 @@ impl Default for FixedDistance {
 
 			length: 100.0,
 		}
-	}
-}
-
-impl ConstraintSolver for FixedDistance {
-	fn solve_velocity(&self, bodies: &mut Query<&mut Body>, h: f32, iterations: i32) -> Result<(), BevyError> {
-		if self.body_a.is_none() || self.body_b.is_none() {
-			return Ok(()); // Ok() for now; todo: maybe throw error
-		}
-		let mut body_a;
-		let mut body_b;
-		if let Ok([a, b]) = bodies.get_many_mut([self.body_a.unwrap(), self.body_b.unwrap()]) {
-			body_a = a;
-			body_b = b;
-		}
-		else { return Ok(()); }
-		
-		if body_a.is_static && body_b.is_static {
-			return Ok(()); // don't do anything if both are static; otherwise sim will break from NaN's
-		}
-
-		let radius_a = self.body_a_offset.rotate(Vec2::from_angle(body_a.angle));
-		let position_a = body_a.position + radius_a;
-
-		let radius_b = self.body_b_offset.rotate(Vec2::from_angle(body_b.angle));
-		let position_b = body_b.position + radius_b;
-		
-		let ds = position_b - position_a;
-		let dir = ds.normalize_or(Vec2::X);
-		let position_error = ds.length() - self.length; // constraint-space position
-
-		let point_a_velocity = body_a.get_velocity_at_point(position_a);
-		let point_b_velocity = body_b.get_velocity_at_point(position_b);
-		let rel_vel = (point_b_velocity - point_a_velocity).dot(dir);
-		
-		let inverse_effective_mass = body_a.inverse_mass + body_b.inverse_mass + radius_a.perp_dot(dir) * body_a.inverse_inertia + radius_b.perp_dot(dir) * body_b.inverse_inertia;
-		let effective_mass = 1.0 / inverse_effective_mass;
-
-
-		// Calculate soft constraint parameters
-		let zeta: f32 = 0.8; // damping ratio, zeta; value is arbitrary
-		let omega: f32 = 2.0 * PI * 30.0; // oscillation frequency, omega; value is arbitrary
-
-		let k = effective_mass * omega.powf(2.0);
-		let c = 2.0 * effective_mass * omega * zeta;
-
-		let gamma = 1.0 / (c + h*k);
-		let beta = h*k * gamma;
-
-		// Soft constraint impulse equation
-		let mut impulse = -(rel_vel + beta / h * position_error) / (inverse_effective_mass + gamma / h);
-		impulse /= iterations as f32;
-
-
-		// Apply impulses
-		let p = -impulse * dir;
-		body_a.apply_impulse(p, position_a);
-		body_b.apply_impulse(-p, position_b);
-
-		Ok(())
 	}
 }

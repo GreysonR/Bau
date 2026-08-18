@@ -1,10 +1,15 @@
 use bevy::prelude::*;
 use std::f32::consts::PI;
 
-use super::Body;
-use super::ConstraintSolver;
+use super::{ Constraint, constraint_options::* };
+use crate::RigidBody;
+
+mod spring_options;
+use spring_options::*;
+
 
 #[derive(Component, Debug)]
+#[require(BodyA, BodyB, UnstretchedLength, Frequency, Damping, AllowCompression)]
 pub struct Spring {
 	pub body_a: Option<Entity>,
 	pub body_a_offset: Vec2,
@@ -36,8 +41,8 @@ impl Default for Spring {
 	}
 }
 
-impl ConstraintSolver for Spring {
-	fn solve_velocity(&self, bodies: &mut Query<&mut Body>, h: f32, iterations: i32) -> Result<(), BevyError> {
+impl Constraint for Spring {
+	fn solve_velocity(&self, bodies: &mut Query<&mut RigidBody>, h: f32, iterations: i32) -> Result<(), BevyError> {
 		if self.body_a.is_none() || self.body_b.is_none() {
 			return Ok(()); // return Ok() for now, todo: maybe return error
 		}

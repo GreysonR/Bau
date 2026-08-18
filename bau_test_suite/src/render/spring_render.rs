@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
-use bau::{ Body, Spring, Constraint };
+use bau::{ RigidBody, Spring };
 
 // Spring rendering stuff
 #[derive(Component)]
@@ -47,6 +47,7 @@ pub struct SpringRenderBuilder {
 	margin: f32,
 }
 impl SpringRenderBuilder {
+	#[allow(unused)]
 	pub fn new(spring: Spring) -> Self {
 		Self {
 			spring,
@@ -71,6 +72,7 @@ impl SpringRenderBuilder {
 		self
 	}
 
+	#[allow(unused)]
 	pub fn build(self, commands: &mut Commands) -> Entity { // TODO: consider generalizing this, and/or turning this method into one that takes in options & the spring rather than a whole builder
 		let stroke = self.stroke.expect("Body should have a stroke before building");
 
@@ -89,7 +91,7 @@ impl SpringRenderBuilder {
 		};
 		
 		commands.spawn((
-			Constraint::Spring(self.spring),
+			self.spring,
 			shape,
 			spring_render,
 			Transform::from_translation(Vec3::new(0.0, 0.0, 0.0))
@@ -99,14 +101,8 @@ impl SpringRenderBuilder {
 }
 
 
-pub fn update(query: Query<(&SpringRender, &mut Shape, &mut Constraint)>, bodies: Query<&Body>) {
-	for (spring_render, mut shape, mut constraint) in query {
-		// Verify it is a spring & unwrap
-		let spring = match &mut *constraint {
-			Constraint::Spring(spring) => spring,
-			_ => panic!("spring constraint render should contain a spring")
-		};
-		
+pub fn update(query: Query<(&SpringRender, &mut Shape, &mut Spring)>, bodies: Query<&RigidBody>) {
+	for (spring_render, mut shape, mut spring) in query {
 		// Update spring path
 		if spring.body_a.is_none() || spring.body_b.is_none() {
 			// Make invisible & return if either body is None
