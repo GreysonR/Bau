@@ -14,7 +14,7 @@ fn main() {
 		// .add_systems(Update, print_mouse_position)
 		.add_plugins((bau::Engine::default(), render::Render))
 		.add_systems(Startup, add_bodies)
-		.add_systems(Update, handle_input)
+		// .add_systems(Update, handle_input)
 		.run();
 
 }
@@ -170,7 +170,7 @@ struct Mouse {
 	constraint: Entity,
 	holding: Option<Entity>
 }
-
+/*
 fn handle_mouse(mouse_buttons: Res<ButtonInput<MouseButton>>, mut commands: Commands, mut mouse_state: ResMut<Mouse>, camera: Query<(&Camera, &GlobalTransform), With<Camera2d>>, window: Single<&Window, With<PrimaryWindow>>, mut bodies: Query<(Entity, &mut RigidBody)>, mut constraints: Query<&mut FixedDistance>) {
 	let mut mouse_constraint = constraints.get_mut(mouse_state.constraint).expect("Mouse constraint not found");
 
@@ -246,4 +246,4 @@ fn handle_input(keys: Res<ButtonInput<KeyCode>>, mut close_events: MessageWriter
 		}
 	}
 }
-
+ */

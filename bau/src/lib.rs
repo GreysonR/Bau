@@ -37,7 +37,7 @@ impl Plugin for Engine {
 				solve_velocity_constraints,
 				solve_position_constraints,
 				apply_impulses
-			).chain()
+			)
 		);
 		
 		app.insert_resource(self.clone());
@@ -45,7 +45,7 @@ impl Plugin for Engine {
 }
 
 // Solves all constraints in the world
-fn solve_velocity_constraints(time: Res<Time>, engine: Res<Engine>, mut commands: Commands, constraints: Query<(Entity, &dyn Constraint)>, mut bodies: Query<&mut RigidBody>) {
+fn solve_velocity_constraints(time: Res<Time>, engine: Res<Engine>, mut commands: Commands, constraints: Query<(Entity, &dyn Constraint)>, mut bodies: Query<(&RigidBody, &Transform, &mut Velocity, &mut AngularVelocity, &Mass, &Inertia)>) {
 	let velocity_iterations = engine.velocity_iterations;
 	let delta = time.delta_secs();
 
@@ -65,7 +65,7 @@ fn solve_velocity_constraints(time: Res<Time>, engine: Res<Engine>, mut commands
 		}
 	}
 }
-fn solve_position_constraints(time: Res<Time>, engine: Res<Engine>, mut commands: Commands, constraints: Query<(Entity, &dyn Constraint)>, mut bodies: Query<&mut RigidBody>) {
+fn solve_position_constraints(time: Res<Time>, engine: Res<Engine>, mut commands: Commands, constraints: Query<(Entity, &dyn Constraint)>, mut bodies: Query<(&RigidBody, &mut Transform, &Velocity, &AngularVelocity, &Mass, &Inertia)>) {
 	let position_iterations = engine.position_iterations;
 	let delta = time.delta_secs();
 	
@@ -100,7 +100,7 @@ fn apply_forces(time: Res<Time>, engine: Res<Engine>, bodies: Query<(&RigidBody,
 		let angular_velocity = &mut angular_velocity.0;
 		let friction_air = friction_air.0;
 		let friction_angular = friction_angular.0;
-		let inverse_mass = mass.get_inverse();
+		let inverse_mass = mass.inverse();
 		let mass = mass.get();
 
 

@@ -17,7 +17,7 @@ impl Mass {
 		self.inverse = 1.0 / mass;
 	}
 	pub fn get(&self) -> f32 { self.value }
-	pub fn get_inverse(&self) -> f32 { self.inverse }
+	pub fn inverse(&self) -> f32 { self.inverse }
 }
 impl Default for Mass {
 	fn default() -> Self {
@@ -43,7 +43,7 @@ impl Inertia {
 		self.inverse = 1.0 / inertia;
 	}
 	pub fn get(&self) -> f32 { self.value }
-	pub fn get_inverse(&self) -> f32 { self.inverse }
+	pub fn inverse(&self) -> f32 { self.inverse }
 }
 impl Default for Inertia {
 	fn default() -> Self {
