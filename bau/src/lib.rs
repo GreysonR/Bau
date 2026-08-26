@@ -45,7 +45,7 @@ impl Plugin for Engine {
 }
 
 // Solves all constraints in the world
-fn solve_velocity_constraints(time: Res<Time>, engine: Res<Engine>, mut commands: Commands, constraints: Query<(Entity, &dyn Constraint)>, mut bodies: Query<(&RigidBody, &Transform, &mut Velocity, &mut AngularVelocity, &Mass, &Inertia)>) {
+fn solve_velocity_constraints(time: Res<Time>, engine: Res<Engine>, mut commands: Commands, constraints: Query<(Entity, &dyn Constraint)>, mut bodies: Query<RigidBodyQuery>) {
 	let velocity_iterations = engine.velocity_iterations;
 	let delta = time.delta_secs();
 
@@ -65,7 +65,7 @@ fn solve_velocity_constraints(time: Res<Time>, engine: Res<Engine>, mut commands
 		}
 	}
 }
-fn solve_position_constraints(time: Res<Time>, engine: Res<Engine>, mut commands: Commands, constraints: Query<(Entity, &dyn Constraint)>, mut bodies: Query<(&RigidBody, &mut Transform, &Velocity, &AngularVelocity, &Mass, &Inertia)>) {
+fn solve_position_constraints(time: Res<Time>, engine: Res<Engine>, mut commands: Commands, constraints: Query<(Entity, &dyn Constraint)>, mut bodies: Query<RigidBodyQuery>) {
 	let position_iterations = engine.position_iterations;
 	let delta = time.delta_secs();
 	
@@ -87,7 +87,7 @@ fn solve_position_constraints(time: Res<Time>, engine: Res<Engine>, mut commands
 }
 
 // Apply various simple forces to bodies; i.e. air friction, gravity; Only applies to dynamic bodies
-fn apply_forces(time: Res<Time>, engine: Res<Engine>, bodies: Query<(&RigidBody, &mut Velocity, &mut AngularVelocity, &FrictionAir, &FrictionAngular, &Mass)>) {
+fn apply_forces(time: Res<Time>, engine: Res<Engine>, bodies: Query<RigidBodyQuery>) {
 	let gravity = engine.gravity;
 	let delta = time.delta_secs();
 
@@ -95,25 +95,23 @@ fn apply_forces(time: Res<Time>, engine: Res<Engine>, bodies: Query<(&RigidBody,
 		return;
 	}
 
-	for (_, mut velocity, mut angular_velocity, friction_air, friction_angular, mass) in bodies {
-		let velocity = &mut velocity.0;
-		let angular_velocity = &mut angular_velocity.0;
-		let friction_air = friction_air.0;
-		let friction_angular = friction_angular.0;
-		let inverse_mass = mass.inverse();
-		let mass = mass.get();
+	for mut body in bodies {
+		let friction_air = body.friction_air.0;
+		let friction_angular = body.friction_angular.0;
+		let mass = body.mass.get();
+		let inverse_mass = body.mass.inverse();
 
 
 		// Apply air friction
 		let friction_air = (1.0 - friction_air).powf(delta * 1000.0); // 1000.0 is arbitrary, used so friction_air doesn't have to be as absurd (0.99999... just to be damped)
-		*velocity *= friction_air;
+		body.velocity.0 *= friction_air;
 
 		let friction_angular = (1.0 - friction_angular).powf(delta * 1000.0);
-		*angular_velocity *= friction_angular;
+		body.angular_velocity.0 *= friction_angular;
 
 		// Apply gravity
 		let force_gravity = gravity * mass;
-		*velocity += force_gravity * inverse_mass * delta;
+		body.velocity.0 += force_gravity * inverse_mass * delta;
 	}
 }
 

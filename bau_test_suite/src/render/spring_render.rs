@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
-use bau::{ RigidBody, Spring };
+use bau::{ RigidBodyQuery, Spring };
 
 // Spring rendering stuff
 #[derive(Component)]
@@ -101,7 +101,7 @@ impl SpringRenderBuilder {
 }
 
 
-pub fn update(query: Query<(&SpringRender, &mut Shape, &mut Spring)>, bodies: Query<&RigidBody>) {
+pub fn update(query: Query<(&SpringRender, &mut Shape, &mut Spring)>, bodies: Query<RigidBodyQuery>) {
 	for (spring_render, mut shape, mut spring) in query {
 		// Update spring path
 		if spring.body_a.is_none() || spring.body_b.is_none() {
@@ -131,8 +131,8 @@ pub fn update(query: Query<(&SpringRender, &mut Shape, &mut Spring)>, bodies: Qu
 		}
 		let [body_a, body_b] = result.unwrap();
 		let points = spring_render.get_points(
-			&(body_a.position + spring.body_a_offset.rotate(Vec2::from_angle(body_a.angle))),
-			&(body_b.position + spring.body_b_offset.rotate(Vec2::from_angle(body_b.angle)))
+			&(body_a.get_position() + spring.body_a_offset.rotate(body_a.get_angle())),
+			&(body_b.get_position() + spring.body_b_offset.rotate(body_b.get_angle()))
 		);
 		
 		let new_shape = ShapeBuilder::with(

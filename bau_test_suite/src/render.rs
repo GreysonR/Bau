@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 
-mod spring_render;
+pub mod spring_render;
 
 // Useful render methods
 pub fn color_hex(hex: &str) -> Color {

@@ -42,41 +42,34 @@ impl Default for Spring {
 }
 
 impl Constraint for Spring {
-	fn solve_velocity(&self, bodies: &mut Query<(&RigidBody, &Transform, &mut Velocity, &mut AngularVelocity, &Mass, &Inertia)>, h: f32, iterations: i32) -> Result<(), BevyError> {
+	fn solve_velocity(&self, bodies: &mut Query<RigidBodyQuery>, h: f32, iterations: i32) -> Result<(), BevyError> {
 		if self.body_a.is_none() || self.body_b.is_none() {
 			return Ok(()); // return Ok() for now, todo: maybe return error
 		}
-		let body_a;
-		let body_b;
+		let mut body_a;
+		let mut body_b;
 		if let Ok([a, b]) = bodies.get_many_mut([self.body_a.unwrap(), self.body_b.unwrap()]) {
 			body_a = a;
 			body_b = b;
 		}
 		else { return Ok(()); }
 
-		let (_, transform_a, mut velocity_a, mut angular_velocity_a, mass_a, inertia_a) = body_a;
-		let position_body_a = transform_a.translation.xy();
-		let rotation_a = transform_a.right().xy();
-		let (_, transform_b, mut velocity_b, mut angular_velocity_b, mass_b, inertia_b) = body_b;
-		let position_body_b = transform_b.translation.xy();
-		let rotation_b = transform_b.right().xy();
+		let radius_a = self.body_a_offset.rotate(body_a.get_angle());
+		let position_a = body_a.get_position() + radius_a;
 
-		let radius_a = self.body_a_offset.rotate(rotation_a);
-		let position_a = position_body_a + radius_a;
-
-		let radius_b = self.body_b_offset.rotate(rotation_b);
-		let position_b = position_body_b + radius_b;
+		let radius_b = self.body_b_offset.rotate(body_b.get_angle());
+		let position_b = body_b.get_position() + radius_b;
 		
 		let ds = position_b - position_a;
 		let dir = ds.normalize_or(Vec2::X);
 		let position_error = ds.length() - self.unstretched_length; // constraint-space position
 		if self.allow_compression && position_error < 0.0 { return Ok(()); } // don't eval constraint if in compression
 
-		let point_a_velocity = RigidBody::get_velocity_at_point(transform_a, &velocity_a, &angular_velocity_a, position_a);
-		let point_b_velocity = RigidBody::get_velocity_at_point(transform_b, &velocity_b, &angular_velocity_b, position_b);
+		let point_a_velocity = body_a.get_velocity_at_point(position_a);
+		let point_b_velocity = body_b.get_velocity_at_point(position_b);
 		let rel_vel = (point_b_velocity - point_a_velocity).dot(dir);
 		
-		let inverse_effective_mass = mass_a.inverse() + mass_b.inverse() + radius_a.perp_dot(dir) * inertia_a.inverse() + radius_b.perp_dot(dir) * inertia_b.inverse();
+		let inverse_effective_mass = body_a.mass.inverse() + body_b.mass.inverse() + radius_a.perp_dot(dir) * body_a.inertia.inverse() + radius_b.perp_dot(dir) * body_b.inertia.inverse();
 		let effective_mass = 1.0 / inverse_effective_mass;
 
 
@@ -97,8 +90,8 @@ impl Constraint for Spring {
 
 		// Apply impulses
 		let p = -impulse * dir;
-		RigidBody::apply_impulse(transform_a, &mut velocity_a, &mut angular_velocity_a, mass_a, inertia_a, position_a, p);
-		RigidBody::apply_impulse(transform_b, &mut velocity_b, &mut angular_velocity_b, mass_b, inertia_b, position_b, -p);
+		body_a.apply_impulse(position_a, p);
+		body_b.apply_impulse(position_a, -p);
 
 		Ok(())
 	}

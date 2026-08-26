@@ -6,7 +6,7 @@ use bevy::window::PrimaryWindow;
 use bau::*;
 
 mod render;
-use render::{ color_hex };
+use render::{ color_hex, spring_render::* };
 
 fn main() {
 	App::new()
@@ -14,7 +14,7 @@ fn main() {
 		// .add_systems(Update, print_mouse_position)
 		.add_plugins((bau::Engine::default(), render::Render))
 		.add_systems(Startup, add_bodies)
-		// .add_systems(Update, handle_input)
+		.add_systems(Update, handle_input)
 		.run();
 
 }
@@ -23,60 +23,53 @@ fn main() {
 fn add_bodies(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut materials: ResMut<Assets<ColorMaterial>>) {
 	// Add bodies
 
-	commands.spawn((
+	let body_a_id = commands.spawn((
 		RigidBody::Dynamic,
 		Mass::new(1.0),
 		Velocity(Vec2::new(0.0, -20.0)),
 		// Collider::rectangle(50.0, 50.0),
-		Transform::from_xyz(0.0, 0.0, 0.0).rotate_z(0.2 * PI),
+		Transform::from_xyz(-100.0, 0.0, 0.0).rotate_z(0.2 * PI),
 
 		Mesh2d(meshes.add(Rectangle::new(50.0, 50.0))),
 		MeshMaterial2d(materials.add(color_hex("#F0A152")))
+	)).id();
+	
+	let body_b_id = commands.spawn((
+		RigidBody::Static,
+		Transform::from_xyz(0.0, 0.0, 0.0),
+
+		Mesh2d(meshes.add(Circle::new(10.0))),
+		MeshMaterial2d(materials.add(color_hex("#E35531")))
+	)).id();
+	
+	let body_c_id = commands.spawn((
+		RigidBody::Dynamic,
+		Transform::from_xyz(200.0, 0.0, 0.0),
+		Velocity::new(-40.0, 0.0),
+
+		Mesh2d(meshes.add(Rectangle::new(30.0, 30.0))),
+		MeshMaterial2d(materials.add(color_hex("#F0A152")))
+	)).id();
+
+
+	let pin_id = commands.spawn((
+		RigidBody::Static,
+		Transform::from_xyz(100.0, 0.0, 0.0),
+		Velocity::new(-40.0, 0.0),
+
+		Mesh2d(meshes.add(Circle::new(3.0))),
+		MeshMaterial2d(materials.add(color_hex("#c1c1c168")))
+	)).id();
+
+	let body_d_id = commands.spawn((
+		RigidBody::Static,
+		Transform::from_xyz(200.0, 400.0, 0.0).rotate_z(std::f32::consts::PI * 0.1),
+
+		FrictionAir(0.9),
+
+		Mesh2d(meshes.add(Circle::new(3.0))),
+		MeshMaterial2d(materials.add(color_hex("#8ae977")))
 	));
-	
-	/*
-	let body_b_id = BodyRenderBuilder::new(
-			BodyBuilder::circle(10.0)
-			.position(Vec2::new(0.0, 0.0))
-			.is_static(true)
-			.build()
-		)
-		.fill(color_hex("#E35531"))
-		.build(&mut commands);
-	
-	
-	let body_c_id = BodyRenderBuilder::new(
-			BodyBuilder::rect(30.0, 30.0)
-			.position(Vec2::new(200.0, 0.0))
-			.velocity(Vec2::new(-40.0, 0.0))
-			// .mass(150.0)
-			.build()
-		)
-		.stroke((color_hex("#F0A152"), 1.0))
-		.build(&mut commands);
-	
-
-	let pin_id = BodyRenderBuilder::new(
-			BodyBuilder::circle(3.0)
-			.position(Vec2::new(100.0, 0.0))
-			.is_static(true)
-			.build()
-		)
-		.fill(color_hex("#c1c1c168"))
-		.build(&mut commands);
-
-
-	let _body_d_id = BodyRenderBuilder::new(
-			BodyBuilder::rect(50.0, 50.0)
-			.position(Vec2::new(200.0, 400.0))
-			// .velocity(Vec2::new(-40.0, 0.0))
-			.angle(std::f32::consts::PI * 0.1)
-			.friction_air(0.9)
-			// .mass(1.0)
-			.build()
-		)
-		.fill(color_hex("#8ae977"))
-		.build(&mut commands);
 
 	
 	// Add spring constraints
@@ -114,7 +107,7 @@ fn add_bodies(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut mate
 		.stroke((color_hex("#fdf2d9b2"), 2.0))
 		.build(&mut commands);
 
-
+	/*
 	// Add fixed distance constraint
 	let _fixed_dist = DistanceRenderBuilder::new(
 			FixedDistance {
@@ -218,11 +211,11 @@ fn handle_mouse(mouse_buttons: Res<ButtonInput<MouseButton>>, mut commands: Comm
 			}
 		}
 	}
-}
+}*/
 
 
 // Keyboard input
-fn handle_input(keys: Res<ButtonInput<KeyCode>>, mut close_events: MessageWriter<WindowCloseRequested>, windows: Query<Entity, With<Window>>, bodies: Query<&mut RigidBody>) {
+fn handle_input(keys: Res<ButtonInput<KeyCode>>, mut close_events: MessageWriter<WindowCloseRequested>, windows: Query<Entity, With<Window>>, bodies: Query<RigidBodyQuery>) {
 	// Quick exiting window with q
 	if keys.just_pressed(KeyCode::KeyQ) {
 		let window = windows.single();
@@ -240,10 +233,10 @@ fn handle_input(keys: Res<ButtonInput<KeyCode>>, mut close_events: MessageWriter
 
 		for mut body in bodies {
 			let velocity = body.get_velocity();
-			let impulse = 100.0 * body.mass;
+			let impulse = 100.0 * body.mass.get();
 			body.set_velocity(velocity + impulse * intent);
-			break; // only apply to 1st body
+			// break; // only apply to 1st body
 		}
 	}
 }
- */
+
