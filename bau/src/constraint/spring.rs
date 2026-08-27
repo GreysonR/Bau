@@ -54,10 +54,10 @@ impl Constraint for Spring {
 		}
 		else { return Ok(()); }
 
-		let radius_a = self.body_a_offset.rotate(body_a.get_angle());
+		let radius_a = self.body_a_offset.rotate(body_a.get_angle_dir());
 		let position_a = body_a.get_position() + radius_a;
 
-		let radius_b = self.body_b_offset.rotate(body_b.get_angle());
+		let radius_b = self.body_b_offset.rotate(body_b.get_angle_dir());
 		let position_b = body_b.get_position() + radius_b;
 		
 		let ds = position_b - position_a;

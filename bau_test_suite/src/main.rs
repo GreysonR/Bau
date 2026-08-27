@@ -21,58 +21,59 @@ fn main() {
 
 
 fn add_bodies(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut materials: ResMut<Assets<ColorMaterial>>) {
-	// Add bodies
-
-	let body_a_id = commands.spawn((
+	let _body_a_id = commands.spawn((
 		RigidBody::Dynamic,
 		Mass::new(1.0),
-		Velocity(Vec2::new(0.0, -20.0)),
+		Velocity::new(50.0, 0.0),
 		// Collider::rectangle(50.0, 50.0),
-		Transform::from_xyz(-100.0, 0.0, 0.0).rotate_z(0.2 * PI),
+		Transform::from_xyz(-20.0, 0.0, 0.0)
+			.with_rotation(Quat::from_rotation_z(0.1 * std::f32::consts::PI)),
 
 		Mesh2d(meshes.add(Rectangle::new(50.0, 50.0))),
 		MeshMaterial2d(materials.add(color_hex("#F0A152")))
 	)).id();
 	
-	let body_b_id = commands.spawn((
+	let _body_b_id = commands.spawn((
 		RigidBody::Static,
-		Transform::from_xyz(0.0, 0.0, 0.0),
+		Transform::from_xyz(100.0, 0.0, 0.0),
 
 		Mesh2d(meshes.add(Circle::new(10.0))),
 		MeshMaterial2d(materials.add(color_hex("#E35531")))
 	)).id();
 	
-	let body_c_id = commands.spawn((
-		RigidBody::Dynamic,
-		Transform::from_xyz(200.0, 0.0, 0.0),
-		Velocity::new(-40.0, 0.0),
+	// let _body_c_id = commands.spawn((
+	// 	RigidBody::Dynamic,
+	// 	Transform::from_xyz(200.0, 0.0, 0.0),
+	// 	Velocity::new(-40.0, 0.0),
 
-		Mesh2d(meshes.add(Rectangle::new(30.0, 30.0))),
-		MeshMaterial2d(materials.add(color_hex("#F0A152")))
-	)).id();
+	// 	Mesh2d(meshes.add(Rectangle::new(30.0, 30.0))),
+	// 	MeshMaterial2d(materials.add(color_hex("#F0A152")))
+	// )).id();
 
 
-	let pin_id = commands.spawn((
-		RigidBody::Static,
-		Transform::from_xyz(100.0, 0.0, 0.0),
-		Velocity::new(-40.0, 0.0),
+	// let _pin_id = commands.spawn((
+	// 	RigidBody::Static,
+	// 	Transform::from_xyz(100.0, 0.0, 0.0),
+	// 	Velocity::new(-40.0, 0.0),
 
-		Mesh2d(meshes.add(Circle::new(3.0))),
-		MeshMaterial2d(materials.add(color_hex("#c1c1c168")))
-	)).id();
+	// 	Mesh2d(meshes.add(Circle::new(3.0))),
+	// 	MeshMaterial2d(materials.add(color_hex("#c1c1c168")))
+	// )).id();
 
-	let body_d_id = commands.spawn((
-		RigidBody::Static,
-		Transform::from_xyz(200.0, 400.0, 0.0).rotate_z(std::f32::consts::PI * 0.1),
+	// let _body_d_id = commands.spawn((
+	// 	RigidBody::Static,
+	// 	Transform::from_xyz(200.0, 400.0, 0.0)
+	// 		.with_rotation(Quat::from_rotation_z(0.1 * std::f32::consts::PI)),
 
-		FrictionAir(0.9),
+	// 	FrictionAir(0.9),
 
-		Mesh2d(meshes.add(Circle::new(3.0))),
-		MeshMaterial2d(materials.add(color_hex("#8ae977")))
-	));
+	// 	Mesh2d(meshes.add(Circle::new(3.0))),
+	// 	MeshMaterial2d(materials.add(color_hex("#8ae977")))
+	// ));
 
 	
 	// Add spring constraints
+	/*
 	let _spring = SpringRenderBuilder::new(
 			Spring {
 				body_a: Some(body_a_id),
@@ -107,6 +108,8 @@ fn add_bodies(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut mate
 		.stroke((color_hex("#fdf2d9b2"), 2.0))
 		.build(&mut commands);
 
+	*/
+
 	/*
 	// Add fixed distance constraint
 	let _fixed_dist = DistanceRenderBuilder::new(
@@ -123,7 +126,7 @@ fn add_bodies(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut mate
 		)
 		.stroke((color_hex("#f4fdd9b2"), 2.0))
 		.build(&mut commands);
-
+	
 	
 	// Mouse control
 	let mouse_body = BodyRenderBuilder::new(

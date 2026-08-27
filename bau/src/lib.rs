@@ -23,7 +23,6 @@ impl Default for Engine {
 }
 impl Plugin for Engine {
 	fn build(&self, app: &mut App) {
-		
 		// Register constraints
 		use bevy_trait_query::RegisterExt;
 		app
@@ -36,10 +35,10 @@ impl Plugin for Engine {
 				apply_forces,
 				solve_velocity_constraints,
 				solve_position_constraints,
-				apply_impulses
+				integrate_positions
 			)
 		);
-		
+
 		app.insert_resource(self.clone());
 	}
 }
@@ -68,7 +67,7 @@ fn solve_velocity_constraints(time: Res<Time>, engine: Res<Engine>, mut commands
 fn solve_position_constraints(time: Res<Time>, engine: Res<Engine>, mut commands: Commands, constraints: Query<(Entity, &dyn Constraint)>, mut bodies: Query<RigidBodyQuery>) {
 	let position_iterations = engine.position_iterations;
 	let delta = time.delta_secs();
-	
+
 	if time.elapsed_secs() < 0.5 { // temporarily pause sim at start so everything can load
 		return;
 	}
@@ -96,11 +95,10 @@ fn apply_forces(time: Res<Time>, engine: Res<Engine>, bodies: Query<RigidBodyQue
 	}
 
 	for mut body in bodies {
+		if let RigidBody::Static = body.body_type  { continue; }
+
 		let friction_air = body.friction_air.0;
 		let friction_angular = body.friction_angular.0;
-		let mass = body.mass.get();
-		let inverse_mass = body.mass.inverse();
-
 
 		// Apply air friction
 		let friction_air = (1.0 - friction_air).powf(delta * 1000.0); // 1000.0 is arbitrary, used so friction_air doesn't have to be as absurd (0.99999... just to be damped)
@@ -110,25 +108,24 @@ fn apply_forces(time: Res<Time>, engine: Res<Engine>, bodies: Query<RigidBodyQue
 		body.angular_velocity.0 *= friction_angular;
 
 		// Apply gravity
-		let force_gravity = gravity * mass;
-		body.velocity.0 += force_gravity * inverse_mass * delta;
+		body.velocity.0 += gravity * delta; // gravity * mass * inverse_mass * delta
 	}
 }
 
 // Apply accumulated impulses for this frame to bodies
-fn apply_impulses(time: Res<Time>, bodies: Query<(&RigidBody, &Velocity, &AngularVelocity, &mut Transform)>) {
+fn integrate_positions(time: Res<Time>, bodies: Query<RigidBodyQuery>) {
 	let delta = time.delta_secs();
 
 	if time.elapsed_secs() < 0.5 { // temporarily pause sim at start so everything can load
 		return;
 	}
-	
-	for (_, velocity, angular_velocity, mut position) in bodies {
 
-		let delta_position = delta * velocity.0;
-		position.translation += delta_position.extend(0.0);
+	for mut body in bodies {
 
-		let delta_angle = delta * angular_velocity.0;
-		position.rotate_z(delta_angle);
+		let delta_position = delta * body.velocity.0;
+		body.transform.translation += delta_position.extend(0.0);
+
+		let delta_angle = delta * body.angular_velocity.0;
+		body.transform.rotate_z(delta_angle);
 	}
 }

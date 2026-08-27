@@ -9,11 +9,11 @@ impl Default for Friction {
 #[derive(Component)]
 pub struct FrictionAir(pub f32);
 impl Default for FrictionAir {
-	fn default() -> Self { Self(0.5) }
+	fn default() -> Self { Self(0.05) }
 }
 
 #[derive(Component)]
 pub struct FrictionAngular(pub f32);
 impl Default for FrictionAngular {
-	fn default() -> Self { Self(0.1) }
+	fn default() -> Self { Self(0.01) }
 }

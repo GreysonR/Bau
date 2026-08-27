@@ -23,6 +23,8 @@ pub enum RigidBody {
 #[derive(QueryData)]
 #[query_data(mutable)]
 pub struct RigidBodyQuery {
+	pub body_type: &'static RigidBody,
+
 	pub transform: &'static mut Transform,
 	pub velocity: &'static mut Velocity,
 	pub angular_velocity: &'static mut AngularVelocity,
@@ -61,10 +63,10 @@ impl<'w, 's> RigidBodyQueryItem<'w, 's> {
 		self.get_velocity() + self.get_angular_velocity() * (point - self.get_position()).perp()
 	}
 
-	pub fn get_angle(&self) -> Vec2 {
+	pub fn get_angle_dir(&self) -> Vec2 {
 		self.transform.right().xy()
 	}
-	pub fn set_angle(&mut self, angle: Vec2) {
+	pub fn set_angle_dir(&mut self, angle: Vec2) {
 		*self.transform = self.transform.with_rotation(Quat::from_rotation_arc_2d(Vec2::X, angle));
 	}
 
