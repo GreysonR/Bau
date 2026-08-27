@@ -44,7 +44,6 @@ impl Default for Spring {
 impl Constraint for Spring {
 	fn solve_velocity(&self, bodies: &mut Query<RigidBodyQuery>, h: f32, iterations: i32) -> Result<(), BevyError> {
 		if self.body_a.is_none() || self.body_b.is_none() {
-			println!("body_a: {}, body_b: {}", self.body_a.is_some(), self.body_b.is_some());
 			return Ok(()); // return Ok() for now, todo: maybe return error
 		}
 		let mut body_a;
@@ -86,7 +85,7 @@ impl Constraint for Spring {
 
 		// Soft constraint impulse equation
 		let mut impulse = -(rel_vel + beta / h * position_error) / (inverse_effective_mass + gamma / h);
-		impulse /= iterations as f32;
+		impulse /= iterations as f32; // multiple iterations throw off calculation; todo: find out better equation for handling multiple iterations
 
 
 		// Apply impulses

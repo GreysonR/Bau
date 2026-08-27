@@ -120,13 +120,13 @@ pub fn update(query: Query<(&SpringRender, &mut Shape, &mut Spring)>, bodies: Qu
 		}
 
 		let result = bodies.get_many([spring.body_a.unwrap(), spring.body_b.unwrap()]);
-		if result.is_err() { // at least one of the bodies is not in the world anymore, so set that body to None in the constraint
-			if bodies.get(spring.body_a.unwrap()).is_err() {
-				spring.body_a = None;
-			}
-			if bodies.get(spring.body_b.unwrap()).is_err() {
-				spring.body_b = None;
-			}
+		if result.is_err() {
+			// if bodies.get(spring.body_a.unwrap()).is_err() {
+			// 	spring.body_a = None;
+			// }
+			// if bodies.get(spring.body_b.unwrap()).is_err() {
+			// 	spring.body_b = None;
+			// }
 			return;
 		}
 		let [body_a, body_b] = result.unwrap();

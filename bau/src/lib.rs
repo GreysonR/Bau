@@ -30,7 +30,7 @@ impl Plugin for Engine {
 			// .register_component_as::<dyn Constraint, FixedDistance>();
 
 		// Engine globals
-		app.add_systems(FixedUpdate, // TODO: examine FixedUpdate vs Update here
+		app.add_systems(FixedUpdate,
 			(
 				apply_forces,
 				solve_velocity_constraints,
