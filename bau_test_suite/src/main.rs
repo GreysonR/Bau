@@ -21,19 +21,19 @@ fn main() {
 
 
 fn add_bodies(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut materials: ResMut<Assets<ColorMaterial>>) {
-	let _body_a_id = commands.spawn((
+	let body_a_id = commands.spawn((
 		RigidBody::Dynamic,
-		Mass::new(1.0),
-		Velocity::new(50.0, 0.0),
 		// Collider::rectangle(50.0, 50.0),
 		Transform::from_xyz(-20.0, 0.0, 0.0)
-			.with_rotation(Quat::from_rotation_z(0.1 * std::f32::consts::PI)),
+		.with_rotation(Quat::from_rotation_z(0.1 * std::f32::consts::PI)),
+		
+		Velocity::new(50.0, 0.0),
 
 		Mesh2d(meshes.add(Rectangle::new(50.0, 50.0))),
 		MeshMaterial2d(materials.add(color_hex("#F0A152")))
 	)).id();
 	
-	let _body_b_id = commands.spawn((
+	let body_b_id = commands.spawn((
 		RigidBody::Static,
 		Transform::from_xyz(100.0, 0.0, 0.0),
 
@@ -73,14 +73,13 @@ fn add_bodies(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut mate
 
 	
 	// Add spring constraints
-	/*
 	let _spring = SpringRenderBuilder::new(
 			Spring {
 				body_a: Some(body_a_id),
 				body_a_offset: Vec2::new(25.0, 25.0),
 				body_b: Some(body_b_id),
 
-				unstretched_length: 100.0,
+				unstretched_length: 50.0,
 				frequency: 2.0,
 				damping: 0.01,
 
@@ -90,7 +89,7 @@ fn add_bodies(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut mate
 		.stroke((color_hex("#f4fdd9b2"), 2.0))
 		.build(&mut commands);
 	
-
+	/*
 	let _spring2 = SpringRenderBuilder::new(
 		Spring {
 			body_a: Some(body_a_id),
@@ -236,7 +235,7 @@ fn handle_input(keys: Res<ButtonInput<KeyCode>>, mut close_events: MessageWriter
 
 		for mut body in bodies {
 			let velocity = body.get_velocity();
-			let impulse = 100.0 * body.mass.get();
+			let impulse = 100.0 * body.mass.value();
 			body.set_velocity(velocity + impulse * intent);
 			// break; // only apply to 1st body
 		}

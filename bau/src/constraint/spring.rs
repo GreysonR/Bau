@@ -9,7 +9,7 @@ use spring_options::*;
 
 
 #[derive(Component, Debug)]
-#[require(BodyA, BodyB, UnstretchedLength, Frequency, Damping, AllowCompression)]
+// #[require(BodyA, BodyB, UnstretchedLength, Frequency, Damping, AllowCompression)]
 pub struct Spring {
 	pub body_a: Option<Entity>,
 	pub body_a_offset: Vec2,
@@ -44,6 +44,7 @@ impl Default for Spring {
 impl Constraint for Spring {
 	fn solve_velocity(&self, bodies: &mut Query<RigidBodyQuery>, h: f32, iterations: i32) -> Result<(), BevyError> {
 		if self.body_a.is_none() || self.body_b.is_none() {
+			println!("body_a: {}, body_b: {}", self.body_a.is_some(), self.body_b.is_some());
 			return Ok(()); // return Ok() for now, todo: maybe return error
 		}
 		let mut body_a;
@@ -91,7 +92,7 @@ impl Constraint for Spring {
 		// Apply impulses
 		let p = -impulse * dir;
 		body_a.apply_impulse(position_a, p);
-		body_b.apply_impulse(position_a, -p);
+		body_b.apply_impulse(position_b, -p);
 
 		Ok(())
 	}

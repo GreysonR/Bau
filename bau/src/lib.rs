@@ -30,12 +30,20 @@ impl Plugin for Engine {
 			// .register_component_as::<dyn Constraint, FixedDistance>();
 
 		// Engine globals
-		app.add_systems(Update, // TODO: examine FixedUpdate vs Update here
+		app.add_systems(FixedUpdate, // TODO: examine FixedUpdate vs Update here
 			(
 				apply_forces,
 				solve_velocity_constraints,
 				solve_position_constraints,
 				integrate_positions
+			)
+		);
+
+		// RigidBody setup
+		app.add_systems(FixedPostUpdate,
+			(
+				setup_rigid_body_mass,
+				setup_rigid_body_inertia,
 			)
 		);
 
@@ -101,10 +109,10 @@ fn apply_forces(time: Res<Time>, engine: Res<Engine>, bodies: Query<RigidBodyQue
 		let friction_angular = body.friction_angular.0;
 
 		// Apply air friction
-		let friction_air = (1.0 - friction_air).powf(delta * 1000.0); // 1000.0 is arbitrary, used so friction_air doesn't have to be as absurd (0.99999... just to be damped)
+		let friction_air = (1.0 - friction_air).powf(delta * 100.0); // 100.0 is arbitrary, used so friction_air doesn't have to be as absurd (0.99999...) to be slightly damped
 		body.velocity.0 *= friction_air;
 
-		let friction_angular = (1.0 - friction_angular).powf(delta * 1000.0);
+		let friction_angular = (1.0 - friction_angular).powf(delta * 100.0);
 		body.angular_velocity.0 *= friction_angular;
 
 		// Apply gravity

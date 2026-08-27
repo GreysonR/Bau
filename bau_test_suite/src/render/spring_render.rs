@@ -109,7 +109,7 @@ pub fn update(query: Query<(&SpringRender, &mut Shape, &mut Spring)>, bodies: Qu
 			let new_shape = ShapeBuilder::with(
 				&shapes::Polygon {
 					closed: false,
-					points: vec![Vec2::ZERO, Vec2::ONE], // todo: hide the constraint properly
+					points: vec![Vec2::MAX - Vec2::ONE, Vec2::MAX], // todo: hide the constraint properly
 				})
 				.stroke(shape.stroke.expect("constraint render should have a stroke"))
 				.build();

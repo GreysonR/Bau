@@ -12,11 +12,17 @@ impl Mass {
 			inverse: 1.0 / mass,
 		}
 	}
+	pub fn infinite() -> Self {
+		Self {
+			value: f32::INFINITY,
+			inverse: 0.0,
+		}
+	}
 	pub fn set(&mut self, mass: f32) {
 		self.value = mass;
 		self.inverse = 1.0 / mass;
 	}
-	pub fn get(&self) -> f32 { self.value }
+	pub fn value(&self) -> f32 { self.value }
 	pub fn inverse(&self) -> f32 { self.inverse }
 }
 impl Default for Mass {
@@ -38,11 +44,17 @@ impl Inertia {
 			inverse: 1.0 / inertia,
 		}
 	}
+	pub fn infinite() -> Self {
+		Self {
+			value: f32::INFINITY,
+			inverse: 0.0,
+		}
+	}
 	pub fn set(&mut self, inertia: f32) {
 		self.value = inertia;
 		self.inverse = 1.0 / inertia;
 	}
-	pub fn get(&self) -> f32 { self.value }
+	pub fn value(&self) -> f32 { self.value }
 	pub fn inverse(&self) -> f32 { self.inverse }
 }
 impl Default for Inertia {

@@ -14,11 +14,34 @@ pub use velocity_components::*;
 
 
 #[derive(Component, Debug)]
-#[require(Transform, Velocity, AngularVelocity, Mass, Inertia, Friction, FrictionAir, FrictionAngular)]
+#[require(Transform, Velocity, AngularVelocity, Friction, FrictionAir, FrictionAngular)] // Mass and Inertia are handled in setup fn
 pub enum RigidBody {
 	Static,
 	Dynamic,
 }
+pub fn setup_rigid_body_mass(mut commands: Commands, rigid_body_query: Query<(Entity, &RigidBody), (Added<RigidBody>, Without<Mass>)>) {
+
+	for rigid_body in &rigid_body_query {
+		let mass = match &rigid_body.1 {
+			RigidBody::Dynamic => Mass::default(),
+			RigidBody::Static => Mass::infinite(),
+		};
+		commands.entity(rigid_body.0)
+			.insert(mass);
+	}
+}
+pub fn setup_rigid_body_inertia(mut commands: Commands, rigid_body_query: Query<(Entity, &RigidBody), (Added<RigidBody>, Without<Inertia>)>) {
+
+	for rigid_body in &rigid_body_query {
+		let inertia = match &rigid_body.1 {
+			RigidBody::Dynamic => Inertia::default(),
+			RigidBody::Static => Inertia::infinite(),
+		};
+		commands.entity(rigid_body.0)
+			.insert(inertia);
+	}
+}
+
 
 #[derive(QueryData)]
 #[query_data(mutable)]
