@@ -15,8 +15,6 @@ impl Into<Vec2> for Velocity {
 
 #[derive(Component, Default)]
 pub struct AngularVelocity(pub f32);
-impl Into<f32> for AngularVelocity {
-	fn into(self) -> f32 {
-	    self.0
-	}
-}
+
+#[derive(Component, Default)]
+pub struct Angle(pub f32);

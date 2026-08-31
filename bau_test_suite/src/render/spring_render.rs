@@ -101,8 +101,8 @@ impl SpringRenderBuilder {
 }
 
 
-pub fn update(query: Query<(&SpringRender, &mut Shape, &mut Spring)>, bodies: Query<RigidBodyQuery>) {
-	for (spring_render, mut shape, mut spring) in query {
+pub fn update(query: Query<(&SpringRender, &mut Shape, &Spring)>, bodies: Query<RigidBodyQuery>) {
+	for (spring_render, mut shape, spring) in query {
 		// Update spring path
 		if spring.body_a.is_none() || spring.body_b.is_none() {
 			// Make invisible & return if either body is None
@@ -131,8 +131,8 @@ pub fn update(query: Query<(&SpringRender, &mut Shape, &mut Spring)>, bodies: Qu
 		}
 		let [body_a, body_b] = result.unwrap();
 		let points = spring_render.get_points(
-			&(body_a.get_position() + spring.body_a_offset.rotate(body_a.get_angle())),
-			&(body_b.get_position() + spring.body_b_offset.rotate(body_b.get_angle()))
+			&(body_a.get_position() + spring.body_a_offset.rotate(body_a.get_angle_dir())),
+			&(body_b.get_position() + spring.body_b_offset.rotate(body_b.get_angle_dir()))
 		);
 		
 		let new_shape = ShapeBuilder::with(

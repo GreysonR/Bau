@@ -23,7 +23,7 @@ fn main() {
 fn add_bodies(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut materials: ResMut<Assets<ColorMaterial>>) {
 	let body_a_id = commands.spawn((
 		RigidBody::Dynamic,
-		// Collider::rectangle(50.0, 50.0),
+		Collider::rectangle(50.0, 50.0),
 		Transform::from_xyz(-20.0, 0.0, 0.0)
 		.with_rotation(Quat::from_rotation_z(0.1 * std::f32::consts::PI)),
 		
@@ -37,7 +37,7 @@ fn add_bodies(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut mate
 		RigidBody::Static,
 		Transform::from_xyz(100.0, 0.0, 0.0),
 
-		Mesh2d(meshes.add(Circle::new(10.0))),
+		Mesh2d(meshes.add(Circle::new(5.0))),
 		MeshMaterial2d(materials.add(color_hex("#E35531")))
 	)).id();
 	
@@ -235,9 +235,10 @@ fn handle_input(keys: Res<ButtonInput<KeyCode>>, mut close_events: MessageWriter
 
 		for mut body in bodies {
 			let velocity = body.get_velocity();
-			let impulse = 100.0 * body.mass.value();
-			body.set_velocity(velocity + impulse * intent);
-			// break; // only apply to 1st body
+			let impulse = 10.0 * body.mass.value();
+			if let RigidBody::Dynamic = body.body_type {
+				body.set_velocity(velocity + impulse * intent); // todo: fix crash when setting velocity (of static body, sometimes on dynamic)
+			}
 		}
 	}
 }

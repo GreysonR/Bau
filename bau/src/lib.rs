@@ -42,8 +42,8 @@ impl Plugin for Engine {
 		// RigidBody setup
 		app.add_systems(FixedPostUpdate,
 			(
-				setup_rigid_body_mass,
-				setup_rigid_body_inertia,
+				(setup_rigid_body_mass, setup_rigid_body_inertia).chain(),
+				post_update_rigid_body,
 			)
 		);
 
@@ -134,6 +134,6 @@ fn integrate_positions(time: Res<Time>, bodies: Query<RigidBodyQuery>) {
 		body.transform.translation += delta_position.extend(0.0);
 
 		let delta_angle = delta * body.angular_velocity.0;
-		body.transform.rotate_z(delta_angle);
+		body.set_angle(body.get_angle() + delta_angle);
 	}
 }

@@ -5,7 +5,7 @@ use super::{ Constraint, constraint_options::* };
 use crate::rigid_body::*;
 
 mod spring_options;
-use spring_options::*;
+pub use spring_options::*;
 
 
 #[derive(Component, Debug)]
@@ -65,8 +65,8 @@ impl Constraint for Spring {
 		let position_error = ds.length() - self.unstretched_length; // constraint-space position
 		if self.allow_compression && position_error < 0.0 { return Ok(()); } // don't eval constraint if in compression
 
-		let point_a_velocity = body_a.get_velocity_at_point(position_a);
-		let point_b_velocity = body_b.get_velocity_at_point(position_b);
+		let point_a_velocity = body_a.get_velocity_at_radius(radius_a);
+		let point_b_velocity = body_b.get_velocity_at_radius(radius_b);
 		let rel_vel = (point_b_velocity - point_a_velocity).dot(dir);
 		
 		let inverse_effective_mass = body_a.mass.inverse() + body_b.mass.inverse() + radius_a.perp_dot(dir) * body_a.inertia.inverse() + radius_b.perp_dot(dir) * body_b.inertia.inverse();
@@ -90,8 +90,8 @@ impl Constraint for Spring {
 
 		// Apply impulses
 		let p = -impulse * dir;
-		body_a.apply_impulse(position_a, p);
-		body_b.apply_impulse(position_b, -p);
+		body_a.apply_impulse(radius_a, p);
+		body_b.apply_impulse(radius_b, -p);
 
 		Ok(())
 	}
