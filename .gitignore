@@ -1,4 +1,5 @@
-.git
-node_modules
-src/rust/target
-profiles
+/target
+.vscode
+.cargo
+Makefile
+.gitignore

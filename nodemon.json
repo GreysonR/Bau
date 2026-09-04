@@ -1,7 +1,0 @@
-{
-	"watch": ["webpack-dev.config.js", "src/rust/pkg/"],
-	"events": {
-		"start": "clear"
-	},
-	"exec": "webpack serve --config webpack-dev.config.js"
-}
