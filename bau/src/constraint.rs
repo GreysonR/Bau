@@ -15,6 +15,7 @@ use super::rigid_body::*;
 #[bevy_trait_query::queryable]
 #[allow(unused)]
 pub trait Constraint {
-	fn solve_velocity(&self, bodies: &mut Query<RigidBodyQuery>, delta_time: f32, iterations: i32) -> Result<(), BevyError> { Ok(()) }
-	fn solve_position(&self, bodies: &mut Query<RigidBodyQuery>, delta_time: f32, iterations: i32) -> Result<(), BevyError> { Ok(()) }
+	fn solve_velocity(&mut self, bodies: &mut Query<RigidBodyQuery>, delta_time: f32) -> Result<(), BevyError> { Ok(()) }
+	fn solve_position(&mut self, bodies: &mut Query<RigidBodyQuery>, delta_time: f32) -> Result<(), BevyError> { Ok(()) }
+	fn post_update(&mut self, bodies: &mut Query<RigidBodyQuery>) -> Result<(), BevyError> { Ok(()) }
 }

@@ -75,6 +75,7 @@ impl<'w, 's> RigidBodyQueryItem<'w, 's> {
 		self.velocity.0
 	}
 	pub fn set_velocity(&mut self, velocity: Vec2) {
+		if let RigidBody::Static = self.body_type { return; } // don't change velocity of static bodies
 		self.velocity.0 = velocity;
 	}
 
@@ -106,12 +107,15 @@ impl<'w, 's> RigidBodyQueryItem<'w, 's> {
 
 
 	// Applies an impulse at a specified position on the body, which changes its angular & translational velocity
-	pub fn apply_impulse(&mut self, impulse_radius: Vec2, impulse_velocity: Vec2) {
-		// let radius = impulse_radius - self.get_position();
+	pub fn apply_impulse(&mut self, impulse_velocity: Vec2, impulse_radius: Vec2) {
 		let cross = impulse_radius.perp_dot(impulse_velocity);
 
 		self.velocity.0 += impulse_velocity * self.mass.inverse();
 		self.angular_velocity.0 += cross * self.inertia.inverse();
+	}
+	// effectively the same as apply_impulse, but always applied at the center of mass
+	pub fn apply_force(&mut self, force: Vec2) {
+		self.velocity.0 += force * self.mass.inverse();
 	}
 }
 

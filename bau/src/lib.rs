@@ -30,20 +30,19 @@ impl Plugin for Engine {
 			// .register_component_as::<dyn Constraint, FixedDistance>();
 
 		// Engine globals
-		app.add_systems(FixedUpdate,
-			(
-				apply_forces,
-				solve_velocity_constraints,
-				solve_position_constraints,
-				integrate_positions
-			)
-		);
+		app.add_systems(FixedUpdate, (
+			apply_forces,
+			solve_velocity_constraints,
+			solve_position_constraints,
+			integrate_positions,
+		));
 
 		// RigidBody setup
 		app.add_systems(FixedPostUpdate,
 			(
 				(setup_rigid_body_mass, setup_rigid_body_inertia).chain(),
 				post_update_rigid_body,
+				post_update_constraints,
 			)
 		);
 
@@ -52,7 +51,7 @@ impl Plugin for Engine {
 }
 
 // Solves all constraints in the world
-fn solve_velocity_constraints(time: Res<Time>, engine: Res<Engine>, mut commands: Commands, constraints: Query<(Entity, &dyn Constraint)>, mut bodies: Query<RigidBodyQuery>) {
+fn solve_velocity_constraints(time: Res<Time>, engine: Res<Engine>, mut commands: Commands, mut constraints: Query<(Entity, &mut dyn Constraint)>, mut bodies: Query<RigidBodyQuery>) {
 	let velocity_iterations = engine.velocity_iterations;
 	let delta = time.delta_secs();
 
@@ -61,9 +60,9 @@ fn solve_velocity_constraints(time: Res<Time>, engine: Res<Engine>, mut commands
 	}
 
 	for _ in 0..velocity_iterations {
-		for (entity, constraints) in constraints {
-			for constraint in constraints {
-				let _ = constraint.solve_velocity(&mut bodies, delta, velocity_iterations).map_err(|_| {
+		for (entity, constraints) in constraints.iter_mut() {
+			for mut constraint in constraints {
+				let _ = constraint.solve_velocity(&mut bodies, delta).map_err(|_| {
 					// despawn constraint if it's broken
 					warn!("Constraint {} had error while solving velocity - despawning", entity);
 					commands.entity(entity).try_despawn();
@@ -72,7 +71,7 @@ fn solve_velocity_constraints(time: Res<Time>, engine: Res<Engine>, mut commands
 		}
 	}
 }
-fn solve_position_constraints(time: Res<Time>, engine: Res<Engine>, mut commands: Commands, constraints: Query<(Entity, &dyn Constraint)>, mut bodies: Query<RigidBodyQuery>) {
+fn solve_position_constraints(time: Res<Time>, engine: Res<Engine>, mut commands: Commands, mut constraints: Query<(Entity, &mut dyn Constraint)>, mut bodies: Query<RigidBodyQuery>) {
 	let position_iterations = engine.position_iterations;
 	let delta = time.delta_secs();
 
@@ -81,14 +80,31 @@ fn solve_position_constraints(time: Res<Time>, engine: Res<Engine>, mut commands
 	}
 
 	for _ in 0..position_iterations {
-		for (entity, constraints) in constraints {
-			for constraint in constraints {
-				let _ = constraint.solve_position(&mut bodies, delta, position_iterations).map_err(|_| {
+		for (entity, constraints) in constraints.iter_mut() {
+			for mut constraint in constraints {
+				let _ = constraint.solve_position(&mut bodies, delta).map_err(|_| {
 					// despawn constraint if it's broken
 					warn!("Constraint {} had error while solving position - despawning", entity);
 					commands.entity(entity).try_despawn();
 				});
 			}
+		}
+	}
+}
+
+// constraint post update, i.e. for clearing forces that frame, cleaning up contacts, etc
+fn post_update_constraints(time: Res<Time>, mut commands: Commands, constraints: Query<(Entity, &mut dyn Constraint)>, mut bodies: Query<RigidBodyQuery>) {
+	if time.elapsed_secs() < 0.5 { // temporarily pause sim at start so everything can load
+		return;
+	}
+
+	for (entity, constraints) in constraints {
+		for mut constraint in constraints {
+			let _ = constraint.post_update(&mut bodies).map_err(|_| {
+				// despawn constraint if it's broken
+				warn!("Constraint {} had error during post update - despawning", entity);
+				commands.entity(entity).try_despawn();
+			});
 		}
 	}
 }

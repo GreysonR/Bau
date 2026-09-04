@@ -80,8 +80,8 @@ fn add_bodies(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut mate
 				body_b: Some(body_b_id),
 
 				unstretched_length: 50.0,
-				frequency: 2.0,
-				damping: 0.01,
+				frequency: 6.0,
+				damping: 0.1,
 
 				..Default::default()
 			}
@@ -231,14 +231,12 @@ fn handle_input(keys: Res<ButtonInput<KeyCode>>, mut close_events: MessageWriter
 		let intent = Vec2::new(
 			(keys.pressed(KeyCode::KeyD) as i32 - keys.pressed(KeyCode::KeyA) as i32) as f32,
 			(keys.pressed(KeyCode::KeyW) as i32 - keys.pressed(KeyCode::KeyS) as i32) as f32,
-		).normalize();
+		).normalize_or_zero();
 
 		for mut body in bodies {
 			let velocity = body.get_velocity();
-			let impulse = 10.0 * body.mass.value();
-			if let RigidBody::Dynamic = body.body_type {
-				body.set_velocity(velocity + impulse * intent); // todo: fix crash when setting velocity (of static body, sometimes on dynamic)
-			}
+			let impulse = 100.0;// * body.mass.value();
+			body.set_velocity(velocity + impulse * intent);
 		}
 	}
 }

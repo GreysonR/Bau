@@ -20,6 +20,8 @@ pub struct Spring {
 	pub unstretched_length: f32,
 	pub frequency: f32,
 	pub damping: f32,
+	
+	pub accumulated_impulse: f32,
 
 	pub allow_compression: bool,
 }
@@ -36,13 +38,15 @@ impl Default for Spring {
 			frequency: 5.0,
 			damping: 0.1,
 
+			accumulated_impulse: 0.0,
+
 			allow_compression: true,
 		}
 	}
 }
 
 impl Constraint for Spring {
-	fn solve_velocity(&self, bodies: &mut Query<RigidBodyQuery>, h: f32, iterations: i32) -> Result<(), BevyError> {
+	fn solve_velocity(&mut self, bodies: &mut Query<RigidBodyQuery>, h: f32) -> Result<(), BevyError> {
 		if self.body_a.is_none() || self.body_b.is_none() {
 			return Ok(()); // return Ok() for now, todo: maybe return error
 		}
@@ -84,15 +88,24 @@ impl Constraint for Spring {
 		let beta = h*k * gamma;
 
 		// Soft constraint impulse equation
-		let mut impulse = -(rel_vel + beta / h * position_error) / (inverse_effective_mass + gamma / h);
-		impulse /= iterations as f32; // multiple iterations throw off calculation; todo: find out better equation for handling multiple iterations
+		let target_impulse = -(rel_vel + beta / h * position_error) / (inverse_effective_mass + gamma / h);
 
+		// Iteration handling
+		let delta_impulse = target_impulse - self.accumulated_impulse; // could clamp this value for other constraint types
+		self.accumulated_impulse += delta_impulse;
 
+		// todo: ditch iterations, go to pure substepping approach
+		// todo: figure out how to do iterations correctly
+		
 		// Apply impulses
-		let p = -impulse * dir;
-		body_a.apply_impulse(radius_a, p);
-		body_b.apply_impulse(radius_b, -p);
+		let p = -delta_impulse * dir;
+		body_a.apply_impulse( p, radius_a);
+		body_b.apply_impulse(-p, radius_b);
 
+		Ok(())
+	}
+	fn post_update(&mut self, _: &mut Query<RigidBodyQuery>) -> Result<(),BevyError> {
+		self.accumulated_impulse = 0.0;
 		Ok(())
 	}
 }
